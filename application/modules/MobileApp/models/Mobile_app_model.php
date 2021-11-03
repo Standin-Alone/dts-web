@@ -122,7 +122,7 @@ public function verify_otp(){
 		$get_user_info = $this->db->get_where('users',['user_id' => $user_id])->result();
 
 		foreach($get_user_info as $value){
-			$result = ['Message' => 'true', 'user_id' => $user_id];
+			$result = ['Message' => 'true', "user_id" => $value->user_id,'email'=>$value->email,'full_name'=>$value->first_name.' '.$value->last_name,'email'=>$value->email,'mobile'=>$value->mobile];
 		}
 		
 	}else{
@@ -173,10 +173,10 @@ public function resend_otp(){
 			$this->email->subject($subject);
 			
 			$this->email->message($load_view);
-			// $this->email->send();
+			
 			
 			if ($this->email->send()) {
-				$result = ["Message"=>'true', "user_id" => $value->user_id,'email'=>$value->email];
+				$result = ["Message"=>'true'];
 			} else {
 				$result = $this->email->print_debugger();
 			}
@@ -187,6 +187,33 @@ public function resend_otp(){
 		$result = ["Message"=>'false'];
 	}
 
+}	
+
+
+// transactions
+
+// QR Code Screen
+public function get_scanned_document(){
+	$result = '';
+	try{
+
+		$request = json_decode(file_get_contents('php://input'));
+		
+		$document_number = $request->document_number;
+		$get_doc_info = $this->db->select('*')
+								->from('document_profile as dp')								
+								->join('doc_type as dt','dp.document_type = dt.type_id')
+								->join('lib_office as lo','lo.office_code = dp.office_code')
+								->where('dp.document_number', $document_number)
+								->get()
+								->result();
+		$result = ["Message" => "true", "doc_info" => $get_doc_info];		
+		
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];				
+	}
+
+	return $result;
 }
 
 

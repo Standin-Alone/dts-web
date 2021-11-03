@@ -32,6 +32,12 @@ class Mobile extends MY_Controller {
 	}
 	
 	
+	// transactions
+	public function get_scanned_document(){
+		$result = $this->Mobile_app_model->get_scanned_document();
+		echo json_encode($result);
+	}
+	
 
 
 
