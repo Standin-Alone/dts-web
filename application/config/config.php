@@ -24,7 +24,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 // $config['base_url'] = 'https://devsysadd.da.gov.ph/dts/';
-$config['base_url'] = 'http://192.168.1.2/dts-web/';
+$config['base_url'] = 'http://192.168.1.6/dts-web/';
 
 /*
 |--------------------------------------------------------------------------

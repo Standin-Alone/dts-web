@@ -39,6 +39,11 @@ class Mobile extends MY_Controller {
 	}
 	
 
+	public function receive_document(){
+		$result = $this->Mobile_app_model->receive_document();
+		echo json_encode($result);
+	}
+
 
 
 }

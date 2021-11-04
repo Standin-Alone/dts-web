@@ -119,10 +119,24 @@ public function verify_otp(){
 	if($verify_otp){
 		// set otp status to 0;
 		$this->db->where('user_id',$user_id)->update('user_otp',['status' => 0]);
-		$get_user_info = $this->db->get_where('users',['user_id' => $user_id])->result();
+		$get_user_info = $this->db	
+								->select('*')						
+								->from('users as u')
+								->join('lib_office as lo', 'u.office_code = lo.office_code')
+								->where('user_id',$user_id)->get()->result();
+						
 
 		foreach($get_user_info as $value){
-			$result = ['Message' => 'true', "user_id" => $value->user_id,'email'=>$value->email,'full_name'=>$value->first_name.' '.$value->last_name,'email'=>$value->email,'mobile'=>$value->mobile];
+			$result = [
+				'Message' => 'true', 
+				"user_id" => $value->user_id,
+				'email'=>$value->email,
+				'full_name'=>$value->first_name.' '.$value->last_name,
+				'mobile'=>$value->mobile,
+				'division'=>$value->INFO_DIVISION,
+				'service'=>$value->INFO_SERVICE,
+				'office_code'=>$value->office_code
+			];
 		}
 		
 	}else{
@@ -200,10 +214,11 @@ public function get_scanned_document(){
 		$request = json_decode(file_get_contents('php://input'));
 		
 		$document_number = $request->document_number;
-		$get_doc_info = $this->db->select('*')
+		$get_doc_info = $this->db->select('dp.document_number','recipient_office_code','subject','title','INFO_SERVICE','INFO_DIVISION')
 								->from('document_profile as dp')								
 								->join('doc_type as dt','dp.document_type = dt.type_id')
 								->join('lib_office as lo','lo.office_code = dp.office_code')
+								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
 								->where('dp.document_number', $document_number)
 								->get()
 								->result();
@@ -215,6 +230,55 @@ public function get_scanned_document(){
 
 	return $result;
 }
+
+
+// Receive Document Screen
+public function receive_document(){
+	
+	$result = '';
+	try{
+
+		$request = json_decode(file_get_contents('php://input'));
+		
+		$document_number = $request->document_number;
+		$office_code = $request->office_code;
+		$check_document =$this->check_document($document_number,$office_code);
+
+		
+		if($check_document){
+			
+			$result = ["Message" => "true", "doc_info" =>$check_document];
+		}else{
+			$result = ["Message" => "false"];
+		};
+
+		return $result;
+				
+		
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];				
+	}
+}
+
+// check document if the recipient is valid to receive
+public function check_document($document_number,$office_code){
+
+	$get_records = $this->db
+						->limit(1)
+						->select('*')
+						->from('document_profile as dp')								
+						->join('document_recipients as dr','dp.document_number = dr.document_number')
+						->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number')
+						->where('dp.document_number', $document_number)
+						->where('dr.recipient_office_code', $office_code)
+						->order_by("dr.date_added", "desc")
+						->get()->result();
+	if($get_records){
+		return $get_records;
+	}
+}
+
+
 
 
 }
