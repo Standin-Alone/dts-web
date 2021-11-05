@@ -204,6 +204,39 @@ public function resend_otp(){
 }	
 
 
+//  My documents Screen
+public function my_documents(){
+	$result = '';
+	try{
+
+		$request = json_decode(file_get_contents('php://input'));
+				
+		$office_code = $request->office_code;
+		$get_doc_info = $this->db								
+								->select('dp.document_number,subject,dp.type,dp.status')
+								->from('document_profile as dp')								
+								->join('document_recipients as dr','dp.document_number = dr.document_number')
+								->join('doc_type as dt','dp.document_type = dt.type_id')
+								->join('lib_office as lo','lo.office_code = dp.office_code')
+								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')														
+								->where('dr.recipient_office_code', $office_code)
+								->where('rcl.type', 'Received')
+								->where('dr.status', '0')
+								->order_by("dr.date_added", "desc")								
+								->get()
+								->result();
+				
+		$result = ["Message" => "true", "doc_info" => $get_doc_info];		
+	
+		
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];				
+	}
+
+	return $result;
+}
+
+
 // transactions
 
 // QR Code Screen
@@ -214,15 +247,26 @@ public function get_scanned_document(){
 		$request = json_decode(file_get_contents('php://input'));
 		
 		$document_number = $request->document_number;
-		$get_doc_info = $this->db->select('dp.document_number','recipient_office_code','subject','title','INFO_SERVICE','INFO_DIVISION')
+		$office_code = $request->office_code;
+		$get_doc_info = $this->db
+								->limit(1)
+								->select('*')
 								->from('document_profile as dp')								
+								->join('document_recipients as dr','dp.document_number = dr.document_number')
 								->join('doc_type as dt','dp.document_type = dt.type_id')
 								->join('lib_office as lo','lo.office_code = dp.office_code')
 								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
-								->where('dp.document_number', $document_number)
+								->where('dp.document_number', $document_number)								
+								->where('dr.recipient_office_code', $office_code)
+								->where('dr.status', '1')
+								->order_by("dr.date_added", "desc")								
 								->get()
 								->result();
-		$result = ["Message" => "true", "doc_info" => $get_doc_info];		
+		if($get_doc_info){				
+			$result = ["Message" => "true", "doc_info" => $get_doc_info];		
+		}else{
+			$result = ["Message" => "Not Authorize"];		
+		}
 		
 	}catch(\Exception $e){
 		$result = ["Message" => "false", "error" => $e->getMessage()];				
@@ -237,16 +281,45 @@ public function receive_document(){
 	
 	$result = '';
 	try{
-
+		$uuid = $this->generate_uuid();
 		$request = json_decode(file_get_contents('php://input'));
 		
 		$document_number = $request->document_number;
 		$office_code = $request->office_code;
+		$user_id = $request->user_id;
+		$full_name = $request->full_name;
+		$info_division = $request->info_division;
+		$info_service = $request->info_service;
+
+
 		$check_document =$this->check_document($document_number,$office_code);
 
 		
 		if($check_document){
-			
+
+			foreach($check_document as $value){
+				$this->db
+						->where('document_number',$value->document_number)
+						->where('recipient_office_code',$value->recipient_office_code)						
+						->update('document_recipients',[
+							'status' => '0'
+						]);
+				$this->db->insert('receipt_control_logs',[
+					'type' => 'Received',
+					'document_number' => $value->document_number,
+					'office_code' => $value->recipient_office_code,
+					'action' => 'No Action',
+					'remarks' => $value->remarks,
+					'file' => '',
+					'attachment' => '',
+					'transacting_user_id' => $user_id,
+					'transacting_user_fullname' => $full_name,
+					'transacting_office' => $info_division.' '.$info_service
+
+				]);
+	
+			}
+		
 			$result = ["Message" => "true", "doc_info" =>$check_document];
 		}else{
 			$result = ["Message" => "false"];
@@ -265,12 +338,14 @@ public function check_document($document_number,$office_code){
 
 	$get_records = $this->db
 						->limit(1)
-						->select('*')
+						->select('dp.document_number,recipient_office_code,subject,dp.remarks,INFO_SERVICE,INFO_DIVISION')
 						->from('document_profile as dp')								
 						->join('document_recipients as dr','dp.document_number = dr.document_number')
+						->join('lib_office as lo','lo.office_code = dr.recipient_office_code')
 						->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number')
 						->where('dp.document_number', $document_number)
 						->where('dr.recipient_office_code', $office_code)
+						->where('rcl.type', 'Released')
 						->order_by("dr.date_added", "desc")
 						->get()->result();
 	if($get_records){
