@@ -354,6 +354,30 @@ public function check_document($document_number,$office_code){
 }
 
 
+public function get_history($document_number){
+	$result = '';
+	try{
+
+		$get_records = $this->db
+							->select('dp.document_number,recipient_office_code,subject,dp.remarks,INFO_SERVICE,INFO_DIVISION,rcl.transacting_user_fullname,  CONCAT( DATE_FORMAT(dr.date_added,"%M %d, %Y"),"\n", TIME_FORMAT(dr.date_added,"%r")) as time')
+							->from('document_profile as dp')								
+							->join('document_recipients as dr','dp.document_number = dr.document_number')
+							->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number')
+							->join('lib_office as lo','lo.office_code = dr.recipient_office_code')							
+							->where('dp.document_number', $document_number)														
+							->order_by("dr.sequence", "desc")
+							->get()->result();
+		if($get_records){
+			$result = ["Message" => "true", "history" =>$get_records];
+		}
+		
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];		
+	}
+	return $result;
+}
+
+
 
 
 }
