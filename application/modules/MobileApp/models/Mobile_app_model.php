@@ -220,8 +220,9 @@ public function my_documents(){
 								->join('lib_office as lo','lo.office_code = dp.office_code')
 								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')														
 								->where('dr.recipient_office_code', $office_code)
+								->or_where('dp.office_code', $office_code)
 								->where('rcl.type', 'Received')
-								->where('dr.status', '0')
+								->where('dr.status', '0')								
 								->order_by("dr.date_added", "desc")								
 								->get()
 								->result();
@@ -332,7 +333,7 @@ public function receive_document(){
 					'attachment' => '',
 					'transacting_user_id' => $user_id,
 					'transacting_user_fullname' => $full_name,
-					'transacting_office' => $info_division.' '.$info_service
+					'transacting_office' => $office_code
 
 				]);
 	
@@ -387,7 +388,7 @@ public function release_document(){
 						'attachment' => '',
 						'transacting_user_id' => $user_id,
 						'transacting_user_fullname' => $full_name,
-						'transacting_office' => $info_division.' '.$info_service
+						'transacting_office' => $office_code
 					]);
 			}
 
@@ -515,14 +516,16 @@ public function get_offices(){
 		if($get_division){
 
 			foreach($get_division->result() as $division_key => $item){
+
 				array_push($office_array , ["name"=>$item->INFO_DIVISION,'id'=>$division_key, "children"=>[]]);
-				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->get();		
+
+				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->get();		
 				foreach($get_records->result() as $value){	
 					
 					
 					foreach($office_array as $office_value){						
 						if($office_value['id'] == $division_key){
-							array_push($office_array[$division_key]['children'],["name"=>$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
+							array_push($office_array[$division_key]['children'],["name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA /' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
 						}
 					}
 
