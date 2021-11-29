@@ -281,6 +281,22 @@ public function get_scanned_document(){
 		if($get_doc_info){				
 			$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
 		}else{
+
+			$this->db->insert('receipt_control_logs',[
+				'type' => 'Received',
+				'document_number' => $document_number,
+				'office_code' => $office_code,
+				'action' => 'Received',
+				'remarks' => $value->remarks,
+				'file' => '',
+				'attachment' => '',
+				'transacting_user_id' => $user_id,
+				'transacting_user_fullname' => $full_name,
+				'transacting_office' => $office_code,
+				'status' => '0'
+
+			]);
+
 			$result = ["Message" => "Not Authorize"];		
 		}
 		
@@ -321,13 +337,13 @@ public function receive_document(){
 						->where('document_number',$value->document_number)
 						->where('recipient_office_code',$value->recipient_office_code)						
 						->update('document_recipients',[
-							'status' => '0'
+							'status' => '0',							
 						]);						
 				$this->db->insert('receipt_control_logs',[
 					'type' => 'Received',
 					'document_number' => $value->document_number,
 					'office_code' => $value->recipient_office_code,
-					'action' => 'No Action',
+					'action' => 'Received',
 					'remarks' => $value->remarks,
 					'file' => '',
 					'attachment' => '',
