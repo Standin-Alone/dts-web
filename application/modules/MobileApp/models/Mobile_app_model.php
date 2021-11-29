@@ -535,13 +535,13 @@ public function get_offices(){
 
 				array_push($office_array , ["name"=>$item->INFO_DIVISION,'id'=>$division_key, "children"=>[]]);
 
-				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->get();		
+				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->get();		
 				foreach($get_records->result() as $value){	
 					
 					
 					foreach($office_array as $office_value){						
 						if($office_value['id'] == $division_key){
-							array_push($office_array[$division_key]['children'],["name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA /' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
+							array_push($office_array[$division_key]['children'],["division"=>$value->INFO_DIVISION,"name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA /' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
 						}
 					}
 
