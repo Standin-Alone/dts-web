@@ -289,7 +289,7 @@ public function get_scanned_document(){
 				'document_number' => $document_number,
 				'office_code' => $office_code,
 				'action' => 'Received',
-				'remarks' => $value->remarks,
+				'remarks' => '',
 				'file' => '',
 				'attachment' => '',
 				'transacting_user_id' => $user_id,
