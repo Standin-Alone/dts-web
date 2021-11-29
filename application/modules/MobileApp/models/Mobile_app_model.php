@@ -248,9 +248,11 @@ public function get_scanned_document(){
 	try{
 
 		$request = json_decode(file_get_contents('php://input'));
-		
+		// payload
 		$document_number = $request->document_number;
 		$office_code = $request->office_code;
+		$user_id = $request->user_id;
+		$full_name = $request->full_name;
 
 		$check_if_release = $this->check_if_release($document_number, $office_code);
 		
