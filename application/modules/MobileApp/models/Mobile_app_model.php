@@ -3,6 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 require 'vendor/autoload.php';
 
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Disposition, Content-Type, Content-Length, Accept-Encoding");
+header("Content-type:application/json");
+
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 
@@ -27,13 +32,19 @@ class Mobile_app_model extends CI_Model {
 		$request = json_decode(file_get_contents('php://input'));
 		$username = $request->username;
 		$password = $request->password;
+
+		// $username = $this->input->post('username');
+		// $password =$this->input->post('password');
+		
+	
+		
 		$random_otp = mt_rand(100000, 999999);
 		$otp_to_send = "";
 
 		$user_data = array(			
 			'email'   => $username,			
 		); 
-
+		
 		$get_records = $this->db	
 							->select('*')						
 							->from('users as u')
@@ -111,6 +122,7 @@ public function verify_otp(){
 	$request = json_decode(file_get_contents('php://input'));
 	$user_id = $request->user_id;
 	$otp     = $request->otp;
+
 
 	$condition  = ['user_id' => $user_id, 'otp' => $otp , 'status' => 1];
 	$verify_otp = $this->db->get_where('user_otp',$condition)->result();
@@ -221,8 +233,9 @@ public function my_documents(){
 								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')														
 								->where('dr.recipient_office_code', $office_code)
 								->or_where('dp.office_code', $office_code)
+								->or_where('rcl.office_code', $office_code)
 								->where('rcl.type', 'Received')
-								->where('dr.status', '0')								
+								->where('dr.active', '0')								
 								->order_by("dr.date_added", "desc")								
 								->get()
 								->result();
@@ -273,7 +286,7 @@ public function get_scanned_document(){
 									->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
 									->where('dp.document_number', $document_number)								
 									->where('dr.recipient_office_code', $office_code)
-									->where('dr.status', '1')
+									->where('dr.active', '1')
 									->order_by("dr.date_added", "desc")								
 									->get()
 									->result();
@@ -339,7 +352,7 @@ public function receive_document(){
 						->where('document_number',$value->document_number)
 						->where('recipient_office_code',$value->recipient_office_code)						
 						->update('document_recipients',[
-							'status' => '0',							
+							'active' => '0',							
 						]);						
 				$this->db->insert('receipt_control_logs',[
 					'type' => 'Received',
@@ -414,7 +427,7 @@ public function release_document(){
 										->select('sequence')
 										->from('document_recipients')
 										->where('document_number',$document_number)
-										->where('status','0')
+										->where('active','0')
 										->where('recipient_office_code',$office_code)
 										->order_by('sequence','DESC')
 										->limit(1)
@@ -543,7 +556,7 @@ public function get_offices(){
 					
 					foreach($office_array as $office_value){						
 						if($office_value['id'] == $division_key){
-							array_push($office_array[$division_key]['children'],["division"=>$value->INFO_DIVISION,"name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA /' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
+							array_push($office_array[$division_key]['children'],["division"=>$value->INFO_DIVISION,"name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA / ' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
 						}
 					}
 

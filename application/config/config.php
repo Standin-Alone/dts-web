@@ -456,10 +456,13 @@ $csrf_pages = array('Login');
 if(isset($_SERVER['REQUEST_URI'])){
 	foreach($csrf_pages as $csrf_page){
 		if(trim($_SERVER['REQUEST_URI']) == '/dts/'){
-			$config['csrf_protection'] = false;
+			$config['csrf_protection'] = TRUE;
 		}
+
+
+		
 		if(stripos($_SERVER['REQUEST_URI'], $csrf_page) !== FALSE){
-			$config['csrf_protection'] = false;
+			$config['csrf_protection'] = TRUE;
 			break;
 		}
 	}

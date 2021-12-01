@@ -14,7 +14,7 @@ class Mobile extends MY_Controller {
 	}
 	
 
-    public function login(){						
+    public function sign_in(){						
         $result = $this->Mobile_app_model->login();
 
         echo json_encode($result);
