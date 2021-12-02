@@ -225,7 +225,7 @@ public function my_documents(){
 				
 		$office_code = $request->office_code;
 		$get_doc_info = $this->db								
-								->select('dp.document_number,subject,dp.type,dp.status')
+								->select('dp.document_number,subject,dp.type,dp.status,lo.info_region')
 								->from('document_profile as dp')								
 								->join('document_recipients as dr','dp.document_number = dr.document_number')
 								->join('doc_type as dt','dp.document_type = dt.type_id')
