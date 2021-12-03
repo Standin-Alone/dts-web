@@ -276,18 +276,18 @@ public function get_scanned_document(){
 			$type="release";
 		}else{
 		
-			$get_doc_info = $this->db
-									->limit(1)
+			$get_doc_info = $this->db									
 									->select('*')
-									->from('document_profile as dp')								
-									->join('document_recipients as dr','dp.document_number = dr.document_number')
+									->from('document_profile as dp')																	
 									->join('doc_type as dt','dp.document_type = dt.type_id')
 									->join('lib_office as lo','lo.office_code = dp.office_code')
 									->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
-									->where('dp.document_number', $document_number)								
-									->where('dr.recipient_office_code', $office_code)
-									->where('dr.active', '1')
-									->order_by("dr.date_added", "desc")								
+									->where('rcl.document_number', $document_number)								
+									->where('rcl.office_code', $office_code)									
+									->or_where('rcl.type', 'Received')
+									->where('rcl.status', '1')
+									->order_by("rcl.log_date", "desc")
+									->limit(1)
 									->get()
 									->result();
 			$type="receive";
@@ -497,10 +497,10 @@ public function check_if_release($document_number,$office_code){
 						->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')						
 						->join('lib_office as lo','lo.office_code = rcl.office_code')
 						->where('dp.document_number',$document_number)
-						->where('lo.office_code',$office_code)
-						->where('rcl.type','Received')
+						->where('lo.office_code',$office_code)						
+						->where('rcl.action','Received')
+						->where('rcl.status','1')
 						->get()->result();
-						
 	if($get_records){
 		return $get_records;
 	}
@@ -510,21 +510,22 @@ public function get_history($document_number){
 	$result = '';
 	try{
 
-		$get_records = $this->db
+		$get_first_log_id = $this->db->select("MIN(log_id) as first_log_id")->from('receipt_control_logs')->where('document_number',$document_number)->get()->row()->first_log_id;
+		$get_records = $this->db									
 							->select('dp.document_number,
-										recipient_office_code,
+										rcl.office_code,
 										subject,dp.remarks,
 										INFO_SERVICE,
 										INFO_DIVISION,
 										rcl.type,
 										rcl.transacting_user_fullname,  
-										CONCAT( DATE_FORMAT(dr.date_added,"%M %d, %Y"),"\n", TIME_FORMAT(dr.date_added,"%r")) as time')
-							->from('document_profile as dp')								
-							->join('document_recipients as dr','dp.document_number = dr.document_number')
-							->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number','left')
-							->join('lib_office as lo','lo.office_code = dr.recipient_office_code')							
+										CONCAT( DATE_FORMAT(rcl.log_date,"%M %e, %Y"),"\n", TIME_FORMAT(rcl.log_date,"%r")) as time')
+							->from('document_profile as dp')															
+							->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')
+							->join('lib_office as lo','lo.office_code = rcl.office_code')							
 							->where('dp.document_number', $document_number)														
-							->order_by("dr.sequence", "desc")
+							->where('log_id !=',$get_first_log_id)
+							->order_by("rcl.log_date", "desc")							
 							->get()->result();
 		if($get_records){
 			$result = ["Message" => "true", "history" =>$get_records];

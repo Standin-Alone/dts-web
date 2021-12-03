@@ -8,28 +8,17 @@ io.on('connection', function(socket){
 
   socket.setMaxListeners(0);
   console.warn('connected server side');
-    
-    socket.on('reset',  function(reload){
-      console.warn(reload[0]);  
-
-        socket.on('message',  function(data){
-          console.warn(reload[0]); 
-        if(reload[0] == 'false'){          
-          io.emit('progress',data);
-        }else{
-          console.warn('Finish');
-        }
-  
-      });
-   
-      
-    })
- 
+  socket.on('push notification',function(message){
+    console.warn('pushed');
+    io.emit('get notification',message)
   });
+  
+ 
+});
 
 
 
-http.listen(7980, '127.0.0.1', function(data) {
+http.listen(7980, '172.17.150.112', function(data) {
 
   console.log('Listening on Port 7980');
 });
