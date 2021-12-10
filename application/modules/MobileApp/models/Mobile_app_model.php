@@ -224,19 +224,22 @@ public function my_documents(){
 		$request = json_decode(file_get_contents('php://input'));
 				
 		$office_code = $request->office_code;
-		$get_doc_info = $this->db								
-								->select('dp.document_number,subject,dp.type,dp.status,lo.info_region,rcl.status')
-								->from('document_profile as dp')								
-								->join('document_recipients as dr','dp.document_number = dr.document_number')
-								->join('doc_type as dt','dp.document_type = dt.type_id')
-								->join('lib_office as lo','lo.office_code = dp.office_code')
-								->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')																						
-								->where('dr.recipient_office_code', $office_code)
-								->or_where('dp.office_code', $office_code)
-								->or_where('rcl.office_code', $office_code)
-								->where('rcl.type', 'Received')
-								->where('dr.active', '0')								
-								->order_by("dr.date_added", "desc")								
+		$current_page = $request->current_page;
+
+
+
+		
+
+		$get_doc_info = $this->db
+								->select('*')
+								->from('document_profile as dp')
+								->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')								
+								->join('lib_office as lo','lo.office_code = rcl.office_code')
+								->where('rcl.office_code',$office_code)																								
+								->where('rcl.status','1')								
+								->limit(5,$current_page  == 1 ? 0 : $current_page)
+								->group_by(['rcl.document_number','rcl.status'])
+								->order_by('log_date')
 								->get()
 								->result();
 				
@@ -267,6 +270,7 @@ public function get_scanned_document(){
 		$user_id = $request->user_id;
 		$full_name = $request->full_name;
 
+
 		// $check_if_release = $this->check_if_release($document_number, $office_code);
 
 		$check_document_exist = $this->db
@@ -293,7 +297,7 @@ public function get_scanned_document(){
 										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
 										where u.user_id = dr.added_by_user_id)  as sender_office_code')
 										->from('document_profile as dp')
-										->join('document_recipients as dr','dp.document_number = dp.document_number')
+										->join('document_recipients as dr','dr.document_number = dp.document_number')
 										->join('lib_office as lo','lo.office_code = dr.recipient_office_code')																			
 										->where('dr.document_number',$document_number)
 										->where('dr.recipient_office_code',$office_code)
@@ -314,12 +318,22 @@ public function get_scanned_document(){
 				// check scanned document if for release
 				$check_if_release = $this->db
 											->limit(1)
-											->select('*')
-											->from('document_profile as dp')
+											->select('*,(select lo_sender.INFO_DIVISION as sender_division  from users as u
+											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+											where u.user_id = dr.added_by_user_id)  as sender_division,
+										(select lo_sender.INFO_SERVICE as sender_service   from users as u
+											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+											where u.user_id = dr.added_by_user_id)  as sender_service,
+										(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
+											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+											where u.user_id = dr.added_by_user_id)  as sender_office_code')
+											->from('document_profile as dp')																						
 											->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
+											->join('document_recipients as dr','dr.document_number = rcl.document_number')											
 											->where('dp.document_number',$document_number)
 											->where('rcl.office_code',$office_code)																						
-											->where('rcl.status','1')											
+											->where('rcl.status','1')		
+											->where('dr.active','0')											
 											->order_by('log_date','DESC')																			
 											->get()
 											->result();
@@ -452,12 +466,40 @@ public function release_document(){
 		$full_name = json_decode($this->input->post('full_name'));
 		$info_division =json_decode($this->input->post('info_division'));
 		$info_service = json_decode($this->input->post('info_service'));
+		$action = json_decode($this->input->post('action'));
+		$doc_prefix = json_decode($this->input->post('doc_prefix'));
 		$file=json_decode($this->input->post('file_attachments'));
 
 		// file upload
 		if(count($file) != 0 ){
 			for($i = 0 ; $i < count($file) ; $i++){
-				$upload_file = file_put_contents('./uploads/'.$file[$i]->name, base64_decode($file[$i]->uri));				
+
+				$base_path = './uploads/';
+				$docPath = './uploads/files/'.$doc_prefix;
+
+				if(!is_dir($base_path)){
+					$oldmask = umask(0);
+					mkdir($base_path, 0775, TRUE);
+					umask($oldmask);
+				}
+
+				if(!is_dir($docPath)){
+					$oldmask = umask(0);
+					mkdir($docPath, 0777, TRUE);
+					umask($oldmask);
+				}
+
+				$encrypted_filename = md5($file[$i]->base_name).$file[$i]->file_extension;
+				$this->db->insert('document_file',[					
+					'document_number' => $document_number,
+					'file_name' =>  $encrypted_filename,							
+					'type' => 'base_file',
+					'uploaded_by_user_id' => $user_id,
+					'uploaded_by_user_fullname' => $full_name
+				]);		
+
+				$upload_file = file_put_contents($docPath.'/'.$encrypted_filename, base64_decode($file[$i]->uri));				
+
 			}
 		}
 		
@@ -488,7 +530,7 @@ public function release_document(){
 						'type' => 'Released',
 						'document_number' => $document_number,
 						'office_code' => $office_code,
-						'action' => 'No Action',
+						'action' => $action,
 						'remarks' => $release_doc->remarks,
 						'file' => '',
 						'attachment' => '',
@@ -524,9 +566,7 @@ public function release_document(){
 			$result = ["Message" => "true"];
 		
 
-		return $result;
-				
-		
+		return $result;					
 	}catch(\Exception $e){
 		$result = ["Message" => "false", "error" => $e->getMessage()];				
 	}
@@ -610,10 +650,11 @@ public function get_history($document_number){
 										INFO_DIVISION,
 										rcl.type,
 										rcl.transacting_user_fullname,  
+										rcl.status as rcl_status,  
 										CONCAT( DATE_FORMAT(rcl.log_date,"%M %e, %Y"),"\n", TIME_FORMAT(rcl.log_date,"%r")) as time')
 							->from('document_profile as dp')															
 							->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')
-							->join('lib_office as lo','lo.office_code = rcl.office_code')							
+							->join('lib_office as lo','lo.office_code = rcl.office_code')														
 							->where('dp.document_number', $document_number)														
 							->where('log_id !=',$get_first_log_id)
 							->order_by("rcl.log_date", "desc")							
