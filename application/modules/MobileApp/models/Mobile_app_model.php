@@ -236,13 +236,13 @@ public function my_documents(){
 								->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')								
 								->join('lib_office as lo','lo.office_code = rcl.office_code')
 								->where('rcl.office_code',$office_code)																								
-								->where('rcl.status','1')								
-								->limit(5,$current_page  == 1 ? 0 : $current_page)
+								->where('rcl.status','1')														
 								->group_by(['rcl.document_number','rcl.status'])
 								->order_by('log_date')
 								->get()
 								->result();
-				
+	
+		
 		$result = ["Message" => "true", "doc_info" => $get_doc_info];		
 	
 		
@@ -284,6 +284,16 @@ public function get_scanned_document(){
 
 		// check if the document is exist
 		if($check_document_exist){
+			
+
+			// $check_last_sequence = $this->db
+			// 								->select('*')
+			// 								->from('document_recipients')
+			// 								->where('document_number',$document_number)												
+			// 								->order_by('sequence','desc')
+			// 								->get()
+			// 								->result();
+
 		
 			$check_if_receive = $this->db
 										->limit(1)
@@ -475,7 +485,7 @@ public function release_document(){
 			for($i = 0 ; $i < count($file) ; $i++){
 
 				$base_path = './uploads/';
-				$docPath = './uploads/files/'.$doc_prefix;
+				$docPath = './uploads/attachments/'.$doc_prefix;
 
 				if(!is_dir($base_path)){
 					$oldmask = umask(0);
