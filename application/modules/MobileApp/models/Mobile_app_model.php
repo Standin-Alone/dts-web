@@ -219,7 +219,9 @@ public function resend_otp(){
 //  My documents Screen
 public function my_documents(){
 	$result = '';
-	try{
+	try{	
+
+
 
 		$request = json_decode(file_get_contents('php://input'));
 				
@@ -234,11 +236,11 @@ public function my_documents(){
 								->select('*')
 								->from('document_profile as dp')
 								->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')								
-								->join('lib_office as lo','lo.office_code = rcl.office_code')
-								->where('rcl.office_code',$office_code)																								
+								->join('lib_office as lo','lo.office_code = rcl.transacting_office')
+																														
 								->where('rcl.status','1')														
 								->group_by(['rcl.document_number','rcl.status'])
-								->order_by('log_date')
+								->order_by('log_date','desc')
 								->get()
 								->result();
 	
@@ -282,22 +284,34 @@ public function get_scanned_document(){
 									->get()
 									->result();
 
+		$check_if_recipient =  $this->db->select('*')
+								->from('document_recipients')
+								->where('document_number',$document_number)
+								->where('recipient_office_code',$office_code)	
+								->get()->result();
+		
 		// check if the document is exist
 		if($check_document_exist){
 			
+			if($check_if_recipient){
+				
+		
+		
 
-			// $check_last_sequence = $this->db
-			// 								->select('*')
-			// 								->from('document_recipients')
-			// 								->where('document_number',$document_number)												
-			// 								->order_by('sequence','desc')
-			// 								->get()
-			// 								->result();
 
+
+		
+
+												
+		
+
+		
 		
 			$check_if_receive = $this->db
 										->limit(1)
-										->select('*,(select lo_sender.INFO_DIVISION as sender_division  from users as u
+										->select('*,
+										
+										(select lo_sender.INFO_DIVISION as sender_division  from users as u
 										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
 										where u.user_id = dr.added_by_user_id)  as sender_division,
 									(select lo_sender.INFO_SERVICE as sender_service   from users as u
@@ -305,17 +319,32 @@ public function get_scanned_document(){
 										where u.user_id = dr.added_by_user_id)  as sender_service,
 									(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
 										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-										where u.user_id = dr.added_by_user_id)  as sender_office_code')
+										where u.user_id = dr.added_by_user_id)  as sender_office_code,
+
+
+										
+										(select log_origin.INFO_DIVISION as origin_division  from users as u
+										inner join lib_office as log_origin on log_origin.office_code = u.office_code
+										where u.user_id =  dp.created_by_user_id)  as origin_division,
+									(select log_origin.INFO_SERVICE as origin_service   from users as u
+										inner join lib_office as log_origin on log_origin.office_code = u.office_code
+										where u.user_id =  dp.created_by_user_id)  as origin_service,
+									(select log_origin.OFFICE_CODE as origin_office_code   from users as u
+										inner join lib_office as log_origin on log_origin.office_code = u.office_code
+										where u.user_id =  dp.created_by_user_id)  as origin_office_code
+										
+										')
 										->from('document_profile as dp')
 										->join('document_recipients as dr','dr.document_number = dp.document_number')
-										->join('lib_office as lo','lo.office_code = dr.recipient_office_code')																			
+										->join('lib_office as lo','lo.office_code = dr.recipient_office_code')
+										
 										->where('dr.document_number',$document_number)
 										->where('dr.recipient_office_code',$office_code)
 										->where('dr.active','1')
 										->get()
 										->result();
 
-			// check if valid to receive
+			//check if valid to receive
 			if($check_if_receive){
 
 				$get_doc_info = $check_if_receive;
@@ -336,18 +365,33 @@ public function get_scanned_document(){
 											where u.user_id = dr.added_by_user_id)  as sender_service,
 										(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
 											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-											where u.user_id = dr.added_by_user_id)  as sender_office_code')
+											where u.user_id = dr.added_by_user_id)  as sender_office_code,
+
+
+										(select log_origin.INFO_DIVISION as origin_division  from users as u
+											inner join lib_office as log_origin on log_origin.office_code = u.office_code
+											where u.user_id = dp.created_by_user_id)  as origin_division,
+										(select log_origin.INFO_SERVICE as origin_service   from users as u
+											inner join lib_office as log_origin on log_origin.office_code = u.office_code
+											where u.user_id = dp.created_by_user_id)  as origin_service,
+										(select log_origin.OFFICE_CODE as origin_office_code   from users as u
+											inner join lib_office as log_origin on log_origin.office_code = u.office_code
+											where u.user_id = dp.created_by_user_id)  as origin_office_code,
+										dp.type as document_type
+											
+											')
 											->from('document_profile as dp')																						
 											->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
 											->join('document_recipients as dr','dr.document_number = rcl.document_number')											
+											->join('lib_office as lo','lo.office_code = dp.office_code')											
 											->where('dp.document_number',$document_number)
-											->where('rcl.office_code',$office_code)																						
+											->where('rcl.transacting_office',$office_code)																						
 											->where('rcl.status','1')		
 											->where('dr.active','0')											
 											->order_by('log_date','DESC')																			
 											->get()
 											->result();
-
+				
 				if($check_if_release[0]->transacting_office == $office_code && $check_if_release[0]->type == 'Received'  ){
 
 					$get_doc_info = $check_if_release;
@@ -359,8 +403,7 @@ public function get_scanned_document(){
 					// insert to logs not valid to receive
 					$this->db->insert('receipt_control_logs',[
 						'type' => 'Received',
-						'document_number' => $document_number,
-						'office_code' => $office_code,
+						'document_number' => $document_number,						
 						'action' => 'Received',
 						'remarks' => '',
 						'file' => '',
@@ -377,8 +420,25 @@ public function get_scanned_document(){
 
 				
 			}
+	
+	
+		}else{
+
+			$this->db->insert('receipt_control_logs',[
+				'type' => 'Received',
+				'document_number' => $document_number,						
+				'action' => 'Received',
+				'remarks' => '',
+				'file' => '',
+				'attachment' => '',
+				'transacting_user_id' => $user_id,
+				'transacting_user_fullname' => $full_name,
+				'transacting_office' => $office_code,
+				'status' => '0'
+			]);
 			
-		
+			$result = ["Message" => "Not Authorize"];	
+		}
 		}else{
 			$result = ["Message" => "Document not found."];		
 		}
@@ -426,15 +486,16 @@ public function receive_document(){
 						]);						
 				$this->db->insert('receipt_control_logs',[
 					'type' => 'Received',
-					'document_number' => $value->document_number,
-					'office_code' => $value->recipient_office_code,
+					'document_number' => $value->document_number,					
 					'action' => 'Received',
 					'remarks' => $value->remarks,
 					'file' => '',
 					'attachment' => '',
 					'transacting_user_id' => $user_id,
 					'transacting_user_fullname' => $full_name,
-					'transacting_office' => $office_code
+					'transacting_office' => $office_code,
+					'status' => '1',
+
 
 				]);
 	
@@ -499,11 +560,11 @@ public function release_document(){
 					umask($oldmask);
 				}
 
-				$encrypted_filename = md5($file[$i]->base_name).$file[$i]->file_extension;
+				$encrypted_filename = md5($file[$i]->base_name).'.'.$file[$i]->file_extension;
 				$this->db->insert('document_file',[					
 					'document_number' => $document_number,
 					'file_name' =>  $encrypted_filename,							
-					'type' => 'base_file',
+					'type' => 'attachment',
 					'uploaded_by_user_id' => $user_id,
 					'uploaded_by_user_fullname' => $full_name
 				]);		
@@ -538,8 +599,7 @@ public function release_document(){
 
 					$this->db->insert('receipt_control_logs',[
 						'type' => 'Released',
-						'document_number' => $document_number,
-						'office_code' => $office_code,
+						'document_number' => $document_number,						
 						'action' => $action,
 						'remarks' => $release_doc->remarks,
 						'file' => '',
@@ -550,27 +610,34 @@ public function release_document(){
 					]);
 			}
 
-			// get the last sequence
-			$get_last_sequence = $this->db
-										->select('sequence')
-										->from('document_recipients')
-										->where('document_number',$document_number)
-										->where('active','0')
-										->where('recipient_office_code',$office_code)
-										->order_by('sequence','DESC')
-										->limit(1)
-										->get()->result();
+			
+
 
 			// insert recipients
 			foreach($recipients_office_code as $value){
 				
-				$this->db->insert('document_recipients',[					
-					'document_number' => $document_number,
-					'recipient_office_code' => $value,
-					'sequence' => $get_last_sequence[0]->sequence +1,					
-					'added_by_user_id' => $user_id,
-					'added_by_user_fullname' => $full_name			
-				]);				
+
+
+
+
+				$get_document_recipients = $this->db
+								->select('recipient_office_code')
+								->from('document_recipients')
+								->where('document_number',$document_number)
+								->where('active','1')
+								->get()->result_array();
+
+				if(!in_array($value,array_column($get_document_recipients,"recipient_office_code"))){
+					$this->db->insert('document_recipients',[					
+						'document_number' => $document_number,
+						'recipient_office_code' => $value,					
+						'added_by_user_id' => $user_id,
+						'added_by_user_fullname' => $full_name			
+					]);	
+				}
+				
+							
+		
 			}
 		
 			$result = ["Message" => "true"];
@@ -606,7 +673,21 @@ public function check_document($document_number,$office_code){
 
 					(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
 						inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-						where u.user_id = dr.added_by_user_id)  as sender_office_code
+						where u.user_id = dr.added_by_user_id)  as sender_office_code,
+
+
+
+					(select log_origin.INFO_DIVISION as origin_division  from users as u
+						inner join lib_office as log_origin on log_origin.office_code = u.office_code
+						where u.user_id =  dp.created_by_user_id)  as origin_division,
+
+					(select log_origin.INFO_SERVICE as origin_service   from users as u
+						inner join lib_office as log_origin on log_origin.office_code = u.office_code
+						where u.user_id =  dp.created_by_user_id)  as origin_service,
+				
+					(select log_origin.OFFICE_CODE as origin_office_code   from users as u
+						inner join lib_office as log_origin on log_origin.office_code = u.office_code
+						where u.user_id =  dp.created_by_user_id)  as origin_office_code
 						
 						')
 						->from('document_profile as dp')
@@ -632,9 +713,9 @@ public function check_if_release($document_number,$office_code){
 						->limit(1)
 						->select('*')						
 						->join('receipt_control_logs as rcl')						
-						->join('lib_office as lo','lo.office_code = rcl.office_code')						
+						->join('lib_office as lo','lo.office_code = rcl.transacting_office')						
 						->where('dp.document_number',$document_number)
-						->where('rcl.office_code',$office_code)						
+						->where('rcl.transacting_office',$office_code)						
 						->where('rcl.action','Received')
 						->where('rcl.status','1')						
 						->order_by('rcl.log_date', 'DESC')
@@ -654,7 +735,7 @@ public function get_history($document_number){
 		$get_first_log_id = $this->db->select("MIN(log_id) as first_log_id")->from('receipt_control_logs')->where('document_number',$document_number)->get()->row()->first_log_id;
 		$get_records = $this->db									
 							->select('dp.document_number,
-										rcl.office_code,
+										rcl.transacting_office,
 										subject,dp.remarks,
 										INFO_SERVICE,
 										INFO_DIVISION,
@@ -664,7 +745,7 @@ public function get_history($document_number){
 										CONCAT( DATE_FORMAT(rcl.log_date,"%M %e, %Y"),"\n", TIME_FORMAT(rcl.log_date,"%r")) as time')
 							->from('document_profile as dp')															
 							->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')
-							->join('lib_office as lo','lo.office_code = rcl.office_code')														
+							->join('lib_office as lo','lo.office_code = rcl.transacting_office')														
 							->where('dp.document_number', $document_number)														
 							->where('log_id !=',$get_first_log_id)
 							->order_by("rcl.log_date", "desc")							
@@ -681,9 +762,28 @@ public function get_history($document_number){
 
 
 // list of offices
-public function get_offices(){
+public function get_offices($document_number,$my_office_code){
 	$result = '';
 	try{
+
+
+		$get_document_recipients = $this->db
+										->select('recipient_office_code')
+										->from('document_recipients')
+										->where('document_number',$document_number)
+										->where('active','1')
+										->get()->result();
+		$consolidate_recipients = [];									
+		//  push default recipients
+		foreach($get_document_recipients as $item){
+			array_push($consolidate_recipients,$item->recipient_office_code);
+		}
+								
+		$check_if_recipient_is_empty = isset($consolidate_recipients) ? $consolidate_recipients  : array() ;
+		
+		array_push($check_if_recipient_is_empty,$my_office_code);
+		
+		
 		$get_division = $this->db->distinct()->select('INFO_DIVISION ,office_code')->from('lib_office')->group_by('INFO_DIVISION')->get();
 		
 		$office_array = [];
@@ -693,7 +793,7 @@ public function get_offices(){
 
 				array_push($office_array , ["name"=>$item->INFO_DIVISION,'id'=>$division_key, "children"=>[]]);
 
-				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->get();		
+				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->where_not_in('office_code',$check_if_recipient_is_empty )->get();		
 				foreach($get_records->result() as $value){	
 					
 					
@@ -708,8 +808,12 @@ public function get_offices(){
 				}
 			}
 		
-			
-			$result = ["Message" => "true", "offices" =>$office_array];
+			if (($key = array_search($my_office_code, $consolidate_recipients)) !== false) {
+				unset($consolidate_recipients[$key]);
+			}
+
+		
+			$result = ["Message" => "true", "offices" =>$office_array,"default_recipients" =>$consolidate_recipients ];
 		}
 		return $result;
 

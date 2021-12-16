@@ -1,30 +1,127 @@
+<!-- <link rel="stylesheet" href="dashboard.css"> -->
+
+<!-- ================== BEGIN ADDITIONALS STYLE ================== -->
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link href="<?php echo base_url(); ?>assets/css/style.css" rel="stylesheet" />
+<!-- ================== END ADDITIONALS STYLE ================== -->
+
+<style>
+    ul.timeline {
+        list-style-type: none;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+
+    /* Timeline vertical line */
+    ul.timeline:before {
+        content: ' ';
+        background: #fff;
+        display: inline-block;
+        position: absolute;
+        left: 16px;
+        width: 4px;
+        height: 100%;
+        z-index: 400;
+        border-radius: 1rem;
+    }
+
+    li.timeline-item {
+        margin: 20px 0;
+    }
+
+    /* Timeline item arrow */
+    .timeline-arrow {
+        border-top: 0.5rem solid transparent;
+        border-right: 0.5rem solid #fff;
+        border-bottom: 0.5rem solid transparent;
+        display: block;
+        position: absolute;
+        top: 20px;
+        left: -8px;
+    }
+
+    /* Timeline item circle marker */
+    li.timeline-item::before {
+        content: ' ';
+        background: #ddd;
+        display: inline-block;
+        position: absolute;
+        border-radius: 50%;
+        border: 3px solid #fff;
+        top: 20px;
+        left: -31px;
+        width: 14px;
+        height: 14px;
+        z-index: 400;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+</style>
+
+<?php
+// Initialize
+
+// ================Received============================
+$received_total_count =  $count_data['received_data']['received_total_count'];
+$received_today_count =  $count_data['received_data']['received_today_count'];
+$received_month_count =  $count_data['received_data']['received_month_count'];
+$received_year_count =  $count_data['received_data']['received_year_count'];
+
+// ================Released============================
+$released_total_count =  $count_data['released_data']['released_total_count'];
+$released_today_count =  $count_data['released_data']['released_today_count'];
+$released_month_count =  $count_data['released_data']['released_month_count'];
+$released_year_count =  $count_data['released_data']['released_year_count'];
+
+// ================My Documents============================
+$my_documents_count = $count_data['my_documents_data']['document_count'];
+$my_documents = $count_data['my_documents_data']['document_details'];
+
+// ================My Archives============================
+$my_archives_count = $count_data['my_archives_data'];
+
+// ================Recevied Documents============================
+?>
+
 <div id="content" class="content">
     <!-- begin row -->
     <div class="row">
+
         <!-- begin col-3 -->
         <div class="col-lg-3 col-md-6">
-            <div class="widget widget-stats bg-red">
-                <div class="stats-icon"><i class="fa fa-desktop"></i></div>
+            <div class="widget widget-stats bg-success">
+                <div class="stats-icon"><i class="fa fa-file-download"></i></div>
                 <div class="stats-info">
-                    <h4>TOTAL VISITORS</h4>
-                    <p>3,291,922</p>    
+                    <h4>Received (Today)</h4>
+                    <p>
+                        <?php
+                        echo $received_today_count;
+                        ?>
+                    </p>
                 </div>
                 <div class="stats-link">
-                    <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
+                    <!-- <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a> -->
+                    <a href="#" type="button" data-toggle="modal" data-target="#modal_received">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
                 </div>
             </div>
         </div>
+
         <!-- end col-3 -->
         <!-- begin col-3 -->
         <div class="col-lg-3 col-md-6">
             <div class="widget widget-stats bg-orange">
-                <div class="stats-icon"><i class="fa fa-link"></i></div>
+                <div class="stats-icon"><i class="fa fa-file-upload"></i></div>
                 <div class="stats-info">
-                    <h4>BOUNCE RATE</h4>
-                    <p>20.44%</p>   
+                    <h4>Released (Today)</h4>
+                    <p>
+                        <?php
+                        echo $released_today_count;
+                        ?>
+                    </p>
                 </div>
                 <div class="stats-link">
-                    <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
+                    <!-- <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a> -->
+                    <a href="#" type="button" data-toggle="modal" data-target="#modal_released">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
                 </div>
             </div>
         </div>
@@ -32,10 +129,14 @@
         <!-- begin col-3 -->
         <div class="col-lg-3 col-md-6">
             <div class="widget widget-stats bg-grey-darker">
-                <div class="stats-icon"><i class="fa fa-users"></i></div>
+                <div class="stats-icon"><i class="fa fa-file-alt"></i></div>
                 <div class="stats-info">
-                    <h4>UNIQUE VISITORS</h4>
-                    <p>1,291,922</p>    
+                    <h4>My Documents</h4>
+                    <p>
+                        <?php
+                        echo $my_documents_count;
+                        ?>
+                    </p>
                 </div>
                 <div class="stats-link">
                     <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
@@ -46,10 +147,14 @@
         <!-- begin col-3 -->
         <div class="col-lg-3 col-md-6">
             <div class="widget widget-stats bg-black-lighter">
-                <div class="stats-icon"><i class="fa fa-clock"></i></div>
+                <div class="stats-icon"><i class="fa fa-folders"></i></div>
                 <div class="stats-info">
-                    <h4>AVG TIME ON SITE</h4>
-                    <p>00:12:23</p> 
+                    <h4>My Archive</h4>
+                    <p>
+                        <?php
+                        echo $my_archives_count;
+                        ?>
+                    </p>
                 </div>
                 <div class="stats-link">
                     <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
@@ -59,4 +164,499 @@
         <!-- end col-3 -->
     </div>
     <!-- end row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card" style="background-image: linear-gradient(to bottom right, #ccf2ff , #379cf7);">
+                <!-- <img class="img-fluid px-3 py-3 ml-5" src="assets/img/dashboard/dts-dashboard-banner.svg" alt="Card image"> -->
+                <!-- <div class="card-img-overlay"> -->
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="col">
+                        <img class="img-fluid px-3 py-3 ml-5" src="assets/img/dashboard/dts-dashboard-banner.svg" alt="Card image" style="max-width: 70%;">
+                    </div>
+                    <div class="col-md-4 my-3 d-flex flex-row mr-3">
+                        <div class="col mh-400 mb-auto my-2 d-flex flex-column my-auto" style="border-radius: 10px; background: rgba(255, 255, 255, 0.2); ">
+                            <div class="my-auto h-auto">
+                                <div class="card p-lg-4 h-auto my-md-3 my-lg-3 shadow bg-warning d-flex " style="border-radius: 10px; background: rgba(255, 255, 255, 0.7); box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
+                                    <a class="btn btn-lg" href="<?php echo base_url() . 'Create_profile' ?>">
+                                        <h3 class="text-white"><i class="fa fa-book mr-3"></i>Create Profile</h3>
+                                        <p class="h5 text-white mx-auto my-0">
+                                            Profile your document for a documented transaction
+                                        </p>
+                                    </a>
+                                </div>
+                                <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-search-location mr-2 text-lg"></i>Track Document</h3>
+                                    <p class="h5 text-white mx-auto">
+                                        Tracks document transaction history
+                                    </p>
+                                    <div class="input-group p-5">
+                                        <input name="track_document" id="track_document" type="text" class="form-control" placeholder="Document Number">
+                                        <button id="track_document_btn" type="button" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
+                                    </div>
+                                </div>
+                                <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Archive Document</h3>
+                                    <p class="h5 text-white mx-auto">
+                                        Archive your finished transactions
+                                    </p>
+                                    <div class="input-group p-5">
+                                        <input type="text" class="form-control" placeholder="Document Number">
+                                        <button type="button" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-6 col-lg-6">
+            <div class="card rounded">
+                <div class="card-header bg-dark">
+                    <div class="d-flex justify-content-between">
+                        <div class="col">
+                            <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-down"></i>INCOMING DOCUMENTS</h6>
+                            <h3 class="text-white">
+                                <?php echo count($incoming_documents) ?>
+                            </h3>
+                        </div>
+                        <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
+                        <span>
+                            <a href="http://localhost:8080/dts/Dashboard/Received_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="p-2 <?php echo $class = !empty($incoming_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
+                    <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
+                        <?php
+                        if ($incoming_documents) {
+                            foreach ($incoming_documents as $row) {
+                        ?>
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex flex-column p-2">
+                                        <div class="d-flex justify-content-between border-bottom align-items-center bg-light">
+                                            <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-2">DA-CO-ICTS-AO20211025-00001</span>
+                                            <span>Date Created:
+                                                <h6 class="mb-1"> 12/01/2021 1:00 pm</h6>
+                                            </span>
+
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-1">
+                                            <span>
+                                                <h6 class="mb-1">Subject: Document Tracking System</h6>
+                                                <h6 class="mb-1">Type: MO</h6>
+                                                <h6 class="mb-1">Office: Information Technology Service</h6>
+                                            </span>
+                                            <div class="mb-1 d-flex flex-column">
+                                                <button class="btn btn-sm my-1 btn-secondary track"><i class="fa fa-search-location mr-2"></i>Track</button>
+                                                <button class="btn btn-sm my-1 btn-primary view"><i class="fa fa-eye mr-2"></i>View</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php }
+                        } else { ?>
+                            <div class="text-center my-4">
+                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No Records Found</span>
+                                <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-6 col-lg-6">
+            <div class="card rounded">
+                <div class="card-header bg-dark">
+                    <div class="d-flex justify-content-between">
+                        <div class="col">
+                            <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-up"></i>OUTCOMING DOCUMENTS</h6>
+                            <h3 class="text-white">
+                                <?php echo count($incoming_documents) ?>
+                            </h3>
+                        </div>
+                        <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
+                        <span>
+                            <a href="http://localhost:8080/dts/Dashboard/Received_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="p-2 <?php echo $class = !empty($incoming_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
+                    <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
+                        <?php
+                        if ($incoming_documents) {
+                            foreach ($incoming_documents as $row) {
+                        ?>
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex flex-column p-2">
+                                        <div class="d-flex justify-content-between border-bottom align-items-center bg-light">
+                                            <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-2">DA-CO-ICTS-AO20211025-00001</span>
+                                            <span>Date Created:
+                                                <h6 class="mb-1"> 12/01/2021 1:00 pm</h6>
+                                            </span>
+
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-1">
+                                            <span>
+                                                <h6 class="mb-1">Subject: Document Tracking System</h6>
+                                                <h6 class="mb-1">Type: MO</h6>
+                                                <h6 class="mb-1">Office: Information Technology Service</h6>
+                                            </span>
+                                            <div class="mb-1 d-flex flex-column">
+                                                <button class="btn btn-sm my-1 btn-secondary track"><i class="fa fa-search-location mr-2"></i>Track</button>
+                                                <button class="btn btn-sm my-1 btn-primary view"><i class="fa fa-eye mr-2"></i>View</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php }
+                        } else { ?>
+                            <div class="text-center my-4">
+                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No Records Found</span>
+                                <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- <a href="#modal-dialog" class="btn btn-primary" data-bs-toggle="modal">Modal</a>
+
+    <div class="modal fae" id="modal-dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal Dialog</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-hidden="true"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" class="btn btn-white" data-bs-dismiss="modal">Close</a>
+                    <a href="javascript:;" class="btn btn-success">Action</a>
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+
+    <!-- ===========================MODAL Document History=========================== -->
+    <div class="modal fae bd-example-modal-lg" id="modal_track" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="container pt-3 pb-2">
+
+                    <!-- For demo purpose -->
+                    <div class="row text-center">
+                        <div class="col-lg-8 mx-auto">
+                            <h1 class="display-6">Document History</h1>
+                            <span class="d-flex flex-row justify-content-center">
+                                <!-- <p id="text_document_number" class="lead mb-0 text-dark"></p> -->
+
+                            </span>
+                        </div>
+                    </div><!-- End -->
+                    <div class="row p-4 d-flex flex-row justify-content-start align-items-end bg-light p-2">
+                        <div class="col-md-9">
+                            <h5><b id="text_document_number"></b>
+                                <a href="#" class="btn-icon btn-sm copy link-secondary" style="text-decoration: none;" data-toggle="tooltip" data-placement="top" title="Click to copy">
+                                    <i class="ml-2 fa fa-clone text-gray"></i>
+                                </a>
+                            </h5>
+                            <span class="d-flex flex-row align-items-end">
+                                Type: &nbsp;
+                                <h6 id="type" class="mb-0 "></h6>
+                            </span>
+                            <span class="d-flex flex-row align-items-end">
+                                Subject: &nbsp;
+                                <h6 id="subject" class="mb-0"></h6>
+                            </span>
+                            <span class="d-flex flex-row align-items-end">
+                                Document Origin: &nbsp;
+                                <h6 id="origin" class="mb-0 "></h6>
+                            </span>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 align-items-center d-flex justify-content-end p-3">
+                            <img src="<?php echo base_url() ?>/assets/img/dashboard/track_document.svg" height="100" class="d-none d-lg-block">
+                        </div>
+                    </div>
+                    <div class="row bg-light">
+                        <div class="col-lg-12 mx-auto m-3 rounded scrollbar" style="max-height: 500px; background-color: #d7dfe6;">
+                            <!-- Timeline -->
+                            <ul id="timeline" class="timeline">
+                                <!-- <li class="timeline-item bg-white rounded ml-3 p-4 shadow-sm">
+                                    <div class="timeline-arrow"></div>
+                                    <div class="d-flex flex-column p-4">
+                                        <div class="d-flex flex-column">
+                                            <div>
+                                                <span class=" badge badge-lg badge-success">
+                                                    <h2 class="h5 mb-0">Received</h2>
+                                                </span>
+                                            </div>
+                                            <span class="small text-gray mt-2"><i class="fa fa-clock-o mr-1"></i>21 March, 2019</span>
+                                        </div>
+                                        <span class="d-flex flex-row mt-2">
+                                            Received By: <h5 class=" ml-2"> Information Communications Technology Service</h5>
+                                        </span>
+                                        <span class="d-flex flex-row">
+                                            Assigned Personnel: <h5 class=" ml-2"> Ling Hayabusa</h5>
+                                        </span>
+                                    </div>
+                                    <div class="p-4">
+                                        <label>Remarks</label>
+                                        <p class="text-small mt-2 font-weight-light">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
+                                    </div>
+                                </li> -->
+                            </ul><!-- End -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =====================================MODAL RECEIVED LIST========================================== -->
+    <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_received">Large modal</button> -->
+
+    <div class="modal fae bd-example-modal-lg" id="modal_received" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="container pt-5 pb-2">
+                    <!-- For demo purpose -->
+                    <div class="row text-center text-white">
+                        <div class="col-lg-8 mx-auto">
+                            <h1 class="display-6">Received Documents</h1>
+                            <div class="input-group mb-3">
+                                <input name="search_received" id="search_received" type="text" class="form-control" placeholder="Enter keyword" aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 50px 0 0 50px;">
+                                <div class="input-group-append">
+                                    <span id="received_btn" class="input-group-text" id="basic-addon2" style="border-radius: 0 50px 50px 0;"><i class="fa fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End -->
+                    <div class="row bg-light px-0">
+                        <div class="col-xl-12 mx-auto mb-2 mt-2">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-3 align-items-center d-flex justify-content-center p-3">
+                                    <img src="<?php echo base_url() ?>/assets/img/dashboard/received_modal.svg" height="130" class="d-none d-lg-block">
+                                </div>
+                                <div class="col-xl-9 col-lg-9">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="row d-flex flex-column">
+                                            <div class="">
+                                                <b>TOTAL RECEIVED DOCUMENTS</b>
+                                            </div>
+                                            <div class="d-flex">
+                                                <h2 class="mb-0"><span data-animation="number" data-value="64559.25"><?php echo $received_total_count ?></span></h2>
+                                                <div class="ms-auto mt-n1 mb-n1v ">
+                                                    <div class="bg-secondary" id="total-sales-sparkline" style="min-height: 36px;">
+                                                    </div>
+                                                    <!-- <hr> -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span>
+                                            <a href="<?php echo base_url() ?>Dashboard/Received_Documents_view" class="btn btn-xs btn-light fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                                        </span>
+                                    </div>
+                                    <!-- <div class="mb-3 ">
+                                    <i class="fa fa-caret-up"></i> <span data-animation="number" data-value="33.21">33.21</span>% compare to last week
+                                </div> -->
+                                    <hr class="bg-secondary opacity-25" style="opacity: 25%;">
+                                    <div class="row text-truncate">
+                                        <div class="col-4">
+                                            <div class=" ">Received This Year</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $received_year_count ?>"><?php echo $received_year_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                        <div class="col-4">
+                                            <div class=" ">Received This Month</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $received_month_count ?>"><?php echo $received_month_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                        <div class="col-4">
+                                            <div class=" ">Received Today</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $received_today_count ?>"><?php echo $received_today_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-light">
+                        <div class="col-lg-12 mx-auto m-3 scrollbar rounded" style="height: 350px; background-color: #d7dfe6;">
+                            <?php foreach ($received_documents as $row) { ?>
+                                <div class="card mb-0 mt-1 bg-white">
+                                    <!-- <div class="d-flex justify-content-between align-items-center p-2">
+                                        <div class="d-flex flex-column">
+                                            <label class="h4 mb-1">From: </label>
+                                            <span class="h6 mb-0">Office: <label class="m-0"> <?php echo $row->from_office ?></label></span>
+                                            <span class="h6 mb-0">Assigned Personel: <label class="m-0"><?php echo $row->from_user ?></label> </span>
+                                        </div>
+                                    </div>
+                                    <hr class="bg-secondary opacity-25" style="opacity: 25%;"> -->
+                                    <div class=" bg-light p-5 d-flex justify-content-between align-items-center">
+                                        <!-- <div class="note-icon"><i class="fab fa-facebook-f"></i></div> -->
+                                        <div class="note-content">
+                                            <h4><b>From</b></h4>
+                                            <div class="d-flex flex-column">
+                                                <span class="h6 mb-1">Office: <label class="m-0"> <?php echo $row->from_office ?></label></span>
+                                                <span class="h6 m-0">Assigned Personnel: <label class="m-0"><?php echo $row->from_user ?></label> </span>
+                                            </div>
+                                        </div>
+                                        <span class="small text-gray align-self-start mt-1"><i class="fa fa-clock-o mr-1"></i>Date Received: <?php echo $row->log_date ?></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center p-5">
+                                        <div class="d-flex flex-column">
+                                            <h4><b>Details</b></h4>
+                                            <span class="h6 m-0">Document No: <label> <?php echo $row->document_number ?></label></span>
+                                            <span class="h6 m-0">Document Type: <label><?php echo $row->doc_type ?></label> </span>
+                                            <span class="h6 m-0">Origin Type: <label><?php echo $row->origin_type ?></label> </span>
+                                            <span class="h6 m-0">Subject: <label> <?php echo $row->subject ?></label></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ================================== Released Modal ============================================ -->
+    <div class=" modal fae bd-example-modal-lg" id="modal_released" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="container pt-5 pb-2">
+                    <!-- For demo purpose -->
+                    <div class="row text-center text-white">
+                        <div class="col-lg-8 mx-auto">
+                            <h1 class="display-6">Released Documents</h1>
+                            <div class="input-group mb-3">
+                                <input name="search_released" id="search_released" type="text" class="form-control" placeholder="Enter keyword" aria-label="Recipient's username" aria-describedby="basic-addon2" style="border-radius: 50px 0 0 50px;">
+                                <div class="input-group-append">
+                                    <span id="released_btn" class="input-group-text" id="basic-addon2" style="border-radius: 0 50px 50px 0;"><i class="fa fa-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End -->
+                    <div class="row bg-light px-0">
+                        <div class="col-xl-12 mx-auto mb-2 mt-2">
+                            <div class="row">
+                                <div class="col-xl-3 col-lg-3 align-items-center d-flex justify-content-center p-3">
+                                    <img src="<?php echo base_url() ?>/assets/img/dashboard/released_modal.svg" height="130" class="d-none d-lg-block">
+                                </div>
+                                <div class="col-xl-9 col-lg-9">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="row d-flex flex-column">
+                                            <div class="">
+                                                <b>TOTAL RELEASED DOCUMENTS</b>
+                                            </div>
+                                            <div class="d-flex">
+                                                <h2 class="mb-0"><span data-animation="number" data-value="64559.25"><?php echo $received_total_count ?></span></h2>
+                                                <div class="ms-auto mt-n1 mb-n1v ">
+                                                    <div class="bg-secondary" id="total-sales-sparkline" style="min-height: 36px;">
+                                                    </div>
+                                                    <!-- <hr> -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <span>
+                                            <a href="<?php echo base_url() ?>Dashboard/Received_Documents_view" class="btn btn-xs btn-light fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                                        </span>
+                                    </div>
+                                    <hr class="bg-secondary opacity-25" style="opacity: 25%;">
+                                    <div class="row text-truncate">
+                                        <div class="col-4">
+                                            <div class=" ">Released This Year</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_year_count ?>"><?php echo $released_year_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                        <div class="col-4">
+                                            <div class=" ">Released This Month</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_month_count ?>"><?php echo $released_month_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                        <div class="col-4">
+                                            <div class=" ">Released Today</div>
+                                            <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_today_count ?>"><?php echo $released_today_count ?></div>
+                                            <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
+                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                        </div> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row bg-light">
+                        <div id="released_div" class="col-lg-12 mx-auto m-3 scrollbar rounded" style="height: 350px; background-color: #d7dfe6;">
+                            <?php foreach ($released_documents as $row) { ?>
+                                <div class="card mb-0 mt-1 bg-white">
+                                    <div class="bg-light d-flex justify-content-between align-items-center p-5">
+                                        <div class="d-flex flex-column">
+                                            <h4><b>Details</b></h4>
+                                            <span class="h6 m-0">Document No: <label> <?php echo $row->document_number ?></label></span>
+                                            <span class="h6 m-0">Document Type: <label><?php echo $row->doc_type ?></label> </span>
+                                            <span class="h6 m-0">Origin Type: <label><?php echo $row->origin_type ?></label> </span>
+                                            <span class="h6 m-0">Subject: <label> <?php echo $row->subject ?></label></span>
+                                        </div>
+                                        <span class="small text-gray align-self-start mt-1"><i class="fa fa-clock-o mr-1"></i>Date Released: <?php echo $row->log_date ?></span>
+                                    </div>
+                                    <div class="p-5 d-flex justify-content-between align-items-center">
+                                        <!-- <div class="note-icon"><i class="fab fa-facebook-f"></i></div> -->
+                                        <div class="note-content">
+                                            <h4><b>Recipients</b></h4>
+                                            <div class="d-flex flex-column">
+                                                <?php
+                                                $get_recipients = $this->db->select("
+                                                 CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as recipient_office
+                                                         ")
+                                                    ->from("document_recipients as dr")
+                                                    ->where("added_by_user_id", $transacting_user_id)
+                                                    ->where("document_number", $row->document_number)
+                                                    ->join("lib_office as lo", "lo.OFFICE_CODE = dr.recipient_office_code")
+                                                    ->get()->result();
+
+                                                foreach ($row as $rec) {
+
+                                                ?>
+
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            <?php } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="<?php echo base_url() ?>Dashboard/Dashboard_js"></script>

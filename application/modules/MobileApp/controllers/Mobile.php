@@ -55,8 +55,8 @@ class Mobile extends MY_Controller {
 	}
 
 	
-	public function get_offices(){
-		$result = $this->Mobile_app_model->get_offices();
+	public function get_offices($document_number,$my_office_code){
+		$result = $this->Mobile_app_model->get_offices($document_number,$my_office_code);
 		echo json_encode($result);
 	}
 
