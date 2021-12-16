@@ -394,6 +394,25 @@ public function get_scanned_document(){
 				
 				if($check_if_release[0]->transacting_office == $office_code && $check_if_release[0]->type == 'Received'  ){
 
+					// $get_previous_sender = $this->db
+					// 							->select('recipient_office_code')
+					// 							->from('document_recipients as dr')
+					// 							->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number')		
+					// 							->where('dr.document_number',$document_number)
+					// 							->where('dr.recipient_office_code != ',$office_code)
+					// 							->where('dr.active', '0')
+					// 							->where('rcl.type', 'Received')
+					// 							->where('rcl.status', '1')	
+					// 							->group_by('dr.recipient_office_code')
+					// 							->get()
+					// 							->result_array();
+
+
+					// array_push($check_if_release,["last_receivers"=>array_column($get_previous_sender,"recipient_office_code")]);
+				
+												
+												
+
 					$get_doc_info = $check_if_release;
 					$type="release";
 					$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
@@ -747,8 +766,9 @@ public function get_history($document_number){
 							->join('receipt_control_logs as rcl','dp.document_number = rcl.document_number')
 							->join('lib_office as lo','lo.office_code = rcl.transacting_office')														
 							->where('dp.document_number', $document_number)														
-							->where('log_id !=',$get_first_log_id)
-							->order_by("rcl.log_date", "desc")							
+							->where('log_id !=',$get_first_log_id)							
+							->order_by("rcl.log_date", "desc")		
+							
 							->get()->result();
 		if($get_records){
 			$result = ["Message" => "true", "history" =>$get_records];
