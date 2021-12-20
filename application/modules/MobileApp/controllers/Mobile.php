@@ -49,6 +49,13 @@ class Mobile extends MY_Controller {
 		echo json_encode($result);
 	}
 
+	// incoming
+	
+	public function incoming_documents($my_office_code){
+		$result = $this->Mobile_app_model->incoming_documents($my_office_code);
+		echo json_encode($result);
+	}
+
 	public function get_history($document_number){
 		$result = $this->Mobile_app_model->get_history($document_number);
 		echo json_encode($result);
