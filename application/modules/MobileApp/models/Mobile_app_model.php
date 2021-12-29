@@ -267,7 +267,7 @@ public function incoming_documents($my_office_code){
 								->select('*')																		
 								->from('document_profile as dp')
 								->join('document_recipients as dr','dp.document_number = dr.document_number')
-								->where('dr.recipient_office_code',$my_office_code)															
+								->where('dr.recipient_office_code',$my_office_code)
 								->where('dr.active','1')															
 								->get()->result();
 		
@@ -279,6 +279,50 @@ public function incoming_documents($my_office_code){
 	return $result;
 }
 
+
+// outgoing documents model
+public function outgoing_documents($my_office_code){
+	$result = '';
+
+	try{
+			
+		$get_outgoing  =  $this->db											
+									->select("*,
+									(SELECT count(*) FROM receipt_control_logs as rcl2
+									WHERE rcl.log_id > rcl2.log_id and rcl2.type= 'Released'
+									ORDER BY log_id ASC LIMIT 1) as check_next_log_if_release
+									
+									")
+									->from('document_profile as dp')																															
+									->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')																													
+									->where('dp.office_code',$my_office_code)
+									->where('rcl.transacting_office',$my_office_code)									
+									->where('rcl.status','1')
+									->where('dp.status','Verified')
+									->order_by('log_date')
+									->get()
+									->result();
+
+		$consolidate_outgoing = array();
+		foreach($get_outgoing as  $item){
+
+			if($item->check_next_log_if_release == 0){
+
+				array_push($consolidate_outgoing,$item);
+			}
+
+										
+		}
+		
+		
+		$result = ["Message" => "true", "doc_info" => $consolidate_outgoing];	
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];				
+	}
+
+	return $result;
+
+}
 
 
 
@@ -897,6 +941,19 @@ public function get_offices($document_number,$my_office_code){
 	}
 }
 
+
+public function get_doc_type(){
+	$result = '';
+	try{
+		$get_doc_type =  $this->db->select('*')
+									->from('doc_type')
+									->get()->result();
+		$result = ["Message" => "true", "doc_type" =>$get_doc_type ];
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];
+	}
+	return $result;
+}
 
 
 

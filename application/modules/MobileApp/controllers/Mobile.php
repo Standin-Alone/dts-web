@@ -56,6 +56,13 @@ class Mobile extends MY_Controller {
 		echo json_encode($result);
 	}
 
+	// outgoing
+	
+	public function outgoing_documents($my_office_code){
+		$result = $this->Mobile_app_model->outgoing_documents($my_office_code);
+		echo json_encode($result);
+	}
+
 	public function get_history($document_number){
 		$result = $this->Mobile_app_model->get_history($document_number);
 		echo json_encode($result);
@@ -64,6 +71,11 @@ class Mobile extends MY_Controller {
 	
 	public function get_offices($document_number,$my_office_code){
 		$result = $this->Mobile_app_model->get_offices($document_number,$my_office_code);
+		echo json_encode($result);
+	}
+
+	public function get_doc_type(){
+		$result = $this->Mobile_app_model->get_doc_type();
 		echo json_encode($result);
 	}
 
