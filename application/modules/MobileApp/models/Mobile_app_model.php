@@ -268,7 +268,8 @@ public function incoming_documents($my_office_code){
 								->from('document_profile as dp')
 								->join('document_recipients as dr','dp.document_number = dr.document_number')
 								->where('dr.recipient_office_code',$my_office_code)
-								->where('dr.active','1')															
+								->where('dr.active','1')
+								->order_by('dr.date_added','desc')															
 								->get()->result();
 		
 		$result = ["Message" => "true", "doc_info" => $get_incoming];	
@@ -299,7 +300,7 @@ public function outgoing_documents($my_office_code){
 									->where('rcl.transacting_office',$my_office_code)									
 									->where('rcl.status','1')
 									->where('dp.status','Verified')
-									->order_by('log_date')
+									->order_by('log_date','desc')
 									->get()
 									->result();
 
