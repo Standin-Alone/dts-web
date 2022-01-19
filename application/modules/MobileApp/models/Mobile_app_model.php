@@ -269,6 +269,7 @@ public function incoming_documents($my_office_code){
 								->join('document_recipients as dr','dp.document_number = dr.document_number')
 								->where('dr.recipient_office_code',$my_office_code)
 								->where('dr.active','1')
+								->where('dr.date_added','NOW()')
 								->order_by('dr.date_added','desc')															
 								->get()->result();
 		

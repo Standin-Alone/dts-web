@@ -34,6 +34,7 @@ class Create_profile_model extends CI_Model
 			'origin_type'			=> $this->input->post('origin_type', true),
 			'subject'		=> $this->input->post('subject', true),
 			'remarks'			=> $this->input->post('remarks', true),
+			'status'			=> 'Draft',
 			'date' 	=> date("Y-m-d", strtotime($this->input->post('date', true))),
 			'OFFICE_CODE' 	=> $this->session->userdata('office'),
 			'created_by_user_id'		=> $this->session->userdata('user_id'),
@@ -75,7 +76,8 @@ class Create_profile_model extends CI_Model
 							'recipient_office_code' 	=> $recipients[$k],
 							'sequence' 					=> $k+1,
 							'added_by_user_id'			=> $this->session->userdata('user_id'),
-							'added_by_user_fullname'	=>  $this->session->userdata('fullname')
+							'added_by_user_fullname'	=> $this->session->userdata('fullname'),
+							'added_by_user_office'		=> $this->session->userdata('office')
 						);
 					}
 				}

@@ -29,29 +29,10 @@
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/sb-admin-2.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/sweetalert2/dist/sweetalert2.min.js"></script> -->
+    <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css">
 	<script type="text/javascript">
 		var base_url = '<?php echo base_url(); ?>';
 	</script>
-	<style type="text/css">
-        @keyframes spinner-border {
-          to { transform: rotate(360deg); }
-        } 
-        .spinner-border{
-            display: inline-block;
-            width: 2rem;
-            height: 2rem;
-            vertical-align: text-bottom;
-            border: .25em solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            -webkit-animation: spinner-border .75s linear infinite;
-            animation: spinner-border .75s linear infinite;
-        }
-        .spinner-border-sm{
-            height: 1rem;
-            border-width: .2em;
-        }
-    </style>
 </head>
 <body class="pace-top bg-white">
 	<div id="page-loader" class="fade show"><span class="spinner"></span></div>
@@ -87,15 +68,14 @@
                 <!-- end login-header -->
                 <!-- begin login-content -->
                 <div class="login-content">
-                    <div id="error_msg">
-                    </div>
+                    <div id="error_msg"></div>
                     <form id="reset_form" class="margin-bottom-0">
                         <input type="hidden" id="token" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
                         <div class="form-group m-b-15">
                             <input type="text" class="form-control form-control-lg" name="email" placeholder="Enter your email here" required />
                         </div>
                         <div class="login-buttons">
-                            <button type="submit" id="resend_otp" class="btn btn-outline-success btn-block btn-lg">
+                            <button type="submit" id="reset_btn" class="btn btn-outline-success btn-block btn-lg">
                         		<span class="spinner-border spinner-border-sm" id="loader" role="status" aria-hidden="true" style="display: none;"></span>
                         		Reset Password
                         	</button>
@@ -141,10 +121,14 @@
 	$(function() {
 		'use strict';
 
+        
+
 		$('#reset_form').on('submit', function() {
 			var form_data = $(this).serializeArray();
 
-			console.log(form_data);
+			$('#loader').show();
+            $('#reset_btn').attr('disabled', true);
+
 			$.ajax({
 				url: base_url + 'Login/check_email',
 				type: 'post',
@@ -152,6 +136,22 @@
 				dataType: 'json',
 				success: function(results){
 					console.log(results)
+
+                    if(results.result == 'failed'){
+                        var error_msg = '<div id="error_login" class="alert alert-danger alert-dismissible fade show" role="alert">'+
+                                        'The<strong> email</strong> is not registered in the system.'+
+                                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">'+
+                                            '<span aria-hidden="true">&times;</span>'+
+                                        '</button>'+
+                                    '</div>';
+
+                        $('#error_msg').html(error_msg);
+                        $('#loader').hide();
+                        $('#reset_btn').removeAttr('disabled');;
+                    }
+
+
+                    $('#token').val(results.token)
 				}
 			});
 

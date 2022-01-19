@@ -16,6 +16,14 @@
         background: white;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
     }
+    .print_only {
+        border: 1px #D3D3D3 solid;
+        padding-top: 5px;
+        padding-left: 5px;
+        border-radius: 5px;
+        background: white;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
 
 @page {
     size: A4;
@@ -25,13 +33,14 @@
 
 @media print{
     .page {
-/*      background-color:#FFFFFF;
+/*        background-color:#FFFFFF;
         color:#000000;
         overflow-y:hidden !important;
         overflow-x:hidden !important;
         margin: 7mm 10mm 0mm !important;
-        height: 100%;*/
-        margin-top: 0; 
+        height: 100%;
+        margin: 5; */
+        background: red;
         width: 210mm;
         min-height: 148.5mm;
         border: initial;
@@ -83,7 +92,6 @@
     #content {
         display: none;
     }
-
     .print_class, .modal-footer{
         display: none;
     }
@@ -102,7 +110,13 @@
                         <div class="panel-heading">
                             <div class="panel-heading-btn">
                                 <a href="javascript:;" id="print" class="btn btn-sm btn-icon btn-success" data-content="Print"><i class="fas fa-print"></i></a>
+                                <?php if($document_information['document_status'] == '1'){ ?>
                                 <a href="javascript:;" class="btn btn-sm btn-icon btn-success release_btn"><i class="fas fa-share"></i></a>
+                                <?php } ?>
+                                <?php
+                                //if($document_information['check_if_archived'] > 0){ ?>
+                                <!-- <a href="javascript:;" class="btn btn-sm btn-icon btn-danger archive_btn"><i class="fas fa-archive"></i></a> -->
+                                <?php //} ?>
                             </div>
                             <h4 class="panel-title">Document Information</h4>
                         </div>
@@ -113,22 +127,30 @@
                             <table id="user" class="table table-condensed table-bordered">
                                 <thead>
                                     <tr>
-                                        <th width="30%">Document #</th>
+                                        <th width="30%" class="bg-silver-lighter">Document #</th>
                                         <th><?php echo $doc_number; ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <tr>
+                                        <td class="bg-silver-lighter">Document Status</td>
+                                        <td>
+                                            <span class="text-black-lighter label label-success text-white">
+                                            <?php echo $document_information['document_current_status'][0]->action; ?>
+                                            </span>
+                                        </td>
+                                    </tr>
                                     <tr>
                                         <td class="bg-silver-lighter">Date</td>
                                         <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->date; ?></span></td>
                                     </tr>
                                     <tr>
                                         <td class="bg-silver-lighter">Document Type</td>
-                                        <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->type; ?></span></td>
+                                        <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->docu_type; ?></span></td>
                                     </tr>
                                     <tr>
                                         <td class="bg-silver-lighter">Document For</td>
-                                        <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->for; ?></span></td>
+                                        <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->for_name; ?></span></td>
                                     </tr>
                                     <tr>
                                         <td class="bg-silver-lighter">Origin Type</td>
@@ -226,42 +248,51 @@
                     </div>
                     <!-- end panel -->
                 </div>                
-                <div class="col-lg-12">
-                    <!-- begin panel -->
-                    <div class="panel panel-inverse">
-                        <div class="panel-heading">
-                            <h4 class="panel-title">Attachments</h4>
+                <div class="col-lg-12 card-accordion" id="accordion">
+                    <!-- begin #accordion -->
+                    <div id="accordion" class="card-accordion">
+                        <!-- begin card -->
+                        <div class="card">
+                            <div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseThree">
+                                Show Attachment
+                            </div>
+                            <div id="collapseThree" class="collapse border" data-parent="#accordion">
+                                <div class="card-body m-0">
+                                    <table id="user" class="table table-condensed table-bordered">
+                                        <?php if(count($document_information['document_attachments']) > 0){ ?>
+                                            <thead>
+                                                <tr>
+                                                    <th>Uploaded By</th>
+                                                    <th width="30%">Link</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                        <?php
+                                            foreach($document_information['document_attachments'] as $row)
+                                            {
+                                                echo '<tr>';
+                                                echo '<td>'.$row->uploaded_by_user_fullname.'</td>'; 
+                                                echo '<td><a href="javascript:;" class="btn btn-sm btn-success show_attachment" data-id="'.$row->file_name.'" data-type="'.$row->doc_type.'">View File <i class="far fa-eye"></i></a>';
+                                                // echo '<td><a class="btn btn-success" href="'.base_url().'View_document/attachment/'.$row->file_name.'" target="_blank">VIEW FILE</a></td>'; 
+                                                echo '<tr>';
+                                            }
+                                        ?>
+                                            </tbody>
+                                        <?php } else { ?>
+                                            <thead>
+                                                <tr>
+                                                    <th>No Attachment.</th>
+                                                </tr>
+                                            </thead>
+                                        <?php } ?>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
-                        <!-- end panel-heading -->
-
-                        <!-- begin table-responsive -->
-                        <div class="table-responsive"> 
-                            <table id="user" class="table table-condensed table-bordered">
-                                <?php if(isset($document_information['document_attachments'])){ ?>
-                                <thead>
-                                    <tr>
-                                        <th>Uploaded By</th>
-                                        <th width="30%">Link</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                <?php
-                                        foreach($document_information['document_attachments'] as $row)
-                                        {
-                                            echo '<tr>';
-                                            echo '<td>'.$row->uploaded_by_user_fullname.'</td>'; 
-                                            echo '<td><a href="javascript:;" class="btn btn-sm btn-success">View File <i class="far fa-eye"></i></a>';
-                                            // echo '<td><a class="btn btn-success" href="'.base_url().'View_document/attachment/'.$row->file_name.'" target="_blank">VIEW FILE</a></td>'; 
-                                            echo '<tr>';
-                                        }
-                                ?>
-                                </tbody>
-                                <?php } ?>
-                            </table>
-                        </div>
-                        <!-- end table-responsive -->
+                        <!-- end card -->
                     </div>
-                    <!-- end panel -->
+                    <!-- end #accordion -->
+
                 </div>                
             </div>
         </div>
@@ -332,6 +363,7 @@
                             <p> Print document routing slip. </p>
                         </div>
                     </div>
+                    <div class="print_only">
                     <div class="invoice">
                         <!-- begin invoice-company -->
                         <p class="text-center"><img class="text-center" style="margin:0px;height: 50px;width: 50px;" src="<?php echo base_url() .'assets/img/DA-Logo.png';?>"></p>
@@ -364,9 +396,9 @@
                             <table class="table table-invoice">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" width="10%">Recipients</th>
-                                        <th class="text-center" width="10%">Date</th>
-                                        <th class="text-center" width="20%">Remarks</th>
+                                        <th class="text-center" width="30%">Recipients</th>
+                                        <th class="text-center" width="20%">Date</th>
+                                        <th class="text-center" width="50%">Remarks</th>
                                     </tr>
                                 </thead>
                                 <tbody id="recipients_list">
@@ -376,18 +408,33 @@
                         <!-- end table-responsive -->
                     </div>
                 </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" onclick="window.print()" id="print_qr" class="btn btn-primary">Print <i class="fas fa-qrcode"></i></button>
+                <button type="button" id="print_qr" class="btn btn-primary">Print <i class="fas fa-qrcode"></i></button>
+                <?php if($document_information['document_status'] == '1'){ ?>
                 <button type="button" class="btn btn-primary" class="release_btn">Release <i class="fas fa-share"></i></button>
+                <?php } ?>
             </div> 
             </form>
         </div>
     </div>
 </div>
+<div class="modal fade" id="modal_received" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="width: 100%;height: 100%;">
+        <div class="modal-content" style="height: auto;min-height: 100%;border-radius: 0;">
+            <center>
+            <embed class="object_file" data="" width="100%" height="900" draggable="false">
+<!--             <object class="object_file" data="<?php echo base_url().'/uploads/attachments/DO/f703127570a717a0f4eab657d9eaac48.pdf'?>" width="100%" height="900" draggable="false"></object> -->
+            </center>
+        </div>
+    </div>
+</div>
+
 <script type="text/javascript">
     var path = '<?php echo base_url() .'Create_profile/qr_code/3/2/';?>';
+    var upload_path = '<?php echo base_url() .'uploads/attachments/';?>';
     var doc_number = '<?php echo $doc_number; ?>';
     $('#print_area').css("display", "none");
     $(document).ready(function(){
@@ -404,15 +451,42 @@
                         var commo_count = r.length;
                         for (ie = 0; ie < commo_count; ie++) {
                             tr +='<tr>';
-                            tr +='<td class="text-center">'+((r[ie].SHORTNAME_REGION == 'OSEC' ? 'DA / ' : '')+r[ie].ORIG_SHORTNAME+' / '+(r[ie].INFO_DIVISION == '' ? r[ie].INFO_SERVICE : r[ie].INFO_SERVICE+' / '+r[ie].INFO_DIVISION))+'</td>';
-                            tr +='<td class="text-center">'+r[ie].date_added+'</td>';
-                            tr +='<td class="text-center"></td>';
+                            // tr +='<td class="text-center">'+((r[ie].SHORTNAME_REGION == 'OSEC' ? 'DA / ' : '')+r[ie].ORIG_SHORTNAME+' / '+(r[ie].INFO_DIVISION == '' ? r[ie].INFO_SERVICE : r[ie].INFO_SERVICE+' / '+r[ie].INFO_DIVISION))+'</td>';
+                            tr +='<td class="text-center pb-0">'+(r[ie].INFO_DIVISION == '' ? r[ie].INFO_SERVICE : r[ie].INFO_DIVISION)+'</td>';
+                            tr +='<td class="text-center pb-0">'+r[ie].date_added+'</td>';
+                            tr +='<td class="text-center pb-0"></td>';
                             tr +='</tr>';
                         }
                         $('#recipients_list').html('').append(tr);
                     }
             });
             $('#print_modal').modal('show');
+        });
+
+        $('#print_qr').on("click", function () {
+            $('.print_only').css('border', "1px #D3D3D3 solid");
+            $('.print_only').css('padding-top', '5px');
+            $('.print_only').css('padding-left', '5px');
+            $('.print_only').css('border-radius', '5px');
+            $('.print_only').css('background', 'white');
+            $('.print_only').css('box-shadow', '0 0 5px rgba(0, 0, 0, 0.1)');
+            $('.print_only').printThis({
+                //base: "https://jasonday.github.io/printThis/"
+            });
+        });
+
+        $('.show_attachment').on("click", function () {
+            var file_name = $(this).data('id');
+            var type = $(this).data('type');
+
+            var value = upload_path+type+'/'+$(this).attr('data-id');
+            //alert(upload_path+type+'/'+file_name);
+            $(".object_file").prop('src', value);
+            $('#modal_received').modal('show');
+        });
+
+        $('#modal_received').on('hidden.bs.modal', function (e) {
+            $(".object_file").attr('data', '');
         });
     });
 </script>

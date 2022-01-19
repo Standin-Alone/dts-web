@@ -170,21 +170,21 @@ $my_archives_count = $count_data['my_archives_data'];
                 <!-- <img class="img-fluid px-3 py-3 ml-5" src="assets/img/dashboard/dts-dashboard-banner.svg" alt="Card image"> -->
                 <!-- <div class="card-img-overlay"> -->
                 <div class="d-flex align-items-center justify-content-between">
-                    <div class="col">
+                    <div class="col d-lg-block d-sm-none">
                         <img class="img-fluid px-3 py-3 ml-5" src="assets/img/dashboard/dts-dashboard-banner.svg" alt="Card image" style="max-width: 70%;">
                     </div>
-                    <div class="col-md-4 my-3 d-flex flex-row mr-3">
+                    <div class="col-lg-4 col-md-1 my-3 d-flex flex-row mx-sm-auto">
                         <div class="col mh-400 mb-auto my-2 d-flex flex-column my-auto" style="border-radius: 10px; background: rgba(255, 255, 255, 0.2); ">
                             <div class="my-auto h-auto">
                                 <div class="card p-lg-4 h-auto my-md-3 my-lg-3 shadow bg-warning d-flex " style="border-radius: 10px; background: rgba(255, 255, 255, 0.7); box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
-                                    <a class="btn btn-lg" href="<?php echo base_url() . 'Create_profile' ?>">
+                                    <a class="btn btn-lg wrap" href="<?php echo base_url() . 'Create_profile' ?>">
                                         <h3 class="text-white"><i class="fa fa-book mr-3"></i>Create Profile</h3>
                                         <p class="h5 text-white mx-auto my-0">
                                             Profile your document for a documented transaction
                                         </p>
                                     </a>
                                 </div>
-                                <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                                <div class="card p-4 h-auto my-md-3 my-md-1 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
                                     <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-search-location mr-2 text-lg"></i>Track Document</h3>
                                     <p class="h5 text-white mx-auto">
                                         Tracks document transaction history
@@ -195,14 +195,16 @@ $my_archives_count = $count_data['my_archives_data'];
                                     </div>
                                 </div>
                                 <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
-                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Archive Document</h3>
+                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Quick Receive</h3>
                                     <p class="h5 text-white mx-auto">
-                                        Archive your finished transactions
+                                        Enter Document Number to log document
                                     </p>
-                                    <div class="input-group p-5">
-                                        <input type="text" class="form-control" placeholder="Document Number">
-                                        <button type="button" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
-                                    </div>
+                                    <form id="received_document">
+                                        <div class="input-group p-5">
+                                            <input name="received_document_btn" id="received_document_btn" type="text" class="form-control" placeholder="Document Number">
+                                            <button type="submit" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -224,7 +226,7 @@ $my_archives_count = $count_data['my_archives_data'];
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
-                            <a href="http://localhost:8080/dts/Dashboard/Received_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                            <a href="<?php echo base_url() ?>Dashboard/Incoming_documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> View All</a>
                         </span>
                     </div>
                 </div>
@@ -235,23 +237,19 @@ $my_archives_count = $count_data['my_archives_data'];
                             foreach ($incoming_documents as $row) {
                         ?>
                                 <div class="list-group-item list-group-item-action">
-                                    <div class="d-flex flex-column p-2">
-                                        <div class="d-flex justify-content-between border-bottom align-items-center bg-light">
-                                            <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-2">DA-CO-ICTS-AO20211025-00001</span>
-                                            <span>Date Created:
-                                                <h6 class="mb-1"> 12/01/2021 1:00 pm</h6>
-                                            </span>
-
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-1">
-                                            <span>
-                                                <h6 class="mb-1">Subject: Document Tracking System</h6>
-                                                <h6 class="mb-1">Type: MO</h6>
-                                                <h6 class="mb-1">Office: Information Technology Service</h6>
-                                            </span>
-                                            <div class="mb-1 d-flex flex-column">
-                                                <button class="btn btn-sm my-1 btn-secondary track"><i class="fa fa-search-location mr-2"></i>Track</button>
-                                                <button class="btn btn-sm my-1 btn-primary view"><i class="fa fa-eye mr-2"></i>View</button>
+                                    <div class="d-flex flex-column">
+                                        <div class="row d-flex flex-row justify-content-between">
+                                            <div class="col-md-8 d-flex flex-column">
+                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 "><?php echo $row->document_number ?></label>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">From: <?php echo $row->from_office ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
+                                            </div>
+                                            <div class="col-md-4 d-flex flex-column justify-content-between align-items-end">
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Date Sent: <?php echo $row->date_created ?></span>
+                                                <span class="d-flex flex-row justify-content-between align-self-end">
+                                                    <button class="btn btn-sm btn-outline-secondary mx-1"><i class="fa fa-search-location mr-1"></i> Logs</button>
+                                                    <button class="btn btn-sm btn-secondary mx-1"><i class="fa fa-file-alt mr-1"></i> View</button>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -259,7 +257,7 @@ $my_archives_count = $count_data['my_archives_data'];
                             <?php }
                         } else { ?>
                             <div class="text-center my-4">
-                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No Records Found</span>
+                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
                                 <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
                             </div>
                         <?php } ?>
@@ -272,41 +270,68 @@ $my_archives_count = $count_data['my_archives_data'];
                 <div class="card-header bg-dark">
                     <div class="d-flex justify-content-between">
                         <div class="col">
-                            <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-up"></i>OUTCOMING DOCUMENTS</h6>
+                            <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-up"></i>OUTGOING DOCUMENTS</h6>
                             <h3 class="text-white">
-                                <?php echo count($incoming_documents) ?>
+                                <?php echo count($outgoing_documents) ?>
                             </h3>
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
-                            <a href="http://localhost:8080/dts/Dashboard/Received_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                            <a href="<?php echo base_url() ?>Dashboard/Outgoing_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> View All</a>
                         </span>
                     </div>
                 </div>
-                <div class="p-2 <?php echo $class = !empty($incoming_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
+                <div class="p-2 <?php echo $class = !empty($outgoing_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
                     <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
                         <?php
-                        if ($incoming_documents) {
-                            foreach ($incoming_documents as $row) {
+                        if ($outgoing_documents) {
+                            foreach ($outgoing_documents as $row) {
+                                $this->db
+                                    ->where("document_number", $row->document_number)
+                                    ->where("added_by_user_id", $this->session->userdata('user_id'))
+                                    ->from("document_recipients");
+                                $count_recipient = $this->db->get()->num_rows();
+
+
+                                $this->db
+                                    ->where("document_number", $row->document_number)
+                                    ->where("added_by_user_id", $this->session->userdata('user_id'))
+                                    ->where("active", "0")
+                                    ->from("document_recipients");
+                                $count_received_recipient = $this->db->get()->num_rows();
                         ?>
                                 <div class="list-group-item list-group-item-action">
-                                    <div class="d-flex flex-column p-2">
-                                        <div class="d-flex justify-content-between border-bottom align-items-center bg-light">
-                                            <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-2">DA-CO-ICTS-AO20211025-00001</span>
-                                            <span>Date Created:
-                                                <h6 class="mb-1"> 12/01/2021 1:00 pm</h6>
-                                            </span>
-
-                                        </div>
-                                        <div class="d-flex justify-content-between mt-1">
-                                            <span>
-                                                <h6 class="mb-1">Subject: Document Tracking System</h6>
-                                                <h6 class="mb-1">Type: MO</h6>
-                                                <h6 class="mb-1">Office: Information Technology Service</h6>
-                                            </span>
-                                            <div class="mb-1 d-flex flex-column">
-                                                <button class="btn btn-sm my-1 btn-secondary track"><i class="fa fa-search-location mr-2"></i>Track</button>
-                                                <button class="btn btn-sm my-1 btn-primary view"><i class="fa fa-eye mr-2"></i>View</button>
+                                    <div class="d-flex flex-column">
+                                        <div class="row d-flex justify-content-between">
+                                            <div class="d-flex flex-column">
+                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 status_document_number"><?php echo $row->document_number ?></label>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Recipients: <?php echo $count_received_recipient . '/' . $count_recipient ?> Received</span>
+                                            </div>
+                                            <div class="d-flex flex-column justify-content-between">
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Date Released: <?php echo $row->date_created ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1"><?php
+                                                                                                            if ($count_received_recipient == $count_recipient) {
+                                                                                                                echo '
+                                                                                                                <button class="btn btn-outline-success btn-xs float-right check_status" data-toggle="tooltip" data-placement="top" title="Check Status">
+                                                                                                                    <i class="fa fa-check-circle mr-1"></i> Done
+                                                                                                                </button>
+                                                                                                                ';
+                                                                                                            } else {
+                                                                                                                echo '
+                                                                                                                <button class="btn btn-outline-secondary btn-xs float-right check_status" data-toggle="tooltip" data-placement="top" title="Check Status">
+                                                                                                                    <i class="fa fa-hourglass-start mr-1"></i> Processing
+                                                                                                                </button>
+                                                                                                                ';
+                                                                                                            }
+                                                                                                            // if ($row->status == "Archived") {
+                                                                                                            //     echo "
+                                                                                                            //                 <span class = 'border-primary rounded float-right border text-primary p-1'>
+                                                                                                            //                    <i class='fa fa-archive mr-1'></i> Archived
+                                                                                                            //                 </span>
+                                                                                                            //                 ";
+                                                                                                            // }
+                                                                                                            ?></span>
                                             </div>
                                         </div>
                                     </div>
@@ -314,7 +339,7 @@ $my_archives_count = $count_data['my_archives_data'];
                             <?php }
                         } else { ?>
                             <div class="text-center my-4">
-                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No Records Found</span>
+                                <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
                                 <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
                             </div>
                         <?php } ?>
@@ -500,8 +525,10 @@ $my_archives_count = $count_data['my_archives_data'];
                     </div>
                     <div class="row bg-light">
                         <div class="col-lg-12 mx-auto m-3 scrollbar rounded" style="height: 350px; background-color: #d7dfe6;">
-                            <?php foreach ($received_documents as $row) { ?>
-                                <div class="card mb-0 mt-1 bg-white">
+                            <?php
+                            // print_r($received_documents);
+                            foreach ($received_documents as $row) { ?>
+                                <div class="card mb-2 mt-2 bg-white">
                                     <!-- <div class="d-flex justify-content-between align-items-center p-2">
                                         <div class="d-flex flex-column">
                                             <label class="h4 mb-1">From: </label>
@@ -516,7 +543,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                             <h4><b>From</b></h4>
                                             <div class="d-flex flex-column">
                                                 <span class="h6 mb-1">Office: <label class="m-0"> <?php echo $row->from_office ?></label></span>
-                                                <span class="h6 m-0">Assigned Personnel: <label class="m-0"><?php echo $row->from_user ?></label> </span>
+                                                <!-- <span class="h6 m-0">Assigned Personnel: <label class="m-0"><?php echo $row->from_user ?></label> </span> -->
                                             </div>
                                         </div>
                                         <span class="small text-gray align-self-start mt-1"><i class="fa fa-clock-o mr-1"></i>Date Received: <?php echo $row->log_date ?></span>
@@ -571,7 +598,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                                 <b>TOTAL RELEASED DOCUMENTS</b>
                                             </div>
                                             <div class="d-flex">
-                                                <h2 class="mb-0"><span data-animation="number" data-value="64559.25"><?php echo $received_total_count ?></span></h2>
+                                                <h2 class="mb-0"><span data-animation="number" data-value="64559.25"><?php echo $released_total_count ?></span></h2>
                                                 <div class="ms-auto mt-n1 mb-n1v ">
                                                     <div class="bg-secondary" id="total-sales-sparkline" style="min-height: 36px;">
                                                     </div>
@@ -580,7 +607,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                             </div>
                                         </div>
                                         <span>
-                                            <a href="<?php echo base_url() ?>Dashboard/Received_Documents_view" class="btn btn-xs btn-light fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
+                                            <a href="<?php echo base_url() ?>Dashboard/Released_Documents_view" class="btn btn-xs btn-light fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> See All</a>
                                         </span>
                                     </div>
                                     <hr class="bg-secondary opacity-25" style="opacity: 25%;">
@@ -589,22 +616,22 @@ $my_archives_count = $count_data['my_archives_data'];
                                             <div class=" ">Released This Year</div>
                                             <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_year_count ?>"><?php echo $released_year_count ?></div>
                                             <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
-                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
-                                        </div> -->
+                                                <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                            </div> -->
                                         </div>
                                         <div class="col-4">
                                             <div class=" ">Released This Month</div>
                                             <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_month_count ?>"><?php echo $released_month_count ?></div>
                                             <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
-                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
-                                        </div> -->
+                                                <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                            </div> -->
                                         </div>
                                         <div class="col-4">
                                             <div class=" ">Released Today</div>
                                             <div class="fs-18px mb-5px font-weight-bold" data-animation="number" data-value="<?php echo $released_today_count ?>"><?php echo $released_today_count ?></div>
                                             <!-- <div class="progress h-5px rounded-3 bg-gray-900 mb-5px">
-                                            <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
-                                        </div> -->
+                                                <div class="progress-bar progress-bar-striped rounded-right bg-teal" data-animation="width" data-value="55%" style="width: 55%;"></div>
+                                            </div> -->
                                         </div>
                                     </div>
                                 </div>
@@ -613,7 +640,9 @@ $my_archives_count = $count_data['my_archives_data'];
                     </div>
                     <div class="row bg-light">
                         <div id="released_div" class="col-lg-12 mx-auto m-3 scrollbar rounded" style="height: 350px; background-color: #d7dfe6;">
-                            <?php foreach ($released_documents as $row) { ?>
+                            <?php foreach ($released_documents as $row) {
+                                // echo $row;
+                            ?>
                                 <div class="card mb-0 mt-1 bg-white">
                                     <div class="bg-light d-flex justify-content-between align-items-center p-5">
                                         <div class="d-flex flex-column">
@@ -625,34 +654,52 @@ $my_archives_count = $count_data['my_archives_data'];
                                         </div>
                                         <span class="small text-gray align-self-start mt-1"><i class="fa fa-clock-o mr-1"></i>Date Released: <?php echo $row->log_date ?></span>
                                     </div>
-                                    <div class="p-5 d-flex justify-content-between align-items-center">
-                                        <!-- <div class="note-icon"><i class="fab fa-facebook-f"></i></div> -->
+                                    <!-- <div class="p-5 d-flex justify-content-between align-items-center">
                                         <div class="note-content">
-                                            <h4><b>Recipients</b></h4>
+                                            <h4><b>Recipient Office</b></h4>
                                             <div class="d-flex flex-column">
                                                 <?php
                                                 $get_recipients = $this->db->select("
                                                  CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as recipient_office
-                                                         ")
+                                                 ")
                                                     ->from("document_recipients as dr")
-                                                    ->where("added_by_user_id", $transacting_user_id)
+                                                    ->where("added_by_user_id", $row->transacting_user_id)
                                                     ->where("document_number", $row->document_number)
                                                     ->join("lib_office as lo", "lo.OFFICE_CODE = dr.recipient_office_code")
                                                     ->get()->result();
 
-                                                foreach ($row as $rec) {
-
+                                                foreach ($get_recipients as $key => $val) {
                                                 ?>
-
-                                                <?php } ?>
+                                                    <span class="h6 m-0">• <?php echo $val->recipient_office ?></span>
+                                                    <?php } ?>
                                             </div>
                                         </div>
-                                    </div>
-
+                                    </div> -->
                                 </div>
                             <?php } ?>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ================================== Released Modal ============================================ -->
+    <div class="modal fade bd-example-modal-lg" id="modal_check_status" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="container pt-5 pb-2">
+                    <!-- For demo purpose -->
+                    <div class="row text-center text-white">
+                        <div class="col-lg-8 mx-auto">
+                            <h1 class="display-6">Document Status</h1>
+                            <div class="input-group mb-3">
+
+                            </div>
+                        </div>
+                    </div><!-- End -->
                 </div>
             </div>
         </div>

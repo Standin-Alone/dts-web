@@ -106,7 +106,7 @@ class Create_document_model extends CI_Model {
 				 ->like('INFO_REGION', $office_name)
 				 ->group_by("ID_REGION")
 				 ->order_by("INFO_REGION", "asc");
-		$query = $this->db->get('office');
+		$query = $this->db->get('lib_office');
 			if($query->num_rows() > 0){
 				foreach ($query->result_array() as $row){
 				//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array
@@ -124,7 +124,7 @@ class Create_document_model extends CI_Model {
 				 ->where('ID_REGION', $office_code)
 				 ->group_by("ID_SERVICE")
 				 ->order_by("INFO_SERVICE", "asc");
-		$query = $this->db->get('office');
+		$query = $this->db->get('lib_office');
 			if($query->num_rows() > 0){
 				foreach ($query->result_array() as $row){
 				//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array
@@ -143,7 +143,7 @@ class Create_document_model extends CI_Model {
 				 ->where('ID_REGION', $office_code)
 				 ->group_by("ID_DIVISION")
 				 ->order_by("INFO_DIVISION", "asc");
-		$query = $this->db->get('office');
+		$query = $this->db->get('lib_office');
 			if($query->num_rows() > 0){
 				foreach ($query->result_array() as $row){
 				//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array

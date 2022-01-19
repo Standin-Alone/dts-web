@@ -31,29 +31,10 @@
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/sb-admin-2.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/sweetalert2/dist/sweetalert2.min.js"></script> -->
-	<script type="text/javascript">
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css">
+    <script type="text/javascript">
 		var base_url = '<?php echo base_url(); ?>';
 	</script>
-    <style type="text/css">
-        @keyframes spinner-border {
-          to { transform: rotate(360deg); }
-        } 
-        .spinner-border{
-            display: inline-block;
-            width: 2rem;
-            height: 2rem;
-            vertical-align: text-bottom;
-            border: .25em solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            -webkit-animation: spinner-border .75s linear infinite;
-            animation: spinner-border .75s linear infinite;
-        }
-        .spinner-border-sm{
-            height: 1rem;
-            border-width: .2em;
-        }
-    </style>
 </head>
 <body class="pace-top bg-white">
 	<div id="page-loader" class="fade show"><span class="spinner"></span></div>
@@ -67,9 +48,7 @@
                 <div class="news-image" style="background-image: url(assets/img/login-bg/login-bg-10.jpg)"></div>
                 <div class="news-caption">
                     <!-- <h4 class="caption-title"><b>Document Tracking System</b></h4> -->
-                    <p>
-                        Download the mobile application <a href='#'>here</a>.
-                    </p>
+                    <p></p>
                 </div>
             </div>
             <!-- end news-feed -->
@@ -113,7 +92,11 @@
                         </div>
 
                         <div class="m-t-20 m-b-40 p-b-40 text-inverse">
-                            Forgot your password? Click <a href="<?php echo base_url(); ?>Login/recover" class="text-success">here</a> to reset.
+                            Forgot your password? Click <a href="<?php echo base_url(); ?>Login/recover" class="text-success">here</a> to reset.<br><br>
+
+                            <p>
+                                Download the mobile application <a href='<?php echo base_url(); ?>DTSMobile.apk'>here (for Android 5 up to latest only)</a>.
+                            </p>
                         </div>
                         <hr />
                         <p class="text-center text-grey-darker">

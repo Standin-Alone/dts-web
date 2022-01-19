@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +24,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 // $config['base_url'] = 'https://devsysadd.da.gov.ph/dts/';
-$config['base_url'] = 'http://192.168.1.6/dts-web/';
+$config['base_url'] = 'http://localhost/dts-web/';
+//$config['base_url'] = 'http://localhost:8080/dts/';
 
 /*
 |--------------------------------------------------------------------------
@@ -453,15 +454,17 @@ $config['csrf_protection'] = FALSE;
 
 $csrf_pages = array('Login');
 
-if(isset($_SERVER['REQUEST_URI'])){
-	foreach($csrf_pages as $csrf_page){
-		if(trim($_SERVER['REQUEST_URI']) == '/dts/'){
+if (isset($_SERVER['REQUEST_URI'])) {
+	foreach ($csrf_pages as $csrf_page) {
+		if (trim($_SERVER['REQUEST_URI']) == '/dts-web/') {
 			$config['csrf_protection'] = TRUE;
 		}
 
+		if (trim($_SERVER['REQUEST_URI']) == '/dts/MobileApp/Mobile/login') {
+			$config['csrf_protection'] = FALSE;
+		}
 
-		
-		if(stripos($_SERVER['REQUEST_URI'], $csrf_page) !== FALSE){
+		if (stripos($_SERVER['REQUEST_URI'], $csrf_page) !== FALSE) {
 			$config['csrf_protection'] = TRUE;
 			break;
 		}

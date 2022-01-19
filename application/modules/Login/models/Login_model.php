@@ -146,8 +146,8 @@ class Login_model extends CI_Model {
 			}
 
 			$user_data = $this->getUserData($row->user_id);
-			$this->session->set_userdata($user_data);
-			$output['result'] = 'success';
+			$output['user_data'] = $user_data;
+			$output['result'] 	 = 'success';
 
 			return $output;
 		}else {
@@ -165,7 +165,7 @@ class Login_model extends CI_Model {
 	}
 
 	public function getUserData($user_id){
-		$query = $this->db->select("a.user_id,a.password,a.email,UPPER(CONCAT(a.first_name,' ',LEFT(a.middle_name,1),' ',a.last_name)) AS fullname,UPPER(a.first_name) as first_name,UPPER(a.middle_name) as middle_name,UPPER(a.last_name) as last_name,b.OFFICE_CODE,b.INFO_SERVICE,b.INFO_DIVISION,b.SHORTNAME_SERVICE,b.ID_REGION,b.ID_SERVICE,b.ID_DIVISION")
+		$query = $this->db->select("a.user_id,a.password,a.email,UPPER(CONCAT(a.first_name,' ',LEFT(a.middle_name,1),' ',a.last_name)) AS fullname,UPPER(a.first_name) as first_name,UPPER(a.middle_name) as middle_name,UPPER(a.last_name) as last_name,b.OFFICE_CODE,b.INFO_SERVICE,b.INFO_DIVISION,b.SHORTNAME_REGION,b.ORIG_SHORTNAME,b.SHORTNAME_SERVICE,b.ID_REGION,b.ID_SERVICE,b.ID_DIVISION")
 						  ->from('users as a')
 						  ->join('lib_office as b','a.office_code = b.OFFICE_CODE','left')
 						  ->where('a.user_id', $user_id)
@@ -188,20 +188,103 @@ class Login_model extends CI_Model {
 				'service_short_name'=> trim($row['SHORTNAME_SERVICE']),
 				'service_long_name' => trim($row['INFO_SERVICE']),
 				'division_name'		=> trim($row['INFO_DIVISION']),
+				'shortname_region'	=> trim($row['SHORTNAME_REGION']),
+				'orig_shortname'	=> trim($row['ORIG_SHORTNAME']),
 				'dts_logged_in' 	=> TRUE
 			);
 
-			#$this->session->set_userdata($data);
-			#$output['result'] = 'success';
-
-			#$this->deactivate_token($user_id);
 			return $data;
 		}
+	}
+
+	public function insert_user_information($uid){
+		$output['results'] = 'failed';
+		$output['token']   = $this->security->get_csrf_hash();
+
+		$first_name  = $this->input->post('first_name', true);
+		$middle_name = $this->input->post('middle_name', true);
+		$last_name 	 = $this->input->post('last_name', true);
+		$office 	 = $this->input->post('office', true);
+		$password    = $this->input->post('password', true);
+		$password	 = $this->encPass($password);
+
+		$data = array(
+			'first_name'  => $first_name,
+			'middle_name' => $middle_name,
+			'last_name'   => $last_name,
+			'office_code' => $office,
+			'password' 	  => $password,
+			'status'	  => '1'
+		);
+
+		$query = $this->db->where('user_id', trim($uid))
+						  ->update('users', $data);
+
+		if($query){
+			$this->deactivate_token($uid);
+			$output['results'] = 'success';
+		}
+
+		return $output;
+	}
+
+	public function get_offices(){
+		$term = $this->input->get('term', true); //search input field value
+
+		$this->db->select('*')
+				 ->from('lib_office')
+				 ->where('STATUS_CODE', '1');
+
+		if($term != ''){
+			$this->db->group_start()
+					 ->like('INFO_REGION', trim($term))
+					 ->or_like('INFO_SERVICE', trim($term))
+					 ->or_like('SHORTNAME_SERVICE', trim($term))
+					 ->or_like('INFO_DIVISION', trim($term))
+					 ->or_like('OFFICE_CODE', trim($term))
+					 ->group_end();
+		}
+
+		$query = $this->db->get();
+
+		$data 	= []; //temporary array
+		$result = []; //return result
+		$key	= 0;
+
+		//group query result by INFO_REGION and INFO_SERVICE to data array
+		foreach ($query->result() as $k => $v) {
+
+			//group name
+			$data[$v->INFO_REGION.' - '.$v->INFO_SERVICE][] = array( 
+				//divisions
+				'id'	=> $v->OFFICE_CODE,
+				'text'  => $v->INFO_DIVISION
+			);
+		}
+
+		//extract data array
+		foreach ($data as $k => $v) {
+			$result[$key] = array(
+				'text' 	   => $k, //text label group name
+				'children' => $v  //division under the group
+			);
+			$key++;
+		}
+
+		return $result;
 	}
 
 	public function base64url_encode($data) { 
  	   return rtrim(strtr(base64_encode($data), '+/', '-_'), '='); 
 	}  
 
+	function encPass($input, $rounds = 10){
+		$salt = "";
+		$saltChars = array_merge(range('A','Z'), range('a','z'), range(0,9));
+		for($i=0; $i<22; $i++){
+		$salt .= $saltChars[array_rand($saltChars)];
+		}
+		return crypt($input, sprintf('$2y$%02d$', $rounds) .$salt);
+    }
 
 }

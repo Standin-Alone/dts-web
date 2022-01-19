@@ -29,29 +29,10 @@
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/sb-admin-2.min.js"></script>
 	<script type="text/javascript" src="<?php echo base_url(); ?>assets/sweetalert2/dist/sweetalert2.min.js"></script> -->
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/custom.css">
 	<script type="text/javascript">
 		var base_url = '<?php echo base_url(); ?>';
 	</script>
-	<style type="text/css">
-        @keyframes spinner-border {
-          to { transform: rotate(360deg); }
-        } 
-        .spinner-border{
-            display: inline-block;
-            width: 2rem;
-            height: 2rem;
-            vertical-align: text-bottom;
-            border: .25em solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            -webkit-animation: spinner-border .75s linear infinite;
-            animation: spinner-border .75s linear infinite;
-        }
-        .spinner-border-sm{
-            height: 1rem;
-            border-width: .2em;
-        }
-    </style>
 </head>
 <body class="pace-top bg-white">
 	<div id="page-loader" class="fade show"><span class="spinner"></span></div>
@@ -66,7 +47,7 @@
                 <div class="news-caption">
                     <!-- <h4 class="caption-title"><b>Document Tracking System</b></h4> -->
                     <p>
-                        Download the mobile application <a href='#'>here</a>.
+                        Download the mobile application <a href='<?php echo base_url(); ?>DTSMobile.apk'>here</a>.
                     </p>
                 </div>
             </div>

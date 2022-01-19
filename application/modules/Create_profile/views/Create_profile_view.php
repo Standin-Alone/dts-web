@@ -1,6 +1,3 @@
-<?php 
-print_r($this->session);
-?>
 <link href="<?php echo base_url(); ?>assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" />
 <style type="text/css">
     .remove_sig {cursor: pointer;}
@@ -91,6 +88,9 @@ print_r($this->session);
         display: none;
     }
     #print_note {
+        display: none;
+    }
+    .release_btn {
         display: none;
     }
 }
@@ -201,6 +201,18 @@ print_r($this->session);
                                 </div>
                                 <div class="col-md-2">&nbsp;</div>
                             </div>
+<!--                             <span id="recipient_div">
+                            <div class="form-group row m-b-15">
+                                <label class="col-md-3 col-form-label text-md-right">Recipient Type</label>
+                                <div class="col-md-7">
+                                    <select class="form-control col-md-5" name="in_transaction" id="in_transaction">
+                                        <option value="0">All</option>
+                                        <option value="1">Specific Recipient</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">&nbsp;</div>
+                            </div>
+                            </span> -->
                             <div class="form-group row m-b-15">
                                 <label class="col-md-3 col-form-label text-md-right">Recipient</label>
                                 <div class="col-md-7">
@@ -356,6 +368,9 @@ print_r($this->session);
                                 <!-- end table-responsive -->
                             </div>
                         </div>
+                        <div class="row m-b-15 d-flex justify-content-center mt-3">
+                            <button type="button" class="btn btn-success release_btn">Release Document <i class="fas fa-share"></i></button>
+                        </div>
                     </fieldset>
                 </div>
                 <!-- end panel-body -->
@@ -422,7 +437,7 @@ var doc_type;
 var action_for;
 var subj_text;
 $('#add_file,#print_area').css("display", "none");
-$('#sender_div').css('display' , 'none');
+$('#sender_div,#recipient_div').css('display' , 'none');
 $('#sender_name,#sender_position,#sender_address').attr('disabled', true);
 
 $.validator.addMethod("checkExists", 
@@ -438,7 +453,7 @@ $(document).ready(function(){
         autoclose: true
     });
     $('.selectpicker').selectpicker('render');
-    $(".multiple-select2").select2({ placeholder: "Select a state" });
+    $(".multiple-select2").select2({ placeholder: "Select Office/Service/Division" });
 
     // Code for the Validator
     $('#add_profile').submit(function(e) {
@@ -493,8 +508,24 @@ $(document).ready(function(){
             console.log(element);
         },
         submitHandler: function() {
+                // var recipients_val = $('#recipients').val();
+                // if(count(recipients_val == 0)){
+                //     Swal.fire({
+                //         position: 'center',
+                //         icon: 'warning',
+                //         title: 'Wait!',
+                //         text: 'Are you sure you want to remove this?',
+                //         showCancelButton: true,
+                //         confirmButtonColor: '#3085d6',
+                //         cancelButtonColor: '#d33',
+                //         confirmButtonText: 'Yes, remove it!'
+                //     }).then((result) => {
+                //         if (result.value) {
+                //             alert('Ok');
+                //         }
+                //     });
+                // }
 
-            //if(myDropzone.files.length > 0){
                 $('#add_profile_button').attr('disabled', false);
                 var formData = $('#add_profile').serializeArray();
 
@@ -761,7 +792,8 @@ $(document).ready(function(){
                             var commo_count = result.length;
                             for (ie = 0; ie < commo_count; ie++) {
                                 tr +='<tr>';
-                                tr +='<td class="text-center">'+result[ie].recipient_office_code+'</td>';
+                                //tr +='<td class="text-center">'+result[ie].added_by_user_fullname+'</td>';
+                                tr +='<td class="text-center pb-0">'+(result[ie].INFO_DIVISION == '' ? result[ie].INFO_SERVICE : result[ie].INFO_DIVISION)+'</td>';
                                 tr +='<td class="text-center">'+result[ie].date_added+'</td>';
                                 tr +='<td class="text-center"></td>';
                                 tr +='</tr>';
@@ -811,6 +843,68 @@ $(document).ready(function(){
             $('#sender_name,#sender_position,#sender_address').attr('disabled', true);
         }
     });
+
+    // $(document.body).on('change', '#in_transaction', function(){
+    //     var this_val = $(this).val();
+    //     if (this_val == '0') {
+    //         $('#recipients').attr('disabled' , true);
+    //     } else {
+    //         $('#recipients').attr('disabled' , false);
+    //     }
+    // });
+
+    // $(document.body).on('change', '#for', function(){
+    //     var this_val = $(this).val();
+    //     if (this_val == '3') {
+    //         $('#recipient_div').css('display' , '');
+    //         $('#recipients').attr('disabled' , true);
+    //     } else {
+    //         $('#recipient_div').css('display' , 'none');
+    //         $('#recipients').attr('disabled' , false);
+    //     }
+    // });
+
+    $(document.body).on('click', '.release_btn', function() {
+        Swal.fire({
+            icon: 'question',
+            title: 'Are you sure?',
+            text: 'Release this document.',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, release it!'
+        }).then((result) => {
+            if(result.value){
+                $.ajax({
+                    url: base_url + 'View_document/release_document1',
+                    method:"POST",  
+                    data: { doc_number: doc_number },
+                    dataType: 'json', 
+                    success:function(r)  
+                    {
+                        if(r == 'success'){
+                            console.log(r);
+                            Swal.fire({
+                                type: 'question',
+                                title: 'Completed',
+                                text: 'Document Released.'
+                            }).then((result) => {
+                                if(result.value){
+                                    location.reload();
+                                }
+                            });
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
+
+                    }
+
+                });
+            }
+        });
+    });
+
 
 });
 

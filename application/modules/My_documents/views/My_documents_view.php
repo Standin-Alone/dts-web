@@ -14,7 +14,7 @@
             </button>
         </div>
         <!-- begin col-8 -->
-        <div class="col-lg-9">
+        <div class="col-lg-12">
                     <!-- begin panel -->
                     <div class="panel panel-inverse panel-with-tabs" data-sortable-id="ui-unlimited-tabs-1">
                         <!-- begin panel-heading -->
@@ -82,7 +82,7 @@
         </div>
         <!-- end col-10 -->
         <!-- begin col-6 -->
-        <div class="col-lg-3">
+        <div class="col-lg-3" style="display: none;">
             <!-- begin panel -->
             <div class="panel panel-inverse">
                 <!-- begin panel-heading -->
@@ -190,7 +190,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
                 className: 'text-center align-middle' 
             },
             {
-                data: 'type',
+                data: 'docu_type',
                 className: 'text-center align-middle'
             },
             {

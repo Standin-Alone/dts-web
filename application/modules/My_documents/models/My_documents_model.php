@@ -58,7 +58,7 @@ class My_documents_model extends CI_Model {
 
 
 		$this->db->select('*')
-				 ->from('document_profile')
+				 ->from('vw_document_profile_info')
 				 ->where('office_code', $this->session->userdata('office'));
 
 		if($search != ''){

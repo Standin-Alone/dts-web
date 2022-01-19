@@ -6,14 +6,13 @@ class Create_profile extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('Create_profile_model');
+		if($this->session->userdata('dts_logged_in') == FALSE){
+			redirect('Login');
+		}
 	}
 
 	public function index(){ 
-		if($this->session->userdata('dts_logged_in') == TRUE){
-			$this->Create_profile_view();
-		} else {
-			redirect('Login');
-		}
+		$this->Create_profile_view();
 	}
 
     public function add_profile(){

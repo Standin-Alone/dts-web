@@ -10,7 +10,7 @@ class View_document_model extends CI_Model {
 
 	public function get_doc_information($doc_number){
 		$information  = $this->db->select('*')
-						   ->from('document_profile')
+						   ->from('vw_document_profile_info')
 				   		   ->where('document_number', $doc_number)
 				   		   ->get();
 
@@ -37,17 +37,24 @@ class View_document_model extends CI_Model {
 		   	->order_by('sequence', 'ASC')
 		   	->get();
 
-		// $document_status = $this->db->select('*')
-		//    	->from('vw_document_status')
-		//    	->where('document_number', $doc_number)
-		//    	->order_by('date_created', 'DESC')
-		//    	->get();
+		$document_status = $this->db->select('*')
+			->from('receipt_control_logs')
+		   	->where('document_number', $doc_number)
+		   	->get();
 
-		// $document_current_status = $this->db->select('*')
-		//    	->from('document_status')
-		//    	->where('document_number', $doc_number)
-		//    	->where('active', '1')
-		//    	->get();
+		$document_current_status = $this->db->select('*')
+		   	->from('receipt_control_logs')
+		   	->where('document_number', $doc_number)
+		   	// ->group_by('document_number')
+		   	->order_by('log_date', 'DESC')
+		   	->limit('1')
+		   	->get();
+
+        $check_if_archived = $this->db->where("document_number", $doc_number)
+                ->where("added_by_user_id", $this->session->userdata('user_id'))
+                ->where("active", "0")
+                ->from("document_recipients")
+                ->get();
 
 		$data = array(
 			'document_details' => $information->result(),
@@ -55,8 +62,10 @@ class View_document_model extends CI_Model {
 			'document_attachments' => $document_attachments->result(),
 			'document_signatories' => $document_signatories->result(),
 			'document_recipients' => $document_recipients->result(),
-			//'document_status' => $document_status->result(),
-			//'document_current_status' => $document_current_status->result()
+			'document_status' => $document_status->num_rows(),
+			'document_current_status' => $document_current_status->result(),
+			'check_if_archived' => $check_if_archived->num_rows()
+
 		);
 
 		// echo '<pre>';
@@ -513,22 +522,22 @@ class View_document_model extends CI_Model {
 		return $query->num_rows();
 	}
 
-	public function archive_document($file_name, $doc_number){
-		$data = array(
-			'document_number' => $doc_number,
-			'user_id'		  => $this->session->userdata('user_id'),
-			'file_name'		  => $file_name,
-			'type'			  => '1'
-		);
+	// public function archive_document($file_name, $doc_number){
+	// 	$data = array(
+	// 		'document_number' => $doc_number,
+	// 		'user_id'		  => $this->session->userdata('user_id'),
+	// 		'file_name'		  => $file_name,
+	// 		'type'			  => '1'
+	// 	);
 
-		$query = $this->db->insert('document_details', $data);
+	// 	$query = $this->db->insert('document_details', $data);
 
-		if($query){
-			return 'success';
-		}else {
-			return 'fail';
-		}
-	}
+	// 	if($query){
+	// 		return 'success';
+	// 	}else {
+	// 		return 'fail';
+	// 	}
+	// }
 
 	public function is_received($doc_number){
 		$office = $this->session->userdata('office');
@@ -729,7 +738,7 @@ class View_document_model extends CI_Model {
 		$logs = array(
 			'type'			=> 'Released',
 			'document_number' 	=> $doc_number,
-			'office_code' 	=> '0100000100',
+			'transacting_office' 	=> $this->session->userdata('office'),
 			'action'			=> 'Profiled',
 			'transacting_user_id'		=> $this->session->userdata('user_id'),
 			'transacting_user_fullname'		=> $this->session->userdata('fullname')
@@ -738,6 +747,30 @@ class View_document_model extends CI_Model {
 		$query_logs = $this->db->insert('receipt_control_logs', $logs);
 
 		if($query_logs){
+			$Verified = array('status' => 'Verified');
+   			$query = $this->db->where('document_number', $doc_number)
+                			  ->update('document_profile', $Verified);
+		}
+
+		if($query_logs){
+			$result = 'success';
+		}
+
+		return $result;
+
+    }
+
+	public function archive_document(){
+		$result   = 'failed';
+		$doc_number   = $this->input->post('doc_number', true);
+
+
+		$archive = array('status' => 'Archived');
+		$query = $this->db->where('document_number', $doc_number)
+            			  ->update('document_profile', $archive);
+
+
+		if($query){
 			$result = 'success';
 		}
 

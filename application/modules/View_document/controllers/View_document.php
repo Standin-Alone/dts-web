@@ -167,70 +167,6 @@ class View_document extends MY_Controller {
 		echo json_encode($result);
 	}
 
-	public function archive_document(){
-		$doc_number = $this->input->post('doc_number', true);
-
-		$doc_prefix  = explode('-', $doc_number);
-		$year    	 = date('Y');
-		$month   	 = date('m');
-		$doc_type 	 = $doc_prefix[0];
-		$service	 = $this->session->userdata('service_long_name');
-
-		$fullpath  = './uploads/'.$year.'/'.$month.'/'.$doc_type.'/'.$service;
-		$docPath   = './uploads/'.$year.'/'.$month.'/'.$doc_type;
-		$pathYear  = './uploads/'.$year;
-		$pathMonth = './uploads/'.$year.'/'.$month;
-
-		if(!is_dir($pathYear)){
-			$oldmask = umask(0);
-			mkdir($pathYear, 0777, TRUE);
-			umask($oldmask);
-		}
-
-		if(!is_dir($pathMonth)){
-			$oldmask = umask(0);
-			mkdir($pathMonth, 0777, TRUE);
-			umask($oldmask);
-		}
-
-		if(!is_dir($docPath)){
-			$oldmask = umask(0);
-			mkdir($docPath, 0777, TRUE);
-			umask($oldmask);
-		}
-
-		if(!is_dir($fullpath)){
-			$oldmask = umask(0);
-			mkdir($fullpath, 0777, TRUE);
-			umask($oldmask);
-		}
-
-		$this->load->library('upload');
-
-		$config['upload_path']	= $fullpath;
-		$config['allowed_types']= 'pdf';//'jpg|jpeg|png|bitmap|pdf|docx|doc'
-		$config['max_size']		= 0;
-		
-		$this->upload->initialize($config);
-
-		if(!$this->upload->do_upload('doc_file')){
-			$error = array('error' => $this->upload->display_errors());
-			echo '<pre>';
-			print_r($error);
-			echo '</pre>';
-		}else {
-			$data = array(
-				'uploaded_data' => $this->upload->data()
-			);
-
-			$file_name  = $data['uploaded_data']['file_name'];
-
-			$result = $this->View_document_model->archive_document($file_name, $doc_number);
-
-			echo $result;
-		}
-	}
-
 	public function re_printQR($doc_number){
 		$this->data['doc_number'] 			= $doc_number;
 		$this->data['title'] 				= 'Document Tracking | '.$doc_number;
@@ -307,6 +243,11 @@ class View_document extends MY_Controller {
 
     public function release_document1(){
         $result = $this->View_document_model->release_document1();
+        echo json_encode($result);
+    }
+
+    public function archive_document(){
+        $result = $this->View_document_model->archive_document();
         echo json_encode($result);
     }
 

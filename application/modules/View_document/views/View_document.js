@@ -482,31 +482,84 @@ $(function() {
     });
 
     $(document.body).on('click', '.release_btn', function() {
-        $.ajax({
-            url: base_url + 'View_document/release_document1',
-            method:"POST",  
-            data: { doc_number: doc_number },
-            dataType: 'json', 
-            success:function(r)  
-            {
-                if(r == 'success'){
-                    console.log(r);
-                    Swal.fire({
-                        type: 'success',
-                        title: 'Completed',
-                        text: 'Document Released.'
-                    }).then((result) => {
-                        if(result.value){
-                            //location.reload();
+        Swal.fire({
+            icon: 'question',
+            title: 'Are you sure?',
+            text: 'Release this document.',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, release it!'
+        }).then((result) => {
+            if(result.value){
+                $.ajax({
+                    url: base_url + 'View_document/release_document1',
+                    method:"POST",  
+                    data: { doc_number: doc_number },
+                    dataType: 'json', 
+                    success:function(r)  
+                    {
+                        if(r == 'success'){
+                            console.log(r);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Completed',
+                                text: 'Document Released.'
+                            }).then((result) => {
+                                if(result.value){
+                                    //location.reload();
+                                }
+                            });
                         }
-                    });
-                }
-            },
-            error: function (jqXHR, textStatus, errorThrown)
-            {
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
 
+                    }
+
+                });
             }
+        });
+    });
 
+    $(document.body).on('click', '.archive_btn', function() {
+        Swal.fire({
+            icon: 'question',
+            title: 'Are you sure?',
+            text: 'Archive this document?',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes!'
+        }).then((result) => {
+            if(result.value){
+                $.ajax({
+                    url: base_url + 'View_document/archive_document',
+                    method:"POST",  
+                    data: { doc_number: doc_number },
+                    dataType: 'json', 
+                    success:function(r)  
+                    {
+                        if(r == 'success'){
+                            console.log(r);
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Completed',
+                                text: 'Document Archived.'
+                            }).then((result) => {
+                                if(result.value){
+                                    //location.reload();
+                                }
+                            });
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown)
+                    {
+
+                    }
+
+                });
+            }
         });
     });
 

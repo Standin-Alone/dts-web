@@ -7,6 +7,10 @@ class Receipt_Control_Center extends MY_Controller
 	public function __construct()
 	{
 		parent::__construct();
+		if ($this->session->userdata('dts_logged_in') == FALSE) {
+			redirect('Login');
+			$this->load->view('Login_view');
+		}
 		$this->load->library('upload');
 		$config['upload_path'] = './uploads/';
 		$config['allowed_types'] = 'gif|jpg|png';
@@ -25,15 +29,24 @@ class Receipt_Control_Center extends MY_Controller
 
 	public function Receive()
 	{
-		$this->data['title']          = 'Receive Document';
+		$this->data['title']          = 'DTS | Receive Document';
+		$this->data['incoming_documents'] = $this->RCC_model->incoming_documents();
+		$this->data['invalid_data'] = $this->RCC_model->get_invalid_count();
+		$this->data['count_data'] = $this->RCC_model->get_count();
+		$this->data['received_documents']          = $this->RCC_model->received_documents();
+		$this->data['get_received_documents'] = $this->RCC_model->get_received_documents();
 		$this->middle                   = 'Receive_view';
 		$this->layout();
 	}
 
 	public function Release()
 	{
-		$this->data['title']          = 'Release Document';
+		$this->data['title']          = 'DTS | Release Document';
+		$this->data['count_data'] = $this->RCC_model->get_count();
 		$this->data['recipients']          = $this->RCC_model->recipients();
+		$this->data['invalid_data'] = $this->RCC_model->get_invalid_count();
+		$this->data['received_documents']          = $this->RCC_model->received_documents();
+		$this->data['get_released_documents'] = $this->RCC_model->get_released_documents();
 		$this->middle                   = 'Release_view';
 		$this->layout();
 	}
@@ -53,6 +66,17 @@ class Receipt_Control_Center extends MY_Controller
 	{
 		$result = $this->RCC_model->receive_document();
 		echo json_encode($result);
+	}
+	public function release_document()
+	{
+		$result = $this->RCC_model->release_document();
+		echo json_encode($result);
+	}
+
+	public function get_history($document_number)
+	{
+		$results = $this->RCC_model->get_history($document_number);
+		echo json_encode($results);
 	}
 	public function Get_origin_current_office($document_number)
 	{

@@ -27,9 +27,50 @@ $(document).ready(function () {
                     current_office.val(val)
                     current_office_code.val(val)
                 });
-
-
             }
         });
     })
+
+    $("#release_btn").on('click', function () {
+        var form_data = $('#form_release').serializeArray();
+        console.log(form_data);
+
+        $.ajax({
+            type: "post",
+            url: base_url + "Receipt_Control_Center/release_document",
+            data: form_data,
+            dataType: "json",
+            success: function (result) {
+                console.log(result);
+                if (result.error == "false") {
+                    Swal.fire({
+                        icon: 'success',
+                        type: 'success',
+                        title: 'Well Done!',
+                        text: result.message,
+                    }).then((result) => {
+                        setTimeout(function () {
+                            track_document(input.val())
+                        }, 200);
+                    });
+                }
+
+                if (result.error == "true") {
+                    Swal.fire({
+                        icon: 'info',
+                        type: 'warning',
+                        title: 'Oops!',
+                        text: result.message,
+                    }).then((result) => {
+                        setTimeout(function () {
+
+                        }, 200);
+                    });
+                }
+            }
+        });
+        return false
+    })
+
+
 });
