@@ -172,23 +172,69 @@ class Create_profile_model extends CI_Model
 		}
 	}
 
-	public function get_offices($office_name)
-	{
-		$this->db->select('ID_REGION, INFO_REGION')
-			->like('INFO_REGION', $office_name)
-			->group_by("ID_REGION")
-			->order_by("INFO_REGION", "asc");
-		$query = $this->db->get('office');
-		if ($query->num_rows() > 0) {
-			foreach ($query->result_array() as $row) {
-				//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array
-				$new_row['label'] = stripslashes($row['INFO_REGION']);
-				$new_row['value'] = htmlentities(stripslashes($row['ID_REGION']));
-				$row_set[] = $new_row;
-			}
-			echo json_encode($row_set); //format the array into json data
+	public function get_offices(){
+		$term = $this->input->get('term', true); //search input field value
+
+		$this->db->select('*')
+				 ->from('lib_office')
+				 ->where('STATUS_CODE', '1');
+
+		if($term != ''){
+			$this->db->group_start()
+					 ->like('INFO_REGION', trim($term))
+					 ->or_like('INFO_SERVICE', trim($term))
+					 ->or_like('SHORTNAME_SERVICE', trim($term))
+					 ->or_like('INFO_DIVISION', trim($term))
+					 ->or_like('OFFICE_CODE', trim($term))
+					 ->group_end();
 		}
+
+		$query = $this->db->get();
+
+		$data 	= []; //temporary array
+		$result = []; //return result
+		$key	= 0;
+
+		//group query result by INFO_REGION and INFO_SERVICE to data array
+		foreach ($query->result() as $k => $v) {
+
+			//group name
+			$data[$v->INFO_REGION.' - '.$v->INFO_SERVICE][] = array( 
+				//divisions
+				'id'	=> $v->OFFICE_CODE,
+				'text'  => $v->INFO_DIVISION
+			);
+		}
+
+		//extract data array
+		foreach ($data as $k => $v) {
+			$result[$key] = array(
+				'text' 	   => $k, //text label group name
+				'children' => $v  //division under the group
+			);
+			$key++;
+		}
+
+		return $result;
 	}
+
+	// public function get_offices($office_name)
+	// {
+	// 	$this->db->select('ID_REGION, INFO_REGION')
+	// 		->like('INFO_REGION', $office_name)
+	// 		->group_by("ID_REGION")
+	// 		->order_by("INFO_REGION", "asc");
+	// 	$query = $this->db->get('office');
+	// 	if ($query->num_rows() > 0) {
+	// 		foreach ($query->result_array() as $row) {
+	// 			//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array
+	// 			$new_row['label'] = stripslashes($row['INFO_REGION']);
+	// 			$new_row['value'] = htmlentities(stripslashes($row['ID_REGION']));
+	// 			$row_set[] = $new_row;
+	// 		}
+	// 		echo json_encode($row_set); //format the array into json data
+	// 	}
+	// }
 
 	public function get_services($service_name, $office_code)
 	{

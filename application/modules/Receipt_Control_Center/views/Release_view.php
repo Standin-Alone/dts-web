@@ -255,7 +255,7 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                     </div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-md-12 col-lg-11">
+                                    <div class="col-md-12 col-lg-12">
                                         <div class="col text-center">
                                             <label class="">Recipients</label>
                                         </div>
@@ -304,7 +304,7 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                 <h4 class="page-header mt-4 d-flex flex-column text-center">
                     <i class="fa fa-mail-bulk fa-2x mt-2"></i>
                     <span>
-                        For Releasing Documents
+                        To Release
                     </span>
                     <small>Select a document you want to release</small>
                 </h4>
@@ -312,7 +312,6 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
             <div class="col-md-12 <?php echo $class = !empty($received_documents) ? 'scrollbar' : ''; ?>" style="height: 400px; background-color: #c6ced5;">
                 <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
                     <?php
-
                     if ($received_documents) {
                         foreach ($received_documents as $row) {
                     ?>
@@ -354,6 +353,7 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
 
 <script src="<?php echo base_url() ?>Receipt_Control_Center/Release_js"></script>
 <script>
+    document.body.style.zoom = "90%"
     $(document).ready(function() {
         $('#Released_table').DataTable();
     });

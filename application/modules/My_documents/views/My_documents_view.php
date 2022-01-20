@@ -24,7 +24,7 @@
                                 <ul class="nav nav-tabs nav-tabs-inverse">
                                     <li class="nav-item prev-button"><a href="javascript:;" data-click="prev-tab" class="nav-link text-success"><i class="fa fa-arrow-left"></i></a></li>
                                     <li class="nav-item"><a href="#nav-tab-1" data-toggle="tab" class="nav-link active">My Documents</a></li>
-                                    <li class="nav-item"><a href="#nav-tab-2" data-toggle="tab" class="nav-link">All Documents</a></li>
+                                    <li class="nav-item"><a href="#nav-tab-2" data-toggle="tab" class="nav-link">Received Documents</a></li>
                                 </ul>
                             </div>
                             <!-- end nav-tabs -->
@@ -63,10 +63,10 @@
                                     <thead>
                                         <tr>
                                             <th class="text-nowrap">Document Number</th>
-                                            <th class="text-nowrap">Type</th>
-                                            <th class="text-nowrap">Subject</th>
-                                            <th class="text-nowrap">Status</th>
-                                            <th class="text-nowrap">Date Created</th>
+                                            <th class="text-nowrap">Transaction Office Code</th>
+                                            <th class="text-nowrap">Name</th>
+                                            <th class="text-nowrap">Action</th>
+                                            <th class="text-nowrap">Log Date</th>
                                             <th class="text-nowrap">View</th>
                                         </tr>
                                     </thead>
@@ -243,21 +243,21 @@ $('#all_docs').DataTable({
                 className: 'text-center align-middle' 
             },
             {
-                data: 'type',
+                data: 'transacting_office',
                 className: 'text-center align-middle'
             },
             {
-                data: 'subject',
+                data: 'transacting_user_fullname',
                 className: 'text-center align-middle'
             },
             {
-                data: 'status',
+                data: 'action',
                 className: 'text-center align-middle'
             },
             {
                 className: 'text-center align-middle',
                 render: function(data, type, row){
-                    var date = new Date(row.date_created);
+                    var date = new Date(row.log_date);
                     var new_date = ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + date.getFullYear();
                     return new_date;
                 }

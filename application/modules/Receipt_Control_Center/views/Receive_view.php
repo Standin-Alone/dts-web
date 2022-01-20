@@ -374,7 +374,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                             <h4 class="page-header mt-4 d-flex flex-column text-center">
                                 <i class="fa fa-mail-bulk fa-2x"></i>
                                 <span>
-                                    For Receiving Documents
+                                    To Receive
                                 </span>
                                 <small>Select a document you want to received</small>
                             </h4>
@@ -419,8 +419,8 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                             </div>
                         <?php } ?>
                         </div>
-                        <button class="btn btn-primary btn-block">View All</button>
                     </div>
+                    <button class="btn btn-primary btn-block">View All</button>
                 </div>
             </div>
         </div>
@@ -442,9 +442,19 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 <!-- script -->
 
 <script>
+    document.body.style.zoom = "90%"
     $(document).ready(function() {
         $('#received_table').DataTable();
+
+        $("input, textarea").focusout(function() {
+            $('meta[name=viewport]').remove();
+            $('head').append('<meta name="viewport" content="width=device-width, maximum-scale=0.9, user-scalable=0">');
+
+            $('meta[name=viewport]').remove();
+            $('head').append('<meta name="viewport" content="width=device-width, initial-scale=yes">');
+        });
     });
 </script>
+
 
 <script src="<?php echo base_url() ?>Receipt_Control_Center/RCC_js"></script>

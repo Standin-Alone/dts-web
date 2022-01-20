@@ -269,7 +269,8 @@ public function incoming_documents($my_office_code){
 								->join('document_recipients as dr','dp.document_number = dr.document_number')
 								->where('dr.recipient_office_code',$my_office_code)
 								->where('dr.active','1')
-								->where('dr.date_added','NOW()')
+								->where('DATE(dr.date_added) = DATE(NOW())')
+								->where('dp.status ','Verified')
 								->order_by('dr.date_added','desc')															
 								->get()->result();
 		
@@ -362,10 +363,9 @@ public function get_scanned_document(){
 		$check_dp_status = $this->db									
 									->select('*')
 									->from('document_profile')
-									->where('document_number',$document_number)									
-									->where('status','Verified')
+									->where('document_number',$document_number)																		
 									->get()
-									->result();
+									->row()->status;
 
 		$check_if_recipient =  $this->db->select('*')
 								->from('document_recipients')
@@ -375,20 +375,10 @@ public function get_scanned_document(){
 		
 		// check if the document is exist
 		if($check_document_exist){
-			if($check_dp_status){
+			if($check_dp_status == 'Verified'){
 				if($check_if_recipient){
 				
-		
-		
-
-
-
-		
-
-												
-		
-
-		
+			
 		
 			$check_if_receive = $this->db
 										->limit(1)
@@ -431,13 +421,20 @@ public function get_scanned_document(){
 										->get()
 										->result();
 
+			
 			//check if valid to receive
 			if($check_if_receive){
+				$check_if_last_log_release = $this->db->limit(1)->select('*')->from('receipt_control_logs')->where('document_number',$document_number)->order_by('log_date','DESC')->get()->row();
 
-				$get_doc_info = $check_if_receive;
-				$type="receive";
+				if($check_if_last_log_release->type == 'Released'){
+				
+					$get_doc_info = $check_if_receive;
+					$type="receive";
 
-				$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
+					$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
+				}else{
+					$result = ["Message" => "This document is not yet release."];
+				}
 						
 			}else{
 
@@ -547,9 +544,12 @@ public function get_scanned_document(){
 			
 			$result = ["Message" => "Not Authorize"];	
 		}
-	}else{
+	}else if ($check_dp_status == 'Archived'){
 
 		$result = ["Message" => "This document process is already finished."];	
+	}else{
+
+		$result = ["Message" => "This document is not yet release."];	
 	}
 		}else{
 			$result = ["Message" => "Document not found."];		
@@ -709,7 +709,7 @@ public function release_document(){
 			// insert release receipt acontrol logs
 			foreach($check_if_release as $release_doc){
 
-
+				
 					$this->db->insert('receipt_control_logs',[
 						'type' => 'Released',
 						'document_number' => $document_number,						
@@ -730,6 +730,12 @@ public function release_document(){
 									->from('document_profile')
 									->where('document_number', $document_number)
 									->get()->row()->office_code;
+
+
+			if($action == 'Return to Sender'){
+
+
+			}else{
 			// insert recipients
 			foreach($recipients_office_code as $value){
 				
@@ -757,7 +763,7 @@ public function release_document(){
 							
 		
 			}
-		
+			}
 			$result = ["Message" => "true"];
 		
 
@@ -905,7 +911,7 @@ public function get_offices($document_number,$my_office_code){
 		array_push($check_if_recipient_is_empty,$my_office_code);
 		
 		
-		$get_division = $this->db->distinct()->select('INFO_DIVISION ,office_code')->from('lib_office')->group_by('INFO_DIVISION')->get();
+		$get_division = $this->db->distinct()->select('INFO_DIVISION ,office_code')->from('lib_office')->where('STATUS_CODE','1')->group_by('INFO_DIVISION')->get();
 		
 		$office_array = [];
 		if($get_division){
@@ -914,7 +920,7 @@ public function get_offices($document_number,$my_office_code){
 
 				array_push($office_array , ["name"=>$item->INFO_DIVISION,'id'=>$division_key, "children"=>[]]);
 
-				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('INFO_DIVISION',$item->INFO_DIVISION)->where_not_in('office_code',$check_if_recipient_is_empty )->get();		
+				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('STATUS_CODE','1')->where('INFO_DIVISION',$item->INFO_DIVISION)->where_not_in('office_code',$check_if_recipient_is_empty )->get();		
 				foreach($get_records->result() as $value){	
 					
 					

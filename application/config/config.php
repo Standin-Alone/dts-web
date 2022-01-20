@@ -460,7 +460,7 @@ if (isset($_SERVER['REQUEST_URI'])) {
 			$config['csrf_protection'] = TRUE;
 		}
 
-		if (trim($_SERVER['REQUEST_URI']) == '/dts/MobileApp/Mobile/login') {
+		if (trim($_SERVER['REQUEST_URI']) == '/dts-web/MobileApp/Mobile/login') {
 			$config['csrf_protection'] = FALSE;
 		}
 

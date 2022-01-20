@@ -232,6 +232,7 @@ class RCC_model extends CI_Model
             $user_id = $this->session->userdata('user_id');
             $fullname = $this->session->userdata('fullname');
 
+            $check_status = $this->db->select("*")->from("document_profile")->where("document_number", $document_number)->get()->result();
 
             $check_if_exist = $this->db->where("document_number", $document_number)->get("document_profile");
             $check_if_verified = $this->db->select("*")->from("document_profile")->where("document_number", $document_number)->get()->result();
@@ -252,6 +253,8 @@ class RCC_model extends CI_Model
                     $result = ["status" => "", "error" => "true", "message" => "Document process is already finished"];
                 } else if ($check_if_verified[0]->status == "Draft") {
                     $result = ["status" => "", "error" => "true", "message" => "Document is not yet released"];
+                } else if ($check_if_verified[0]->status == "" || $check_if_verified[0]->status == null) {
+                    $result = ["status" => "", "error" => "true", "message" => "Document is unverified by the system, Please reprofile the document"];
                 } else {
                     // if verified check if owner
                     if ($check_if_owner) {
@@ -352,7 +355,6 @@ class RCC_model extends CI_Model
                             $check_latest_transaction = $this->db->select("*")
                                 ->from("receipt_control_logs")
                                 ->where("document_number", $document_number)
-                                ->where("transacting_office", $office_code)
                                 ->order_by("log_date", "desc")
                                 ->limit(1)
                                 ->get()->result();
@@ -388,42 +390,81 @@ class RCC_model extends CI_Model
                                 ->order_by("log_date", "desc")
                                 ->limit(1)
                                 ->get()->result();
-
-                            if ($check_if_latest_transaction[0]->transacting_office == $office_code) {
-                                //
-                                $check_latest_transaction = $this->db->select("*")
-                                    ->from("receipt_control_logs")
-                                    ->where("document_number", $document_number)
-                                    ->where("transacting_office", $office_code)
-                                    ->where("status", "1")
-                                    ->order_by("log_date", "desc")
-                                    ->limit(1)
-                                    ->get()->result();
-                                if ($check_latest_transaction[0]->type == "Received") {
-                                    //received
-                                    $result = ["status" => "", "error" => "true", "message" => "Document already received"];
-                                } else {
-                                    $received_data = [
-                                        'type' => 'Received',
-                                        'document_number' => $document_number,
-                                        'office_code' => $office_code,
-                                        'action' => 'Received',
-                                        'remarks' => '',
-                                        'file' => '',
-                                        'attachment' => '',
-                                        'transacting_user_id' => $user_id,
-                                        'transacting_user_fullname' => $fullname,
-                                        'transacting_office' => $office_code,
-                                        'status' => "1"
-                                    ];
-                                    $insert_data = $this->insert_logs($received_data);
-                                    if ($insert_data) {
-                                        $data = ['active' => '0'];
-                                        $this->db->set($data);
-                                        $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
-                                        $this->db->update('document_recipients');
+                            if ($check_if_latest_transaction) {
+                                if ($check_if_latest_transaction[0]->transacting_office == $office_code) {
+                                    //
+                                    $check_latest_transaction = $this->db->select("*")
+                                        ->from("receipt_control_logs")
+                                        ->where("document_number", $document_number)
+                                        ->where("transacting_office", $office_code)
+                                        ->where("status", "1")
+                                        ->order_by("log_date", "desc")
+                                        ->limit(1)
+                                        ->get()->result();
+                                    if ($check_latest_transaction[0]->type == "Received") {
+                                        //received
+                                        $result = ["status" => "", "error" => "true", "message" => "Document already received"];
+                                    } else {
+                                        $received_data = [
+                                            'type' => 'Received',
+                                            'document_number' => $document_number,
+                                            'office_code' => $office_code,
+                                            'action' => 'Received',
+                                            'remarks' => '',
+                                            'file' => '',
+                                            'attachment' => '',
+                                            'transacting_user_id' => $user_id,
+                                            'transacting_user_fullname' => $fullname,
+                                            'transacting_office' => $office_code,
+                                            'status' => "1"
+                                        ];
+                                        $insert_data = $this->insert_logs($received_data);
+                                        if ($insert_data) {
+                                            $data = ['active' => '0'];
+                                            $this->db->set($data);
+                                            $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
+                                            $this->db->update('document_recipients');
+                                        }
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
                                     }
-                                    $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                } else {
+                                    $check_latest_transaction = $this->db->select("*")
+                                        ->from("receipt_control_logs")
+                                        ->where("document_number", $document_number)
+                                        ->where("status", '1')
+                                        ->order_by("log_date", "desc")
+                                        ->limit(1)
+                                        ->get()->result();
+                                    // "<pre>";
+                                    // print_r($check_if_latest_transaction);
+                                    // "<pre>";
+                                    if ($check_latest_transaction[0]->type == "Released") {
+                                        $received_data = [
+                                            'type' => 'Received',
+                                            'document_number' => $document_number,
+                                            'office_code' => $office_code,
+                                            'action' => 'Received',
+                                            'remarks' => '',
+                                            'file' => '',
+                                            'attachment' => '',
+                                            'transacting_user_id' => $user_id,
+                                            'transacting_user_fullname' => $fullname,
+                                            'transacting_office' => $office_code,
+                                            'status' => "1"
+                                        ];
+                                        $insert_data = $this->insert_logs($received_data);
+                                        if ($insert_data) {
+                                            $data = ['active' => '0'];
+                                            $this->db->set($data);
+                                            $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
+                                            $this->db->update('document_recipients');
+                                        }
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                    } elseif ($check_latest_transaction[0]->type == "Received") {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document already received"];
+                                    } else {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
+                                    }
                                 }
                             } else {
                                 $check_latest_transaction = $this->db->select("*")
@@ -436,30 +477,34 @@ class RCC_model extends CI_Model
                                 // "<pre>";
                                 // print_r($check_if_latest_transaction);
                                 // "<pre>";
-                                if ($check_latest_transaction[0]->type == "Released") {
-                                    $received_data = [
-                                        'type' => 'Received',
-                                        'document_number' => $document_number,
-                                        'office_code' => $office_code,
-                                        'action' => 'Received',
-                                        'remarks' => '',
-                                        'file' => '',
-                                        'attachment' => '',
-                                        'transacting_user_id' => $user_id,
-                                        'transacting_user_fullname' => $fullname,
-                                        'transacting_office' => $office_code,
-                                        'status' => "1"
-                                    ];
-                                    $insert_data = $this->insert_logs($received_data);
-                                    if ($insert_data) {
-                                        $data = ['active' => '0'];
-                                        $this->db->set($data);
-                                        $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
-                                        $this->db->update('document_recipients');
+                                if ($check_latest_transaction) {
+                                    if ($check_latest_transaction[0]->type == "Released") {
+                                        $received_data = [
+                                            'type' => 'Received',
+                                            'document_number' => $document_number,
+                                            'office_code' => $office_code,
+                                            'action' => 'Received',
+                                            'remarks' => '',
+                                            'file' => '',
+                                            'attachment' => '',
+                                            'transacting_user_id' => $user_id,
+                                            'transacting_user_fullname' => $fullname,
+                                            'transacting_office' => $office_code,
+                                            'status' => "1"
+                                        ];
+                                        $insert_data = $this->insert_logs($received_data);
+                                        if ($insert_data) {
+                                            $data = ['active' => '0'];
+                                            $this->db->set($data);
+                                            $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
+                                            $this->db->update('document_recipients');
+                                        }
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                    } elseif ($check_latest_transaction[0]->type == "Received") {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document already received"];
+                                    } else {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
                                     }
-                                    $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
-                                } elseif ($check_latest_transaction[0]->type == "Received") {
-                                    $result = ["status" => "", "error" => "true", "message" => "Document already received"];
                                 } else {
                                     $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
                                 }
@@ -509,6 +554,8 @@ class RCC_model extends CI_Model
                     $result = ["status" => "", "error" => "true", "message" => "Document process is already finished"];
                 } else if ($check_if_verified[0]->status == "Draft") {
                     $result = ["status" => "", "error" => "true", "message" => "Document is not yet released"];
+                } else if ($check_if_verified[0]->status == "" || $check_if_verified[0]->status == null) {
+                    $result = ["status" => "", "error" => "true", "message" => "This Document is unverified by the system, please reprofile the document"];
                 } else {
                     //if exist, check if owner
                     $check_if_owner =  $this->db->select("*")
@@ -660,50 +707,71 @@ class RCC_model extends CI_Model
                                 ->limit(1)
                                 ->get()->result();
 
-                            if ($check_if_latest_transaction[0]->transacting_office == $office_code) {
-                                //
-                                $check_latest_transaction = $this->db->select("*")
-                                    ->from("receipt_control_logs")
-                                    ->where("document_number", $document_number)
-                                    ->where("transacting_office", $office_code)
-                                    ->where("status", '1')
-                                    ->order_by("log_date", "desc")
-                                    ->limit(1)
-                                    ->get()->result();
-                                if ($check_latest_transaction[0]->type == "Released") {
-                                    //received
-                                    $result = ["status" => "", "error" => "true", "message" => "Document already released"];
-                                } else {
-                                    //released the document
-                                    $released_data = [
-                                        'type' => 'Released',
-                                        'document_number' => $document_number,
-                                        'office_code' => $office_code,
-                                        'action' => $action,
-                                        'remarks' => $remarks,
-                                        'file' => '',
-                                        'attachment' => '',
-                                        'transacting_user_id' => $user_id,
-                                        'transacting_user_fullname' => $fullname,
-                                        'transacting_office' => $office_code,
-                                        'status' => "1"
-                                    ];
-                                    $insert_data = $this->insert_logs($released_data);
+                            if ($check_if_latest_transaction) {
 
-                                    if ($insert_data == "success") {
-                                        if (!empty($recipients)) {
-                                            foreach ($recipients as $key => $value) {
-                                                $this->db->insert('document_recipients', [
-                                                    'document_number' => $document_number,
-                                                    'recipient_office_code' => $value,
-                                                    'sequence' => $key,
-                                                    'added_by_user_id' => $user_id,
-                                                    'added_by_user_fullname' => $fullname
-                                                ]);
+
+                                if ($check_if_latest_transaction[0]->transacting_office == $office_code) {
+                                    //
+                                    $check_latest_transaction = $this->db->select("*")
+                                        ->from("receipt_control_logs")
+                                        ->where("document_number", $document_number)
+                                        ->where("transacting_office", $office_code)
+                                        ->where("status", '1')
+                                        ->order_by("log_date", "desc")
+                                        ->limit(1)
+                                        ->get()->result();
+                                    if ($check_latest_transaction[0]->type == "Released") {
+                                        //received
+                                        $result = ["status" => "", "error" => "true", "message" => "Document already released"];
+                                    } else {
+                                        //released the document
+                                        $released_data = [
+                                            'type' => 'Released',
+                                            'document_number' => $document_number,
+                                            'office_code' => $office_code,
+                                            'action' => $action,
+                                            'remarks' => $remarks,
+                                            'file' => '',
+                                            'attachment' => '',
+                                            'transacting_user_id' => $user_id,
+                                            'transacting_user_fullname' => $fullname,
+                                            'transacting_office' => $office_code,
+                                            'status' => "1"
+                                        ];
+                                        $insert_data = $this->insert_logs($released_data);
+
+                                        if ($insert_data == "success") {
+                                            if (!empty($recipients)) {
+                                                foreach ($recipients as $key => $value) {
+                                                    $this->db->insert('document_recipients', [
+                                                        'document_number' => $document_number,
+                                                        'recipient_office_code' => $value,
+                                                        'sequence' => $key,
+                                                        'added_by_user_id' => $user_id,
+                                                        'added_by_user_fullname' => $fullname,
+                                                        'added_by_user_office' => $office_code
+                                                    ]);
+                                                }
                                             }
                                         }
+                                        $result = ["status" => "", "error" => "false", "message" => "Document has been released succesfully"];
                                     }
-                                    $result = ["status" => "", "error" => "false", "message" => "Document has been released succesfully"];
+                                } else {
+                                    $check_latest_transaction = $this->db->select("*")
+                                        ->from("receipt_control_logs")
+                                        ->where("document_number", $document_number)
+                                        ->where("status", '1')
+                                        ->order_by("log_date", "desc")
+                                        ->limit(1)
+                                        ->get()->result();
+                                    // "<pre>";
+                                    // print_r($check_if_latest_transaction);
+                                    // "<pre>";
+                                    if ($check_latest_transaction[0]->type == "Received") {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
+                                    } else {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet received by your office"];
+                                    }
                                 }
                             } else {
                                 $check_latest_transaction = $this->db->select("*")
@@ -716,8 +784,12 @@ class RCC_model extends CI_Model
                                 // "<pre>";
                                 // print_r($check_if_latest_transaction);
                                 // "<pre>";
-                                if ($check_latest_transaction[0]->type == "Received") {
-                                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
+                                if ($check_latest_transaction) {
+                                    if ($check_latest_transaction[0]->type == "Received") {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
+                                    } else {
+                                        $result = ["status" => "", "error" => "true", "message" => "Document is not yet received by your office"];
+                                    }
                                 } else {
                                     $result = ["status" => "", "error" => "true", "message" => "Document is not yet received by your office"];
                                 }

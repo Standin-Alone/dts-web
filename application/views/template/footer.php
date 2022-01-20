@@ -1,3 +1,8 @@
+<script>
+	$(document).ready(function() {
+		//FormMultipleUpload.init();
+	});
+</script>
 <footer class="footer">
 	<div class="container-fluid">
 <!-- 		<nav class="float-left">

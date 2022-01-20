@@ -125,25 +125,24 @@ class My_documents_model extends CI_Model {
 
 
 		$this->db->select('*')
-				 ->from('document_profile')
+				 ->from('receipt_control_logs')
 				 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE)', '', FALSE);
-			   	 ->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
-				 #->where('service_code', '0100000101');
+			   	 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
+			   	 ->where('action', 'Received')
+				 ->where('transacting_office', $this->session->userdata('office') );
 
 		if($search != ''){
 			$this->db->group_start()
 					 ->like('document_number', $search['value'])
-					 ->or_like('date', $search['value'])
-					 ->or_like('sender_name', $search['value'])
-					 ->or_like('sender_address', $search['value'])
-					 ->or_like('subject', $search['value'])
-					 ->or_like('remarks', $search['value'])
+					 ->or_like('log_date', $search['value'])
+					 ->or_like('transacting_user_fullname', $search['value'])
+					 ->or_like('action', $search['value'])
 					 ->or_like('type', $search['value'])
 					 ->group_end();
 		}
 
 		// $this->db->group_by('pras_num')
-		$this->db->order_by('date_created', 'DESC')
+		$this->db->order_by('log_date', 'DESC')
 				 ->limit($length, $start);
 
 		$query = $this->db->get();
@@ -162,24 +161,23 @@ class My_documents_model extends CI_Model {
 
 	public function get_total_all($search = null, $user_id = null){
 		$this->db->select('*')
-				 ->from('document_profile')
-				 ->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
-				 //->where('service_code', '0100000101');
+				 ->from('receipt_control_logs')
+				 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
+				 ->where('action', 'Received')
+				 ->where('transacting_office', $this->session->userdata('office') );
 
 		if($search != ''){
 			$this->db->group_start()
 					 ->like('document_number', $search)
-					 ->or_like('date', $search)
-					 ->or_like('sender_name',$search)
-					 ->or_like('sender_address', $search)
-					 ->or_like('subject',$search)
-					 ->or_like('remarks', $search)
+					 ->or_like('log_date', $search)
+					 ->or_like('transacting_user_fullname',$search)
+					 ->or_like('action', $search)
 					 ->or_like('type',$search)
 					 ->group_end();
 		}
 		
 		// $this->db->group_by('document_number')
-		$this->db->order_by('date_created', 'DESC');
+		$this->db->order_by('log_date', 'DESC');
 				 
 		$query = $this->db->get();
 

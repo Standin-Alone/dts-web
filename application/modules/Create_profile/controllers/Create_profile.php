@@ -21,8 +21,8 @@ class Create_profile extends MY_Controller {
     }
 
 	public function get_offices(){
-		$office_name = strtolower($_GET['office_name']);
-		$this->Create_profile_model->get_offices($office_name);
+		$results = $this->Create_profile_model->get_offices();
+		echo json_encode($results);
 	}
 
 	public function get_services(){

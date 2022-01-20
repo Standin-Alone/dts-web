@@ -29,14 +29,47 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link href="<?php echo base_url(); ?>assets/css/style.css" rel="stylesheet" />
+
+<link href="<?php echo base_url() ?>assets/plugins/nvd3/build/nv.d3.css" rel="stylesheet" type="text/css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+<script src="<?php echo base_url() ?>assets/plugins/nvd3/build/nv.d3.js"></script>
+<script src="<?php echo base_url() ?>assets/plugins/nvd3/examples/lib/stream_layers.js"></script>
+
+<style>
+    svg {
+        display: block;
+    }
+
+    #test2 {
+        height: 350px !important;
+        width: 350px !important;
+    }
+
+    #test1 {
+        height: 350px !important;
+        width: 350px !important;
+    }
+
+
+    .nvd3.nv-pie.nv-chart-donut2 .nv-pie-title {
+        fill: rgba(70, 107, 168, 0.78);
+    }
+
+    .nvd3.nv-pie.nv-chart-donut1 .nv-pie-title {
+        opacity: 0.4;
+        fill: rgba(224, 116, 76, 0.91);
+    }
+</style>
+
 <div id="content" class="content">
+
     <div class="d-flex justify-content-between">
-        <h1 class="page-header mb-3">Received Documents</h1>
-        <ol class="breadcrumb float-xl-end">
-            <li class="breadcrumb-item"><a href="<?php echo base_url() ?>Dashboard">Dashboard</a></li>
-            <li class="breadcrumb-item active">Received Document</li>
-        </ol>
     </div>
+    <h1 class="page-header mb-3">Received Documents</h1>
+    <ol class="breadcrumb float-xl-end">
+        <li class="breadcrumb-item"><a href="<?php echo base_url() ?>Dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item active">Received Document</li>
+    </ol>
     <div class="row my-4">
         <div class="col-md-8">
             <div class=" card border-0 mb-3 overflow-hidden bg-white text-gray">
@@ -99,14 +132,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <div class="col-sm-4">
-
-
-        </div>
-        <div class="col-md-12">
             <div class="card border-0 text-truncate mb-3 bg-gray-800 text-gray">
                 <div class="card-body">
                     <div class="mb-3 text-gray-500">
@@ -130,16 +155,16 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                             <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Count of received unauthorized documents"></i>
                         </span> -->
                     </div>
-                    <div class="d-flex flex-row align-items-end mb-1">
-                        <div class="col d-sm-flex flex-row align-items-end">
-                            <a href="#" class="btn btn-dark me-2 text-truncate" id="daterange-filter">
+                    <div class="d-lg-flex flex-sm-row align-items-end mb-1 justify-content-between">
+                        <div class="col-lg-4 col-md-12 d-lg-flex flex-row align-items-end mb-2">
+                            <a href="#" class="btn btn-dark text-truncate" id="daterange-filter">
                                 <i class="fa fa-calendar fa-fw text-white text-opacity-50 ms-n1"></i>
                                 <span>22 November 2021 - 21 December 2021</span>
                                 <b class="caret ms-1 opacity-5"></b>
                             </a>
                         </div>
-                        <div class="d-flex flex-row align-items-end">
-                            <span class="d-flex flex-row mx-2">
+                        <div class="col-lg-8 col-md-12 d-lg-flex flex-row align-items-end">
+                            <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Status</label>
                                 <select class="form-control ml-2" aria-label="Default select example">
                                     <option selected>All</option>
@@ -147,7 +172,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                                     <option value="0">Invalid Logs</option>
                                 </select>
                             </span>
-                            <span class="d-flex flex-row mx-2">
+                            <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Origin Type</label>
                                 <select class="form-control ml-2" aria-label="Default select example">
                                     <option selected>All</option>
@@ -155,7 +180,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                                     <option value="External">External</option>
                                 </select>
                             </span>
-                            <span class="d-flex flex-row mx-2">
+                            <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Document Type</label>
                                 <select class="form-control ml-2" aria-label="Default select example">
                                     <option value="" selected>All</option>
@@ -170,44 +195,39 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                         </div>
                     </div>
                 </div>
-                <!-- <div class="mb-4 text-gray-500 ">
-                        <i class="fa fa-caret-down"></i> <span data-animation="number" data-value="0.50">0.50</span>% compare to last week
-                    </div> -->
-                <!-- <div class="d-flex mb-2">
-                        <div class="d-flex align-items-center">
-                            <i class="fa fa-circle text-red fs-8px me-2"></i>
-                            Added to cart
-                        </div>
-                        <div class="d-flex align-items-center ms-auto">
-                            <div class="text-gray-500 small"><i class="fa fa-caret-up"></i> <span data-animation="number" data-value="262">262</span>%</div>
-                            <div class="w-50px text-end ps-2 fw-bold"><span data-animation="number" data-value="3.79">3.79</span>%</div>
-                        </div>
-                    </div>
-                    <div class="d-flex mb-2">
-                        <div class="d-flex align-items-center">
-                            <i class="fa fa-circle text-warning fs-8px me-2"></i>
-                            Reached checkout
-                        </div>
-                        <div class="d-flex align-items-center ms-auto">
-                            <div class="text-gray-500 small"><i class="fa fa-caret-up"></i> <span data-animation="number" data-value="11">11</span>%</div>
-                            <div class="w-50px text-end ps-2 fw-bold"><span data-animation="number" data-value="3.85">3.85</span>%</div>
-                        </div>
-                    </div>
-                    <div class="d-flex">
-                        <div class="d-flex align-items-center">
-                            <i class="fa fa-circle text-lime fs-8px me-2"></i>
-                            Sessions converted
-                        </div>
-                        <div class="d-flex align-items-center ms-auto">
-                            <div class="text-gray-500 small"><i class="fa fa-caret-up"></i> <span data-animation="number" data-value="57">57</span>%</div>
-                            <div class="w-50px text-end ps-2 fw-bold"><span data-animation="number" data-value="2.19">2.19</span>%</div>
-                        </div>
-                    </div> -->
             </div>
+        </div>
+        <div class="col-sm-4">
+            <ul class="list-group col-md-12 ">
+                <li class="list-group-item">
+                    <b>TYPE OF DOCUMENT RECEIVED</b>
+                    <span class="ms-2">
+                        <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Count of documents received by your office"></i>
+                    </span>
+                    <svg id="test1" width="60%" class="mypiechart mx-auto mt-3"></svg>
+                </li>
+                <div class="scrollbar" style="max-height: 200px;">
+                    <?php
+                    foreach ($get_document_type_data as $row) {
+                    ?>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <span><?php echo $row->type_desc . ' (' . $row->type . ')' ?></span>
+                                <span class="h5 font-weight-bold"><?php echo $row->type_count ?></span>
+                            </div>
+                        </li>
+                    <?php
+                    }
+                    ?>
+                </div>
+            </ul>
+
+        </div>
+        <div class="col-md-8">
         </div>
     </div>
 
-    <table id="received_table" class="table table-bordered align-middle bg-light">
+    <table id="received_table" class="table table-bordered align-middle bg-light table-responsive">
         <thead class="bg-white">
             <tr>
                 <th width="10%">Document Number</th>
@@ -277,5 +297,119 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 <script>
     $(document).ready(function() {
         $('#received_table').DataTable();
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        let doc_type_data = [];
+        var retVal;
+        $.ajax({
+            type: "get",
+            url: base_url + "Dashboard/get_document_type_data",
+            dataType: "json",
+            async: false,
+            success: function(response) {
+                doc_type_data = response
+            }
+        });
+
+
+
+        console.log('====================================');
+        console.log(doc_type_data);
+        console.log('====================================');
+
+        var testdata = [{
+                key: "One",
+                y: 4,
+                color: '#380fcc'
+            },
+            {
+                key: "Two",
+                y: 2,
+                color: '#0da1d6'
+            },
+            {
+                key: "Three",
+                y: 9,
+                color: '#ed822e'
+            },
+            {
+                key: "Four",
+                y: 7,
+                color: '#c7ac4d'
+            },
+            {
+                key: "Five",
+                y: 4,
+                color: '#3a57de'
+            },
+            {
+                key: "Six",
+                y: 3,
+                color: '#1d68c7'
+            },
+            {
+                key: "Seven",
+                y: 100,
+                color: '#fbb334'
+            }
+        ];
+
+        var height = 300;
+        var width = 300;
+
+        var chart1;
+        nv.addGraph(function() {
+            var chart1 = nv.models.pieChart()
+                .x(function(d) {
+                    return d.type
+                })
+                .y(function(d) {
+                    return d.type_count
+                })
+                .donut(true)
+                .width(width)
+                .height(height)
+                .padAngle(.02)
+                .cornerRadius(1.5)
+                .id('donut1'); // allow custom CSS for this one svg
+
+            chart1.title("Document Type");
+            chart1.pie.donutLabelsOutside(true).donut(true);
+
+            d3.select("#test1")
+                .datum(doc_type_data)
+                .transition().duration(1200)
+                .call(chart1);
+
+            // LISTEN TO WINDOW RESIZE
+            // nv.utils.windowResize(chart1.update);
+
+            // LISTEN TO CLICK EVENTS ON SLICES OF THE PIE/DONUT
+            // chart.pie.dispatch.on('elementClick', function() {
+            //     code...
+            // });
+
+            // chart.pie.dispatch.on('chartClick', function() {
+            //     code...
+            // });
+
+            // LISTEN TO DOUBLECLICK EVENTS ON SLICES OF THE PIE/DONUT
+            // chart.pie.dispatch.on('elementDblClick', function() {
+            //     code...
+            // });
+
+            // LISTEN TO THE renderEnd EVENT OF THE PIE/DONUT
+            // chart.pie.dispatch.on('renderEnd', function() {
+            //     code...
+            // });
+
+            // OTHER EVENTS DISPATCHED BY THE PIE INCLUDE: elementMouseover, elementMouseout, elementMousemove
+            // @see nv.models.pie
+
+            return chart1;
+
+        });
     });
 </script>

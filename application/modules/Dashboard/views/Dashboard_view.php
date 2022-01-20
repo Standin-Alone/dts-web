@@ -245,7 +245,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
                                             </div>
                                             <div class="col-md-4 d-flex flex-column justify-content-between align-items-end">
-                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Date Sent: <?php echo $row->date_created ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo date("g:i a", strtotime($row->date_created)) ?></span>
                                                 <span class="d-flex flex-row justify-content-between align-self-end">
                                                     <button class="btn btn-sm btn-outline-secondary mx-1"><i class="fa fa-search-location mr-1"></i> Logs</button>
                                                     <button class="btn btn-sm btn-secondary mx-1"><i class="fa fa-file-alt mr-1"></i> View</button>
@@ -288,14 +288,12 @@ $my_archives_count = $count_data['my_archives_data'];
                             foreach ($outgoing_documents as $row) {
                                 $this->db
                                     ->where("document_number", $row->document_number)
-                                    ->where("added_by_user_id", $this->session->userdata('user_id'))
                                     ->from("document_recipients");
                                 $count_recipient = $this->db->get()->num_rows();
 
 
                                 $this->db
                                     ->where("document_number", $row->document_number)
-                                    ->where("added_by_user_id", $this->session->userdata('user_id'))
                                     ->where("active", "0")
                                     ->from("document_recipients");
                                 $count_received_recipient = $this->db->get()->num_rows();
@@ -309,7 +307,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Recipients: <?php echo $count_received_recipient . '/' . $count_recipient ?> Received</span>
                                             </div>
                                             <div class="d-flex flex-column justify-content-between">
-                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Date Released: <?php echo $row->date_created ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo  $time = date('g:i a', strtotime($row->date_created));   ?></span>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1"><?php
                                                                                                             if ($count_received_recipient == $count_recipient) {
                                                                                                                 echo '

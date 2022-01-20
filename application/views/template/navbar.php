@@ -1,71 +1,106 @@
 <?php
-    $roles_set = $this->session->userdata('role');
+$roles_set = $this->session->userdata('role');
 
-    $admin   = array('Home','Add_pras',);
-    $encoder = array(1,5,2);
-    $viewer  = array(1,5,4);
-    $validator = array(1,5,3);
+$admin   = array('Home', 'Add_pras',);
+$encoder = array(1, 5, 2);
+$viewer  = array(1, 5, 4);
+$validator = array(1, 5, 3);
 
-    $reports = array(5,4);
-    $color;
-    // if(current_url() == base_url().'Home'){ $color = 'data-color="azure"'; }
-    // if(current_url() == base_url().'Add_pras'){ $color = 'data-color="rose"'; }
-    // if(current_url() == base_url().'Pras_list'){ $color = 'data-color="green"'; }
-    // if(current_url() == base_url().'Pras_list/Pras_profile'){ $color = 'data-color="green"'; }
-
+$reports = array(5, 4);
+$color;
+// if(current_url() == base_url().'Home'){ $color = 'data-color="azure"'; }
+// if(current_url() == base_url().'Add_pras'){ $color = 'data-color="rose"'; }
+// if(current_url() == base_url().'Pras_list'){ $color = 'data-color="green"'; }
+// if(current_url() == base_url().'Pras_list/Pras_profile'){ $color = 'data-color="green"'; }
 ?>
 
-
-        <!-- begin #sidebar -->
-        <div id="sidebar" class="sidebar">
-            <!-- begin sidebar scrollbar -->
-            <div data-scrollbar="true" data-height="100%">
-                <!-- begin sidebar user -->
-                <ul class="nav">
-                    <li class="nav-profile">
-                        <a href="javascript:;" data-toggle="nav-profile">
-                            <div class="cover with-shadow"></div>
-                            <div class="image">
-                                <img src="../assets/img/user/user-13.jpg" alt="" />
-                            </div>
-                            <div class="info">
-                                <b class="caret pull-right"></b>
-                                Sean Ngu
-                                <small>Front end developer</small>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <ul class="nav nav-profile">
-                            <li><a href="javascript:;"><i class="fa fa-cog"></i> Settings</a></li>
-                            <li><a href="javascript:;"><i class="fa fa-pencil-alt"></i> Send Feedback</a></li>
-                            <li><a href="javascript:;"><i class="fa fa-question-circle"></i> Helps</a></li>
-                        </ul>
-                    </li>
+<!-- begin #sidebar -->
+<div id="sidebar" class="sidebar">
+    <!-- begin sidebar scrollbar -->
+    <div data-scrollbar="true" data-height="100%">
+        <!-- begin sidebar user -->
+        <ul class="nav">
+            <li class="nav-profile">
+                <a href="javascript:;" data-toggle="nav-profile">
+                    <div class="cover with-shadow"></div>
+                    <div class="image">
+                        <img src="../assets/img/user/user-13.jpg" alt="" />
+                    </div>
+                    <div class="info">
+                        <!-- <b class="caret pull-right"></b> -->
+                        <?php echo $this->session->userdata('fullname') ?>
+                        <small>
+                        <?php
+                        //$this->session->userdata('shortname_region') == 'OSEC' ? 'DA / ' : '').$this->session->userdata('orig_shortname').' / '.(
+                        echo strtoupper($this->session->userdata('division_name') == '' ? $this->session->userdata('service_long_name') : $this->session->userdata('division_name'));
+                        ?>
+                        </small>
+                    </div>
+                </a>
+            </li>
+<!--             <li>
+                <ul class="nav nav-profile">
+                    <li><a href="javascript:;"><i class="fa fa-cog"></i> Settings</a></li>
+                    <li><a href="javascript:;"><i class="fa fa-pencil-alt"></i> Send Feedback</a></li>
+                    <li><a href="javascript:;"><i class="fa fa-question-circle"></i> Helps</a></li>
                 </ul>
-                <!-- end sidebar user -->
-                <!-- begin sidebar nav -->
-                <ul class="nav">
-                    <li class="nav-header">Navigation</li>
-                    <?php
-                        //if($this->session->userdata('user_type') == 'admin' OR $this->session->userdata('user_type') == 'super_admin'){
-                            if(current_url() == base_url().'Dashboard'){
-                                echo '<li class="active"><a href="'.base_url().'Dashboard"><i class="fa fa-th-large"></i> <span>Dashboard</span></a></li>';
-                            } else {
-                                echo '<li><a href="'.base_url().'Dashboard"><i class="fa fa-th-large"></i> <span>Dashboard</span></a></li>';
-                            }
-                        //}
-                    ?>
-                    <?php
-                        //if($this->session->userdata('user_type') == 'admin' OR $this->session->userdata('user_type') == 'super_admin'){ 
-                            if(current_url() == base_url().'Create_document'){
-                                echo '<li class="active"><a href="'.base_url().'Create_document"><i class="fas fa-book"></i> <span>Create Document</span></a></li>';
-                            } else {
-                                echo '<li><a href="'.base_url().'Create_document"><i class="fas fa-book"></i> <span>Create Document</span></a></li>';
-                            }
-                        //}
-                    ?>
-<!--                     <li class="has-sub">
+            </li> -->
+        </ul>
+        <!-- end sidebar user -->
+        <!-- begin sidebar nav -->
+        <ul class="nav">
+            <li class="nav-header">Navigation</li>
+            <?php
+            //if($this->session->userdata('user_type') == 'admin' OR $this->session->userdata('user_type') == 'super_admin'){
+            if (current_url() == base_url() . 'Dashboard') {
+                echo '<li class="active"><a href="' . base_url() . 'Dashboard"><i class="fa fa-th-large"></i> <span>Dashboard</span></a></li>';
+            } else {
+                echo '<li><a href="' . base_url() . 'Dashboard"><i class="fa fa-th-large"></i> <span>Dashboard</span></a></li>';
+            }
+            //}
+            ?>
+            <?php
+            //if($this->session->userdata('user_type') == 'admin' OR $this->session->userdata('user_type') == 'super_admin'){ 
+            if (current_url() == base_url() . 'Create_profile') {
+                echo '<li class="active"><a href="' . base_url() . 'Create_profile"><i class="fas fa-book"></i> <span>Create Profile</span></a></li>';
+            } else {
+                echo '<li><a href="' . base_url() . 'Create_profile"><i class="fas fa-book"></i> <span>Create Profile</span></a></li>';
+            }
+            //}
+            ?>
+            <?php
+            //if($this->session->userdata('user_type') == 'admin' OR $this->session->userdata('user_type') == 'super_admin'){ 
+            if (current_url() == base_url() . 'My_documents') {
+                echo '<li class="active"><a href="' . base_url() . 'My_documents"><i class="fas fa-folder-open"></i> <span>My Document</span></a></li>';
+            } else {
+                echo '<li><a href="' . base_url() . 'My_documents"><i class="fas fa-folder-open"></i> <span>My Document</span></a></li>';
+            }
+            //}
+            ?>
+            <li class="has-sub <?php
+                                if (current_url() == base_url() . 'Receipt_Control_Center/Release' || current_url() == base_url() . 'Receipt_Control_Center/Receive') {
+                                    echo 'active';
+                                }
+                                ?>">
+                <a href="javascript:;">
+                    <b class="caret"></b>
+                    <i class="fa fa-tasks"></i>
+                    <span>Receipt & Control Center</span>
+                </a>
+                <ul class="sub-menu">
+                    <li class="<?php
+                                if (current_url() == base_url() . 'Receipt_Control_Center/Receive') {
+                                    echo 'active';
+                                }
+                                ?>"><a href="<?php echo base_url() . 'Receipt_Control_Center/Receive' ?>">Receive Document</a></li>
+                    <li class="<?php
+                                if (current_url() == base_url() . 'Receipt_Control_Center/Release') {
+                                    echo 'active';
+                                }
+                                ?>"><a href="<?php echo base_url() . 'Receipt_Control_Center/Release' ?>">Release Document</a></li>
+                </ul>
+            </li>
+            <!--                     <li class="has-sub">
                         <a href="javascript:;">
                             <span class="badge pull-right">10</span>
                             <i class="fa fa-hdd"></i> 
@@ -297,7 +332,7 @@
                             <li><a href="helper_css.html">Predefined CSS Classes</a></li>
                         </ul>
                     </li> -->
-<!--                     <li class="has-sub">
+            <!--                     <li class="has-sub">
                         <a href="javascript:;">
                             <b class="caret"></b>
                             <i class="fa fa-align-left"></i> 
@@ -328,13 +363,13 @@
                             <li><a href="javascript:;">Menu 1.3</a></li>
                         </ul>
                     </li> -->
-                    <!-- begin sidebar minify button -->
-                    <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
-                    <!-- end sidebar minify button -->
-                </ul>
-                <!-- end sidebar nav -->
-            </div>
-            <!-- end sidebar scrollbar -->
-        </div>
-        <div class="sidebar-bg"></div>
-        <!-- end #sidebar -->
+            <!-- begin sidebar minify button -->
+            <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
+            <!-- end sidebar minify button -->
+        </ul>
+        <!-- end sidebar nav -->
+    </div>
+    <!-- end sidebar scrollbar -->
+</div>
+<div class="sidebar-bg"></div>
+<!-- end #sidebar -->

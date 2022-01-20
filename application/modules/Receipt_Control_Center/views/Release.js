@@ -1,4 +1,6 @@
 $(document).ready(function () {
+
+
     console.log('test');
     $('.multiple-select2').select2({
         placeholder: 'Select an option'
@@ -52,12 +54,13 @@ $(document).ready(function () {
                         setTimeout(function () {
                             track_document(input.val())
                         }, 200);
-                    });
+                        location.reload();
+                    })
                 }
 
                 if (result.error == "true") {
                     Swal.fire({
-                        icon: 'info',
+                        icon: 'error',
                         type: 'warning',
                         title: 'Oops!',
                         text: result.message,

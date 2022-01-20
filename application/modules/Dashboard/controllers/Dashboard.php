@@ -37,9 +37,16 @@ class Dashboard extends MY_Controller
 		$this->data['get_received_documents'] = $this->Dashboard_model->get_received_documents();
 		$this->data['released_documents'] = $this->Dashboard_model->released_documents();
 		$this->data['document_type'] = $this->Dashboard_model->get_document_type();
+		$this->data['get_document_type_data'] = $this->Dashboard_model->get_document_type_data();
 		$this->data['title'] 		 = 'DTS | Received Documents';
 		$this->middle 		 		 = 'Received_Documents_view';
 		$this->layout();
+	}
+
+	public function get_document_type_data()
+	{
+		$results = $this->Dashboard_model->get_document_type_data();
+		echo json_encode($results);
 	}
 
 	public function Released_Documents_view()
@@ -54,10 +61,15 @@ class Dashboard extends MY_Controller
 		$this->middle 		 		 = 'Released_Documents_view';
 		$this->layout();
 	}
+
+
 	public function Incoming_Documents_view()
 	{
 		$this->data = [];
 		$this->data['get_incoming_documents'] = $this->Dashboard_model->get_incoming_documents();
+		$this->data['get_latest_incoming'] = $this->Dashboard_model->get_latest_incoming();
+		$this->data['get_document_type_data'] = $this->Dashboard_model->get_document_type_data();
+		$this->data['get_over_due_incoming'] = $this->Dashboard_model->get_over_due_incoming();
 		$this->data['title'] 		 = 'DTS | Incoming Documents';
 		$this->middle 		 		 = 'Incoming_Documents_view';
 		$this->layout();
@@ -65,6 +77,8 @@ class Dashboard extends MY_Controller
 	public function Outgoing_Documents_view()
 	{
 		$this->data = [];
+		$this->data['get_outgoing_documents'] = $this->Dashboard_model->get_outgoing_documents();
+		$this->data['get_latest_outgoing'] = $this->Dashboard_model->get_latest_outgoing();
 		$this->data['title'] 		 = 'DTS | Outgoing Documents';
 		$this->middle 		 		 = 'Outgoing_Documents_view';
 		$this->layout();

@@ -201,28 +201,38 @@
                                 </div>
                                 <div class="col-md-2">&nbsp;</div>
                             </div>
-<!--                             <span id="recipient_div">
+                            <span id="recipient_div">
                             <div class="form-group row m-b-15">
-                                <label class="col-md-3 col-form-label text-md-right">Recipient Type</label>
-                                <div class="col-md-7">
-                                    <select class="form-control col-md-5" name="in_transaction" id="in_transaction">
-                                        <option value="0">All</option>
-                                        <option value="1">Specific Recipient</option>
-                                    </select>
+                                <label class="col-md-3 col-form-label text-md-right">Dissemination Option</label>
+                                <div class="col-md-1">
+                                    <div class="radio radio-css is-valid">
+                                        <input type="radio" name="status" id="all_radio" value="All"/>
+                                        <label for="all_radio">All</label>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">&nbsp;</div>
+                                <div class="col-md-1">
+                                    <div class="radio radio-css is-invalid">
+                                        <input type="radio" name="status" id="specific_radio" value="Specific" />
+                                        <label for="specific_radio">Specific</label>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-7">
+                                </div>
                             </div>
-                            </span> -->
+                            </span>
                             <div class="form-group row m-b-15">
                                 <label class="col-md-3 col-form-label text-md-right">Recipient</label>
                                 <div class="col-md-7">
-                                    <select class="multiple-select2 form-control" multiple="multiple" id="recipients" name="recipients[]">
+<!--                                     <select class="multiple-select2 form-control" multiple="multiple" id="recipients" name="recipients[]">
                                         <?php 
                                         foreach($recipients as $row)
                                         {
                                             echo '<option value="'.$row->OFFICE_CODE.'">'.strtoupper(($row->SHORTNAME_REGION == 'OSEC' ? 'DA / ' : '').$row->ORIG_SHORTNAME.' / '.($row->INFO_DIVISION == '' ? $row->INFO_SERVICE : $row->INFO_SERVICE.' / '.$row->INFO_DIVISION)).'</option>';
                                         }
                                         ?>
+                                    </select> -->
+                                    <select class="js-example-basic-single form-control-lg" multiple="multiple" id="recipients" name="recipients[]" required>
+                                        <option></option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">&nbsp;</div>
@@ -453,8 +463,29 @@ $(document).ready(function(){
         autoclose: true
     });
     $('.selectpicker').selectpicker('render');
-    $(".multiple-select2").select2({ placeholder: "Select Office/Service/Division" });
-
+    //$(".multiple-select2").select2({ placeholder: "Select Office/Service/Division" });
+    $('#recipients').select2({
+      placeholder: "Office / Place of Assignment",
+      allowClear: true,
+      minimumResultsForSearch: 10,
+      width: '100%',
+      ajax: {
+        url: base_url + 'Create_profile/get_offices',
+        type: 'get',
+        dataType: 'json',
+        data: function(params){
+          var queryParameters = {
+                    term: params.term
+                }
+                return queryParameters;
+        },
+        processResults: function(data){
+          return {
+                results: data
+            };
+        }
+      }
+    });
     // Code for the Validator
     $('#add_profile').submit(function(e) {
         e.preventDefault();
@@ -593,7 +624,7 @@ $(document).ready(function(){
     $("#signatory_emp").autocomplete({
         source: function( request, response ) {
             var sig_emp_code = $('#signatory_emp').val();
-            $.getJSON( 'Create_profile/get_signature_da_name', {
+            $.getJSON( 'View_document/get_signature_da_name', {
                 // 'agency_id': '9304df8f-a323-453d-a458-ab728e1bc419',
                 'term': request.term
             }, response );
@@ -844,25 +875,26 @@ $(document).ready(function(){
         }
     });
 
-    // $(document.body).on('change', '#in_transaction', function(){
-    //     var this_val = $(this).val();
-    //     if (this_val == '0') {
-    //         $('#recipients').attr('disabled' , true);
-    //     } else {
-    //         $('#recipients').attr('disabled' , false);
-    //     }
-    // });
+    $('input[type=radio][name=status]').change(function() {
+        if (this.value == 'All') {
+            $('#recipients').prop('disabled', true);
+        } else {
+            $('#recipients').prop('disabled', false);
+        }
+    });
 
-    // $(document.body).on('change', '#for', function(){
-    //     var this_val = $(this).val();
-    //     if (this_val == '3') {
-    //         $('#recipient_div').css('display' , '');
-    //         $('#recipients').attr('disabled' , true);
-    //     } else {
-    //         $('#recipient_div').css('display' , 'none');
-    //         $('#recipients').attr('disabled' , false);
-    //     }
-    // });
+    $(document.body).on('change', '#for', function(){
+        var this_val = $(this).val();
+        if (this_val == '3') {
+            $('#recipient_div').css('display' , '');
+            $('#recipients').prop('disabled' , true);
+            $("input[name=status][value='All']").prop('checked', true);
+        } else {
+            $('#recipient_div').css('display' , 'none');
+            $('#recipients').prop('disabled' , false);
+            $("input[name=status][value='']").prop('checked', true);
+        }
+    });
 
     $(document.body).on('click', '.release_btn', function() {
         Swal.fire({

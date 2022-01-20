@@ -1,5 +1,6 @@
 <style type="text/css">
     .remove_sig {cursor: pointer;}
+    .remove_rec {cursor: pointer;}
     .dz-remove{display:inline-block !important;width:1.2em;height:1.2em;position:absolute;top:5px;right:5px;z-index:1000;font-size:1.2em !important;line-height:1em;text-align:center;font-weight:bold;border:1px solid gray !important;border-radius:1.2em;color:gray;background-color:white;opacity:.5;}
     .dz-remove:hover{text-decoration:none !important;opacity:1;}
     #document_type-error { text-align: left; }
@@ -99,6 +100,7 @@
 
 </style>
 <div id="content" class="content">
+    <?php echo $this->session->userdata('office').'----1'; ?>
     <!-- begin row -->
     <div class="row">
         <!-- begin col-8 -->
@@ -109,6 +111,7 @@
                     <div class="panel panel-inverse">
                         <div class="panel-heading">
                             <div class="panel-heading-btn">
+                                <a href="javascript:;" class="btn btn-sm btn-icon btn-success update_information"><i class="fas fa-pen-alt"></i></a>
                                 <a href="javascript:;" id="print" class="btn btn-sm btn-icon btn-success" data-content="Print"><i class="fas fa-print"></i></a>
                                 <?php if($document_information['document_status'] == '1'){ ?>
                                 <a href="javascript:;" class="btn btn-sm btn-icon btn-success release_btn"><i class="fas fa-share"></i></a>
@@ -133,7 +136,7 @@
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td class="bg-silver-lighter">Document Status</td>
+                                        <td class="bg-silver-lighter">Status</td>
                                         <td>
                                             <span class="text-black-lighter label label-success text-white">
                                             <?php echo $document_information['document_current_status'][0]->action; ?>
@@ -183,8 +186,12 @@
                                             <div id="accordion" class="card-accordion">
                                                 <!-- begin card -->
                                                 <div class="card">
-                                                    <div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseOne">
-                                                        Click to show recipients.
+                                                    <div class="card-header bg-black text-white pointer-cursor collapsed">
+                                                        <a data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                                            Click to show recipients.
+                                                        </a>
+                                                        <a href="javascript:;" class="btn btn-sm btn-icon btn-success float-right update_recipients ml-1"><i class="fas fa-pen-alt"></i></a>
+                                                        <a href="javascript:;" class="btn btn-sm btn-icon btn-danger float-right" id="remove_rec_modal"><i class="fas fa-trash-alt"></i></a>
                                                     </div>
                                                     <div id="collapseOne" class="collapse border" data-parent="#accordion">
                                                         <div class="card-body pl-0 pr-0">
@@ -214,8 +221,12 @@
                                             <div id="accordion" class="card-accordion">
                                                 <!-- begin card -->
                                                 <div class="card">
-                                                    <div class="card-header bg-black text-white pointer-cursor collapsed" data-toggle="collapse" data-target="#collapseTwo">
-                                                        Click to show signatories.
+                                                    <div class="card-header bg-black text-white pointer-cursor collapsed">
+                                                        <a data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                                            Click to show signatories.
+                                                        </a>
+                                                        <a href="javascript:;" class="btn btn-sm btn-icon btn-success float-right ml-1" id="add_sig_modal"><i class="fas fa-pen-alt"></i></a>
+                                                        <a href="javascript:;" class="btn btn-sm btn-icon btn-danger float-right" id="remove_sig_modal"><i class="fas fa-trash-alt"></i></a>
                                                     </div>
                                                     <div id="collapseTwo" class="collapse border" data-parent="#accordion">
                                                         <div class="card-body pl-0 pr-0">
@@ -306,16 +317,16 @@
                     <div class="panel-heading-btn">
                         <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
                     </div>
-                    <h4 class="panel-title">Document file and attachment</h4>
+                    <h4 class="panel-title">Document</h4>
                 </div>
                 <!-- end panel-heading -->
                 <!-- begin alert -->
-                <div class="alert alert-success fade show">
+<!--                 <div class="alert alert-success fade show">
                     <button type="button" class="close" data-dismiss="alert">
                         <span aria-hidden="true">&times;</span>
                     </button>
                     Options
-                </div>
+                </div> -->
                 <!-- end alert -->
                 <!-- begin panel-body -->
                 <div class="panel-body">
@@ -416,7 +427,7 @@
                 <?php if($document_information['document_status'] == '1'){ ?>
                 <button type="button" class="btn btn-primary" class="release_btn">Release <i class="fas fa-share"></i></button>
                 <?php } ?>
-            </div> 
+            </div>
             </form>
         </div>
     </div>
@@ -431,13 +442,283 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="update_info_modal" tabindex="-1" role="">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+
+            <form id="edit_profile" autocomplete="off" enctype="multipart/form-data">
+            <input type="hidden" name="document_number" value="<?php echo $doc_number; ?>">
+            <div class="modal-body">
+                <!-- begin invoice -->
+                    <div class="note note-info">
+                        <div class="note-icon"><i class="fas fa-book"></i></div>
+                        <div class="note-content">
+                            <h4><b>Edit Document Information</b></h4>
+                            <p> Enter the document information and details. </p>
+                        </div>
+                    </div>
+                <div class="border border-secondary rounded page">
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Date</label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control datepicker col-md-12" name="date" id="date">
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Document Type</label>
+                        <div class="col-md-7">
+                            <select class="form-control col-md-12" name="document_type" id="document_type">
+                                <option value="">Select Document Type</option>
+                                <?php 
+                                    foreach($document_type as $row)
+                                    {
+                                        echo '<option value="'.$row->type_id.'">'.$row->type.'</option>';
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Action</label>
+                        <div class="col-md-7">
+                            <select class="form-control col-md-12" name="for" id="for">
+                                <option value="">Select For</option>
+                                <?php 
+                                    foreach($document_for as $row)
+                                    {
+                                        echo '<option value="'.$row->for_id.'">'.$row->for.'</option>';
+                                    }
+                                ?>
+                            </select>
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Origin Type</label>
+                        <div class="col-md-7">
+                            <select class="form-control col-md-12" name="origin_type" id="origin_type">
+                                <option value="Internal">Internal</option>
+                                <option value="External">External</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <span id="sender_div">
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Sender Name</label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control col-md-12" name="sender_name" id="sender_name">
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Sender Position</label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control col-md-12" name="sender_position" id="sender_position">
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Sender Address</label>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control col-md-12" name="sender_address" id="sender_address">
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    </span>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Subject</label>
+                        <div class="col-md-7">
+                            <textarea class="textarea form-control" name="subject" id="subject" placeholder="Enter text ..." rows="10"></textarea>
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                    <div class="form-group row m-b-15">
+                        <label class="col-md-3 col-form-label text-md-right">Remarks</label>
+                        <div class="col-md-7">
+                            <textarea class="textarea form-control" name="remarks" id="remarks" placeholder="Enter text ..." rows="10"></textarea>
+                        </div>
+                        <div class="col-md-2">&nbsp;</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close <i class="fas fa-window-close"></i></button>
+                <button type="submit" id="save_update_info" class="btn btn-primary">Save Changes <i class="fas fa-save"></i></button>
+            </div> 
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addEmpModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form id="edit_signatories" autocomplete="off" enctype="multipart/form-data">
+            <input type="hidden" name="document_number" value="<?php echo $doc_number; ?>">
+            <div class="modal-body">
+                <div class="note note-success m-b-15">
+                    <div class="note-icon f-s-20">
+                        <i class="fas fa-file-signature fa-2x"></i>
+                    </div>
+                    <div class="note-content">
+                        <h6 class="m-t-5 m-b-5 p-b-2">Signatory Information</h6>
+                        <ul class="m-b-5 p-l-25">
+                            <li>Search & Click <strong id="pras"></strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                        <div class="form-group">
+                            <label>Employee Name:</label>
+                            <input type="text"  id="signatory_emp" name="signatory_emp" class="form-control" placeholder="Search by Employee Lastname, Click & Select.">
+                        </div>
+                        <div class="form-group">
+                            <label>Position/Designation:</label>
+                            <input type="text" name="signatory_designation" class="form-control" placeholder="Enter Employee Current Position.">
+                        </div>
+                        <div class="form-group">
+                            <label>Service/Division</label>
+                            <input type="text" id="signatory_office" name="signatory_office" class="form-control" placeholder="Search Service/Division, Click & Select.">
+                            <input type="hidden" id="modal_sig_office_code" name="modal_sig_office_code">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-window-close"></i> Close</button>
+                <button type="submit" id="modal_add_sig_btn" class="btn btn-success modal_sig_add_btn"><i class="fas fa-user-plus"></i> Add</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addRecModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form id="edit_recipient" autocomplete="off" enctype="multipart/form-data">
+            <input type="hidden" name="document_number" value="<?php echo $doc_number; ?>">
+            <div class="modal-body">
+                <div class="note note-success m-b-15">
+                    <div class="note-icon f-s-20">
+                        <i class="fas fa-file-signature fa-2x"></i>
+                    </div>
+                    <div class="note-content">
+                        <h6 class="m-t-5 m-b-5 p-b-2">Document Recipient</h6>
+                        <ul class="m-b-5 p-l-25">
+                            <li>Search & Click to add Recipient.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" role="tabpanel" aria-labelledby="v-pills-home-tab">
+                        <div class="form-group">
+                            <label>Recipient</label>
+<!--                             <input type="text" id="add_recipients" name="add_recipients" class="form-control" placeholder="Search Service/Division, Click & Select.">
+                            <input type="hidden" id="recipients_office_code" name="recipients_office_code"> -->
+                            <select class="js-example-basic-single form-control-lg" multiple="multiple" id="recipients_office_code" name="recipients_office_code[]" required>
+                                <option></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-window-close"></i> Close</button>
+                <button type="submit" id="modal_add_rec_btn" class="btn btn-success modal_add_rec_btn"><i class="fas fa-user-plus"></i> Add</button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeEmpModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="note note-success m-b-15">
+                    <div class="note-icon f-s-20">
+                        <i class="fas fa-file-signature fa-2x"></i>
+                    </div>
+                    <div class="note-content">
+                        <h6 class="m-t-5 m-b-5 p-b-2">Remove Signatory</h6>
+                        <ul class="m-b-5 p-l-25">
+                            <li>Click <i class="fas fa-trash-alt"></i> to remove specific signatory.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Fullname</th>
+                                <th class="text-center">Designation</th>
+                                <th class="text-center">Office</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="body_signature">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-window-close"></i> Close</button>
+<!--                 <button type="submit" id="modal_add_sig_btn" class="btn btn-success modal_sig_add_btn"><i class="fas fa-user-plus"></i> Add</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="removeRecModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="note note-success m-b-15">
+                    <div class="note-icon f-s-20">
+                        <i class="fas fa-file-signature fa-2x"></i>
+                    </div>
+                    <div class="note-content">
+                        <h6 class="m-t-5 m-b-5 p-b-2">Remove Recipients</h6>
+                        <ul class="m-b-5 p-l-25">
+                            <li>Click <i class="fas fa-trash-alt"></i> to remove specific recipients.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <table class="table table-bordered table-striped mt-3">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Office</th>
+                                <th class="text-center">Added By</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="body_recipients">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fas fa-window-close"></i> Close</button>
+<!--                 <button type="submit" id="modal_add_sig_btn" class="btn btn-success modal_sig_add_btn"><i class="fas fa-user-plus"></i> Add</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script type="text/javascript">
     var path = '<?php echo base_url() .'Create_profile/qr_code/3/2/';?>';
     var upload_path = '<?php echo base_url() .'uploads/attachments/';?>';
     var doc_number = '<?php echo $doc_number; ?>';
+    var office_code = '<?php echo $this->session->userdata('office'); ?>';
     $('#print_area').css("display", "none");
     $(document).ready(function(){
+        $('.datepicker').datepicker({
+            todayHighlight: true,
+            autoclose: true
+        });
         $(document.body).on('click', '#print', function() {
             $("#doc_num_qr").attr('src', path+doc_number);
             $("#doc_num_text").text(doc_number);
