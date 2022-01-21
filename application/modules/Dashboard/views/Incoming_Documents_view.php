@@ -154,7 +154,7 @@ $office_code = $this->session->userdata('office');
                                                                             ->get()->result();
                                                                         if ($latest_log[0]->type == 'Released') {
                                                                         ?>
-                                                                            <span class="d-flex flex-column align-items-end">
+                                                                            <span class="d-flex align-items-end">
                                                                                 Latest Status:
                                                                                 <span>
                                                                                     <?php
@@ -299,7 +299,7 @@ $office_code = $this->session->userdata('office');
                     </div>
                 </div>
                 <div class="col-xl-4 col-lg-6 ">
-                    <ul class="list-group mb-5">
+                    <ul class="list-group mb-4">
                         <li class="list-group-item">
                             <!-- <div>
                                 <b>TYPE OF INCOMING DOCUMENTS</b>
@@ -313,7 +313,7 @@ $office_code = $this->session->userdata('office');
                                     <h1 class="mr-2 font-weight-bold text-secondary">
                                         <?php
                                         $total = null;
-                                        foreach ($get_document_type_data as $row) {
+                                        foreach ($get_document_type_data_incoming as $row) {
                                             $total = intval($total) + intval($row->type_count);
                                         }
                                         echo $total;
@@ -353,7 +353,7 @@ $office_code = $this->session->userdata('office');
                                 "#32a932",
                                 "#90ca4b"
                             ];
-                            foreach ($get_document_type_data as $key => $row) {
+                            foreach ($get_document_type_data_incoming as $key => $row) {
                             ?>
                                 <li class="list-group-item pie bg-light <?php echo 'slice_desc' . $key ?>">
                                     <div class="d-flex justify-content-between">
@@ -366,50 +366,75 @@ $office_code = $this->session->userdata('office');
                             ?>
                         </div>
                     </ul>
-                    <b class="text-danger mb-2 mt-5">OVER DUE DOCUMENTS</b>
-                    <span class="ms-2 "><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Received documents without action for 3 days and above"></i></span>
+
                     <ul class="list-group mt-2">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>
+                                <b class="text-danger mb-2 mt-3">
+                                    OVER DUE DOCUMENTS
+                                </b>
+                                <span class="ms-2 "><i class="fa fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="Received documents without action for more than 3 day"></i></span>
+                            </span>
+                            <?php if ($get_over_due_incoming) {
+                                echo '<span class="badge badge-danger">' . count($get_over_due_incoming) . '</span>';
+                            } ?>
+                        </li>
                         <?php
                         // print_r($get_over_due_incoming);
-
-                        foreach ($get_over_due_incoming as $key => $data) {
-                            // print_r($data);
+                        if ($get_over_due_incoming) {
+                            foreach ($get_over_due_incoming as $key => $data) {
+                                // print_r($data);
                         ?>
-                            <li class="list-group-item">
-                                <div class="col-md-12 d-flex flex-column justify-content-between p-0 m-0">
-                                    <div class="mx-0 px-0 d-flex flex-row col-md-12 justify-content-between">
+                                <li class="list-group-item">
+                                    <div class="col-md-12 d-flex flex-column justify-content-between p-0 m-0">
+                                        <div class="mx-0 px-0 d-flex flex-row col-md-12 justify-content-between">
 
-                                    </div>
-                                    <div class="mx-0 px-0 d-flex flex-row col-md-12">
-                                        <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                            <h5><?php echo $data['details']['document_number'] ?></h5>
-                                            <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $data['details']['doc_type'] ?> </span>
-                                            <span><label class="my-0 text-secondary">Subject: </label> <?php echo $data['details']['subject'] ?> </span>
                                         </div>
-                                        <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end">
-                                            <!-- <span><label class="my-0 text-secondary">Date sent: </label>
+                                        <div class="mx-0 px-0 d-flex flex-row col-md-12">
+                                            <div class="mx-0 px-0 d-flex flex-column col-md-8">
+                                                <h5><?php echo $data['details']['document_number'] ?></h5>
+                                                <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $data['details']['doc_type'] ?> </span>
+                                                <span><label class="my-0 text-secondary">Subject: </label> <?php echo $data['details']['subject'] ?> </span>
+                                                <span><label class="my-0 text-secondary">From: </label> <?php echo $data['details']['from_office'] ?></span>
+                                            </div>
+                                            <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between"">
+                                            <!-- <span><label class=" my-0 text-secondary">Date sent: </label>
 
-                                        </span> -->
-                                            <span class="d-flex flex-column">
-                                                <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm btn-primary mb-1">Release</a>
-                                                <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                                </span> -->
+                                                <span><label class="my-0 text-secondary"> </label> Received <?php echo $data['interval'] ?> days ago</span>
+                                                <span class="d-flex flex-column">
+                                                    <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1">Release</a>
+                                                    <!-- <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                                     Details
-                                                </a>
-                                            </span>
+                                                </a> -->
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="mx-0 px-0 d-flex flex-row col-md-12 ">
-                                        <div class="collapse row col-md-12 mx-0 my-1 px-0 py-1 bg-light rounded" id="collapseExample<?php echo $key ?>">
-                                            <div class="card card-body mx-0 my-0 py-0 px-1 bg-light d-flex flex-column">
-                                                <div class="col-md-12 px-0 mx-0 d-flex">
-                                                    <span><label class="my-0 text-secondary">From: </label> <?php echo $data['details']['from_office'] ?></span>
+                                        <div class="mx-0 px-0 d-flex flex-row col-md-12 ">
+                                            <div class="collapse row col-md-12 mx-0 my-1 px-0 py-1 bg-light rounded" id="collapseExample<?php echo $key ?>">
+                                                <div class="card card-body mx-0 my-0 py-0 px-1 bg-light d-flex flex-column">
+                                                    <div class="col-md-12 px-0 mx-0 d-flex">
+                                                        <span><label class="my-0 text-secondary">From: </label> <?php echo $data['details']['from_office'] ?></span>
+                                                    </div>
+                                                    <div class="col-md-12 px-0 mx-0 d-flex">
+                                                        <span><label class="my-0 text-secondary"> </label> Received <?php echo $data['interval'] ?> days ago</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12 px-0 mx-0 mt-2 mb-0 pb-0">
+                                                    <a href="" target="_blank" class="btn btn-block btn-sm mb-0 pb-0">See All Details</a>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12 px-0 mx-0 mt-2 mb-0 pb-0">
-                                                <a href="" target="_blank" class="btn btn-block btn-sm mb-0 pb-0">See All Details</a>
-                                            </div>
                                         </div>
                                     </div>
+                                </li>
+                            <?php
+                            }
+                        } else {
+                            ?>
+                            <li class="list-group-item">
+                                <div class="text-center">
+                                    <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
+                                    <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
                                 </div>
                             </li>
                         <?php
@@ -428,7 +453,7 @@ $office_code = $this->session->userdata('office');
         var retVal;
         $.ajax({
             type: "get",
-            url: base_url + "Dashboard/get_document_type_data",
+            url: base_url + "Dashboard/get_document_type_data_incoming",
             dataType: "json",
             async: false,
             success: function(response) {

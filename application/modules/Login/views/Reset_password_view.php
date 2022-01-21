@@ -70,6 +70,12 @@
                     </div>
                 </div>
                 <!-- end login-header -->
+                <?php
+
+                /*echo '<pre>';
+                print_r($user_data);
+                echo '</pre>';*/
+                ?>
                 <!-- begin login-content -->
                 <div class="login-content">
                     <div id="error_msg">
@@ -97,7 +103,7 @@
                             <input type="text" class="form-control form-control-lg" id="mobile" name="mobile" placeholder="Mobile" required />
                         </div> -->
                         <div class="form-group m-b-15">
-                            <input type="text" class="form-control form-control-lg" id="password" name="password" placeholder="Password" required />
+                            <input type="text" class="form-control form-control-lg" id="password" name="password" placeholder="New Password" required />
                         </div>
                         <!-- <div class="checkbox checkbox-css m-b-30">
               <input type="checkbox" id="remember_me_checkbox" value="" />
@@ -108,7 +114,7 @@
                         <div class="login-buttons">
                             <button type="submit" id="create_btn" class="btn btn-success btn-block btn-lg">
                                 <span class="spinner-border spinner-border-sm" id="loader" role="status" aria-hidden="true" style="display: none;"></span>
-                                Create
+                                Reset
                             </button>
                         </div>
 
@@ -171,6 +177,7 @@
     $('#last_name').val(user_data.last_name);
     $('#office').append('<option selected value="'+user_data.office+'">'+user_data.division_name+'</option>');
 
+
     $('#office').select2({
       placeholder: "Office / Place of Assignment",
       allowClear: true,
@@ -211,7 +218,7 @@
           if(data.results == 'success'){
             Swal.fire({
               title: 'Horaay!',
-              text: "Your account has been created, you may now login.",
+              text: "Your account has been reset the password, you may now login.",
               icon: 'success',
               confirmButtonColor: '#3085d6',
               cancelButtonColor: '#d33',

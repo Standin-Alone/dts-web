@@ -358,9 +358,9 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                                 <button id="receive_btn" type="submit" class="btn btn-primary btn btn-block mt-3">
                                     Receive
                                 </button>
-                                <div class="spinner-border" role="status">
+                                <!-- <div class="spinner-border" role="status">
                                     <span class="spinner-border spinner-border-sm" id="loader" role="status" aria-hidden="true" style="display: none;"></span>
-                                </div>
+                                </div> -->
                             </form>
                         </div>
                     </div>

@@ -93,7 +93,7 @@ class My_documents_model extends CI_Model {
 
 	public function get_total_records($search = null, $user_id = null){
 		$this->db->select('*')
-				 ->from('document_profile')
+				 ->from('vw_document_profile_info')
 				 ->where('office_code', $this->session->userdata('office'));
 
 		if($search != ''){
@@ -129,7 +129,7 @@ class My_documents_model extends CI_Model {
 				 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE)', '', FALSE);
 			   	 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
 			   	 ->where('action', 'Received')
-				 ->where('transacting_office', $this->session->userdata('office') );
+				 ->where('transacting_office !=', $this->session->userdata('office') );
 
 		if($search != ''){
 			$this->db->group_start()

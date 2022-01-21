@@ -18,10 +18,10 @@
                     <!-- begin panel -->
                     <div class="panel panel-inverse panel-with-tabs" data-sortable-id="ui-unlimited-tabs-1">
                         <!-- begin panel-heading -->
-                        <div class="panel-heading p-0">
+                        <div class="panel-heading p-0 bg-success">
                             <!-- begin nav-tabs -->
                             <div class="tab-overflow">
-                                <ul class="nav nav-tabs nav-tabs-inverse">
+                                <ul class="nav nav-tabs nav-tabs-inverse bg-success">
                                     <li class="nav-item prev-button"><a href="javascript:;" data-click="prev-tab" class="nav-link text-success"><i class="fa fa-arrow-left"></i></a></li>
                                     <li class="nav-item"><a href="#nav-tab-1" data-toggle="tab" class="nav-link active">My Documents</a></li>
                                     <li class="nav-item"><a href="#nav-tab-2" data-toggle="tab" class="nav-link">Received Documents</a></li>
@@ -198,8 +198,11 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
                 className: 'text-center align-middle'
             },
             {
-                data: 'status',
-                className: 'text-center align-middle'
+                className: 'text-center align-middle',
+                render: function(data, type, row){
+                    var val = (row.status == 'Verified' ? 'Created' : (row.status == 'Archived' ? 'Completed' : row.status));
+                    return val;
+                }
             },
             {
                 className: 'text-center align-middle',
@@ -266,7 +269,7 @@ $('#all_docs').DataTable({
             {
                 className: 'text-center align-middle',
                 render: function(data, type, row){
-                var link = '<a href="javascript:void(0)" id="view_users" data-id="'+row.user_id+'" data-toggle="tooltip" data-placement="top" title="View Document"><i class="fas fa-folder-open"></i></a>';
+                var link = '<a href="'+base_url + "View_document/document/"+row.document_number+'" target="_blank" data-id="'+row.document_id+'" data-toggle="tooltip" data-placement="top" title="View Document"><i class="fas fa-folder-open"></i></a>';
                     return link;
                 }
             }

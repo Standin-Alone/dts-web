@@ -76,15 +76,46 @@ class Login extends CI_Controller {
 		$output['result'] = 'failed';
 		$output['token']  = $this->security->get_csrf_hash();
 
-		$results = $this->Login_model->check_email();
+		$data = $this->Login_model->check_email();
 
-		if($results > 0){
-
+		if(count($data) > 0){
+			$result = $this->Login_model->insertOTP($data[0]->user_id, $data[0]->email, 'reset_password');
 
 			$output['result'] = 'success';
 		}
 
 		echo json_encode($output);
+	}
+
+	public function reset_password($token_name, $token_value){
+		$this->load->library('encryption');
+		$this->load->model('Login_model');
+
+		if($token_name != 'token'){
+			redirect('Login');
+		}
+
+		$token 		 = $this->base64url_decode(trim($token_value));
+		$cleanToken  = $this->security->xss_clean($token);
+
+		$otp   = substr($cleanToken, 0,6);
+		$uid   = substr($cleanToken, 6, 36);
+		$email = substr($cleanToken, 42);
+
+		$results = $this->Login_model->check_active_otp(trim($otp),trim($uid),trim($email));
+
+
+		if($results['result'] == 'success'){
+			$output['user_data'] = $results['user_data'];
+			$output['utoken']	 = $token_value;
+
+			$this->load->view('Reset_password_view', $output);
+
+		}else {
+			redirect('Login');
+		}
+
+		#$this->load->view('Reset_password_view');
 	}
 
 	public function check(){
@@ -127,7 +158,7 @@ class Login extends CI_Controller {
 	public function insert_user_information(){
 		$this->load->model('Login_model');
 		$utoken_value = $this->input->post('utoken', true);
-		$cleanToken 	  = $this->base64url_decode(trim($utoken_value));
+		$cleanToken   = $this->base64url_decode(trim($utoken_value));
 
 		$uid   = substr($cleanToken, 6, 36);
 

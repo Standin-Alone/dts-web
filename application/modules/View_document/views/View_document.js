@@ -8,11 +8,12 @@ $(function() {
       minimumResultsForSearch: 10,
       width: '100%',
       ajax: {
-        url: base_url + 'Login/get_offices',
+        url: base_url + 'View_document/get_offices',
         type: 'get',
         dataType: 'json',
         data: function(params){
           var queryParameters = {
+                    'document_number': doc_number,
                     term: params.term
                 }
                 return queryParameters;
@@ -121,7 +122,7 @@ $(function() {
                     console.log(r);
                     $.each(r, function(k,v) {
                         $('#date').val(v.date);
-                        $('#document_type').val(v.document_type);
+                        $('#document_type').val(v.type);
                         $('#for').val(v.for);
                         $('#origin_type').val(v.origin_type);
                         if(v.origin_type == 'External'){
@@ -145,12 +146,12 @@ $(function() {
         e.preventDefault();
         }).validate({
             rules: {
-                date: {
-                    required: true
-                },
-                document_type: {
-                    required: true
-                },
+                // date: {
+                //     required: true
+                // },
+                // document_type: {
+                //     required: true
+                // },
                 for: {
                     required: true
                 },
@@ -408,16 +409,16 @@ $('#edit_recipient').submit(function(e) {
                     if(r[ie].added_by_user_office == office_code){
                         if(r[ie].active == '0'){
                             table_row += '<td class="text-center">'+
-                                '<i class="fas fa-trash" style="color: #808080;border-color:#f59c1a;" title="'+r[ie].added_by_user_office+'"></i>'+
+                                '<i class="fas fa-trash" style="color: #808080;border-color:#f59c1a;" title="Remove Disabled"></i>'+
                             '</td>';
                         } else {
                             table_row += '<td class="text-center">'+
-                            '<i data-id_rec="'+r[ie].recipient_id+'" class="fas fa-trash remove_rec" style="color: #f59c1a;border-color:#f59c1a;" title="'+r[ie].added_by_user_office+'"></i>'+
+                            '<i data-id_rec="'+r[ie].recipient_id+'" class="fas fa-trash remove_rec" style="color: #f59c1a;border-color:#f59c1a;" title="Remove"></i>'+
                             '</td>';
                         }
                     } else {
                         table_row += '<td class="text-center">'+
-                            '<i class="fas fa-trash" style="color: #808080;border-color:#f59c1a;" title="'+r[ie].added_by_user_office+'"></i>'+
+                            '<i class="fas fa-trash" style="color: #808080;border-color:#f59c1a;" title="Remove Disabled"></i>'+
                         '</td>';
                     }
                     table_row += '</tr>';
@@ -589,7 +590,7 @@ $('#edit_recipient').submit(function(e) {
                                 text: 'Document Archived.'
                             }).then((result) => {
                                 if(result.value){
-                                    //location.reload();
+                                    location.reload();
                                 }
                             });
                         }

@@ -32,11 +32,11 @@ class Login_model extends CI_Model {
 	public function check_email(){
 		$email = $this->input->post('email', true);
 		
-		$this->db->get_where('users', array('email' => $email, 'status' => '1'), 1);
-		return $this->db->affected_rows();
+		$query = $this->db->get_where('users', array('email' => $email, 'status' => '1'), 1);
+		return $query->result();
 	}
 
-	public function insertOTP($user_id,$email){
+	public function insertOTP($user_id,$email, $mode = null){
 		$check_rows = $this->get_duplicates($user_id);
 		if(sizeof($check_rows) > 0){
 			$this->db->set('status',0)
@@ -56,13 +56,13 @@ class Login_model extends CI_Model {
 
 		//email here
 		if($query){
-			$this->send_email($user_id,$otp,$email);
+			$this->send_email($user_id,$otp,$email, $mode);
 		}
 
 		return $otp.$user_id.$email;
 	}
 
-	public function send_email($user_id,$otp,$email){
+	public function send_email($user_id,$otp,$email,$mode){
 		$this->load->library('email');
 
 		$user_data = $this->getUserData($user_id);
@@ -79,18 +79,36 @@ class Login_model extends CI_Model {
 		$config['smtp_timeout'] = '5';
 		$config['mailtype']  = 'html';
 		$config['smtp_user'] = 'support.sadd@da.gov.ph';
-		$config['smtp_pass'] = 'SysADDem@1L0721';
+		$config['smtp_pass'] = 'B9F@kn@Ubz4GTLFe';
 		$config['validate']	 = FALSE;
 		$config['charset']  = 'iso-8859-1';
 		$config['wordwrap'] = true;
 		$this->email->initialize($config);
 		$this->email->set_newline("\r\n");
 
-		$email_template = $this->load->view('Email_otp_view', $data, true);
+		$token  = $this->base64url_encode($otp.$user_id.$email);
+		$url	= base_url() . 'Login/reset_password/token/' . $token;
+		$link 	= '<a href="'.$url.'">'.$url.'</a>';
 
+		$email_template = '';
+
+		if($mode != null){
+			$subject = 'Reset Information | Document Tracking System';
+			$email_template .= 'A request to reset the information for your account has been made at Document Tracking System of Department of Agriculture. <br> You may now reset your information by clicking 
+                this link or copying and pasting it to your browser: <p></p';
+            $email_template .= $link;
+			$email_template .= '<p></p>This link can only be used once and will lead you to a page where
+					you can complete your registration. It expires after one day and nothing will happen if it is not used. <br><p></p>';
+			$email_template .= 'DA-ICTS SysADD | DTS Team<p></p>';
+			$email_template .=  '<strong> This is a system-generated email, please do not reply.</strong>';
+		}else {
+			$subject = 'User OTP | Document Tracking System';
+			$email_template = $this->load->view('Email_otp_view', $data, true);
+		}
+	
 		$this->email->from('support.sadd@da.gov.ph', 'no-reply');
 		$this->email->to($email);
-		$this->email->subject('User OTP | Document Tracking System');
+		$this->email->subject($subject);
 		$this->email->message($email_template);
 
 		if($this->email->send()){

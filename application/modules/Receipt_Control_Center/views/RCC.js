@@ -92,6 +92,13 @@ $(document).ready(function () {
                                 </span>
                             `
                                 }
+                                if (type == "Completed" && status == 1) {
+                                    return `
+                                <span class="badge badge-lg mb-2" style="background-color: #74da2f;>
+                                    <h2 class="h5 mb-0">Complete</h2>
+                                </span>
+                            `
+                                }
                                 if (type == "Released" && status == 0) {
                                     return `
                                 <div class="d-flex flex-row align-items-center">
@@ -284,7 +291,7 @@ $(document).ready(function () {
 
                 if (result.error == "true") {
                     Swal.fire({
-                        icon: 'info',
+                        icon: 'error',
                         type: 'warning',
                         title: 'Oops!',
                         text: result.message,

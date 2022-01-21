@@ -100,7 +100,6 @@
 
 </style>
 <div id="content" class="content">
-    <?php echo $this->session->userdata('office').'----1'; ?>
     <!-- begin row -->
     <div class="row">
         <!-- begin col-8 -->
@@ -111,15 +110,24 @@
                     <div class="panel panel-inverse">
                         <div class="panel-heading">
                             <div class="panel-heading-btn">
-                                <a href="javascript:;" class="btn btn-sm btn-icon btn-success update_information"><i class="fas fa-pen-alt"></i></a>
-                                <a href="javascript:;" id="print" class="btn btn-sm btn-icon btn-success" data-content="Print"><i class="fas fa-print"></i></a>
+                                <?php if($document_information['document_details'][0]->office_code == $this->session->userdata('office')){ ?>
+                                <a href="javascript:;" class="btn btn-sm btn-icon btn-success update_information" title="Edit Document"><i class="fas fa-pen-alt"></i></a>
+                                <?php } ?>
+                                <a href="javascript:;" id="print" class="btn btn-sm btn-icon btn-success" data-content="Print" title="Print"><i class="fas fa-print"></i></a>
                                 <?php if($document_information['document_status'] == '1'){ ?>
-                                <a href="javascript:;" class="btn btn-sm btn-icon btn-success release_btn"><i class="fas fa-share"></i></a>
+                                <a href="javascript:;" class="btn btn-sm btn-icon btn-success release_btn" title="Release"><i class="fas fa-share"></i></a>
                                 <?php } ?>
                                 <?php
-                                //if($document_information['check_if_archived'] > 0){ ?>
-                                <!-- <a href="javascript:;" class="btn btn-sm btn-icon btn-danger archive_btn"><i class="fas fa-archive"></i></a> -->
-                                <?php //} ?>
+                                    //if($document_information['document_details'][0]->office_code == $this->session->userdata('office')){
+                                        if($document_information['document_current_status'][0]->action == 'Received' && $document_information['document_current_status'][0]->transacting_office == $this->session->userdata('office')){
+                                            echo '<a href="javascript:;" class="btn btn-sm btn-danger archive_btn" title="Archived">Mark as Completed</a>';
+                                        }
+                                    // } else {
+                                    //     if($document_information['document_current_status'][0]->action == 'Received' && $document_information['document_current_status'][0]->transacting_office == $this->session->userdata('office')){
+                                    //         echo '<a href="javascript:;" class="btn btn-sm btn-danger archive_btn" title="Archived">Mark as Completed</a>';
+                                    //     }
+                                    // }
+                                ?>
                             </div>
                             <h4 class="panel-title">Document Information</h4>
                         </div>
@@ -374,7 +382,7 @@
                             <p> Print document routing slip. </p>
                         </div>
                     </div>
-                    <div class="print_only">
+                    <div class="print_only p-1">
                     <div class="invoice">
                         <!-- begin invoice-company -->
                         <p class="text-center"><img class="text-center" style="margin:0px;height: 50px;width: 50px;" src="<?php echo base_url() .'assets/img/DA-Logo.png';?>"></p>
@@ -418,6 +426,7 @@
                         </div>
                         <!-- end table-responsive -->
                     </div>
+                    <div class="row text-center ml-0 pr-1" style="width: 100%;height: 100px;border: 1px solid black;box-sizing: border-box;"></div>
                 </div>
                 </div>
             </div>
@@ -461,14 +470,15 @@
                     <div class="form-group row m-b-15">
                         <label class="col-md-3 col-form-label text-md-right">Date</label>
                         <div class="col-md-7">
-                            <input type="text" class="form-control datepicker col-md-12" name="date" id="date">
+                            <input type="text" class="form-control col-md-12" name="date" id="date" readonly>
                         </div>
                         <div class="col-md-2">&nbsp;</div>
                     </div>
                     <div class="form-group row m-b-15">
                         <label class="col-md-3 col-form-label text-md-right">Document Type</label>
                         <div class="col-md-7">
-                            <select class="form-control col-md-12" name="document_type" id="document_type">
+                                <input type="text" class="form-control col-md-12" id="document_type" readonly>
+<!--                             <select class="form-control col-md-12" name="document_type" id="document_type" readonly>
                                 <option value="">Select Document Type</option>
                                 <?php 
                                     foreach($document_type as $row)
@@ -476,14 +486,14 @@
                                         echo '<option value="'.$row->type_id.'">'.$row->type.'</option>';
                                     }
                                 ?>
-                            </select>
+                            </select> -->
                         </div>
                         <div class="col-md-2">&nbsp;</div>
                     </div>
                     <div class="form-group row m-b-15">
                         <label class="col-md-3 col-form-label text-md-right">Action</label>
                         <div class="col-md-7">
-                            <select class="form-control col-md-12" name="for" id="for">
+                            <select class="form-control col-md-12" name="for" id="for" >
                                 <option value="">Select For</option>
                                 <?php 
                                     foreach($document_for as $row)

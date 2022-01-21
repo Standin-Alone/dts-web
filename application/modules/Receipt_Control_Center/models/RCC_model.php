@@ -1300,3 +1300,7 @@ class RCC_model extends CI_Model
         return $result;
     }
 }
+
+// public function to_release_documents(){
+    
+// }

@@ -29,7 +29,7 @@ class Users_management extends MY_Controller {
 		$config['smtp_timeout'] = '5';
 		$config['mailtype']  = 'html';
 		$config['smtp_user'] = 'support.sadd@da.gov.ph';
-		$config['smtp_pass'] = 'SysADDem@1L0721';
+		$config['smtp_pass'] = 'B9F@kn@Ubz4GTLFe';
 		$config['validate']	 = FALSE;
 		$config['charset']  = 'iso-8859-1';
 		$config['wordwrap'] = true;

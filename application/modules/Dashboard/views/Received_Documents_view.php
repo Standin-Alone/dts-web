@@ -40,14 +40,9 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
         display: block;
     }
 
-    #test2 {
-        height: 350px !important;
-        width: 350px !important;
-    }
-
     #test1 {
-        height: 350px !important;
-        width: 350px !important;
+        height: 343px !important;
+        width: 343px !important;
     }
 
 
@@ -62,7 +57,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 </style>
 
 <div id="content" class="content">
-
     <div class="d-flex justify-content-between">
     </div>
     <h1 class="page-header mb-3">Received Documents</h1>
@@ -197,33 +191,47 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                 </div>
             </div>
         </div>
-        <div class="col-sm-4">
-            <ul class="list-group col-md-12 ">
-                <li class="list-group-item">
-                    <b>TYPE OF DOCUMENT RECEIVED</b>
+        <div class="mx-0 col-sm-4">
+            <ul class="mx-0 list-group">
+                <li class="list-group-item ">
+                    <b class="mt-3">TYPE OF DOCUMENT RECEIVED</b>
                     <span class="ms-2">
                         <i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="" data-original-title="Count of documents received by your office"></i>
                     </span>
                     <svg id="test1" width="60%" class="mypiechart mx-auto mt-3"></svg>
+                    <?php
+                    $color = [
+                        "#348fe2",
+                        "#f59c1a",
+                        "#727cb6",
+                        "#ffd900",
+                        "#ff5b57",
+                        "#fb5597",
+                        "#00acac",
+                        "#32a932",
+                        "#90ca4b",
+                        "#8753de",
+                        "#49b6d6",
+                    ];
+                    if ($get_origin_type_data) {
+                    ?>
+
+                        <div class="d-flex mb-1 mt-0">
+                            <span class="mr-2" data-toggle="tooltip" data-placement="left" title="Documents received inside DA"><i style="color: #348fe2;" class="fa fa-square mr-2"></i> <?php echo $get_origin_type_data[0]->origin_type ?></span>
+                            <span class="h5 my-0 font-weight-bold"><?php echo $get_origin_type_data[0]->origin_type_count ?></span>
+                        </div>
+                    <?php }
+                    if (count($get_origin_type_data) > 1) {
+                    ?>
+                        <!-- <hr class="bg-secondary my-1 opacity-25" style="opacity: 25%;"> -->
+                        <div class="d-flex mt-1">
+                            <span class="mr-2" data-toggle="tooltip" data-placement="left" title="Documents received outside DA"><i style="color: #f59c1a;" class="fa fa-square mr-2"></i> <?php echo $get_origin_type_data[1]->origin_type ?></span>
+                            <span class="h5 my-0 font-weight-bold"><?php echo $get_origin_type_data[1]->origin_type_count ?></span>
+                        </div>
+                    <?php } ?>
                 </li>
-                <div class="scrollbar" style="max-height: 200px;">
-                    <?php
-                    foreach ($get_document_type_data as $row) {
-                    ?>
-                        <li class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <span><?php echo $row->type_desc . ' (' . $row->type . ')' ?></span>
-                                <span class="h5 font-weight-bold"><?php echo $row->type_count ?></span>
-                            </div>
-                        </li>
-                    <?php
-                    }
-                    ?>
-                </div>
             </ul>
 
-        </div>
-        <div class="col-md-8">
         </div>
     </div>
 
@@ -302,10 +310,10 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 <script>
     $(document).ready(function() {
         let doc_type_data = [];
-        var retVal;
+
         $.ajax({
             type: "get",
-            url: base_url + "Dashboard/get_document_type_data",
+            url: base_url + "Dashboard/get_origin_type_data",
             dataType: "json",
             async: false,
             success: function(response) {
@@ -313,101 +321,83 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
             }
         });
 
+        var color = [
+            "#348fe2",
+            "#f59c1a",
+            "#727cb6",
+            "#ffd900",
+            "#ff5b57",
+            "#fb5597",
+            "#00acac",
+            "#32a932",
+            "#90ca4b",
+            "#8753de",
+            "#49b6d6",
+        ]
 
 
-        console.log('====================================');
-        console.log(doc_type_data);
-        console.log('====================================');
+        let total = [];
+        $.map(doc_type_data, function(data, i) {
+            total.push({
+                type: data.origin_type,
+                type_count: data.type_count,
+                color: color[i]
+            })
+        });
 
-        var testdata = [{
-                key: "One",
-                y: 4,
-                color: '#380fcc'
-            },
-            {
-                key: "Two",
-                y: 2,
-                color: '#0da1d6'
-            },
-            {
-                key: "Three",
-                y: 9,
-                color: '#ed822e'
-            },
-            {
-                key: "Four",
-                y: 7,
-                color: '#c7ac4d'
-            },
-            {
-                key: "Five",
-                y: 4,
-                color: '#3a57de'
-            },
-            {
-                key: "Six",
-                y: 3,
-                color: '#1d68c7'
-            },
-            {
-                key: "Seven",
-                y: 100,
-                color: '#fbb334'
-            }
-        ];
 
-        var height = 300;
-        var width = 300;
+
+        var height = 320;
+        var width = 320;
 
         var chart1;
         nv.addGraph(function() {
             var chart1 = nv.models.pieChart()
                 .x(function(d) {
-                    return d.type
+                    return d.origin_type
                 })
                 .y(function(d) {
-                    return d.type_count
+                    return d.origin_type_count
                 })
                 .donut(true)
-                .width(width)
+                // .width(width)
                 .height(height)
-                .padAngle(.02)
-                .cornerRadius(1.5)
-                .id('donut1'); // allow custom CSS for this one svg
-
-            chart1.title("Document Type");
-            chart1.pie.donutLabelsOutside(true).donut(true);
+                .padAngle(.015)
+                .cornerRadius(3.5)
+                .showLabels(true)
+                .labelThreshold(.04)
+                // .labelType("percent")
+                .labelsOutside(false)
+                .growOnHover(true)
+                .donutRatio(0.5)
+                .id('donut1') // allow custom CSS for this one svg
+                .color(color)
+                // chart1.legendPosition("down")
+                .growOnHover(true)
+                .labelType("percent")
+            chart1.pie.donut(true);
 
             d3.select("#test1")
                 .datum(doc_type_data)
                 .transition().duration(1200)
                 .call(chart1);
 
-            // LISTEN TO WINDOW RESIZE
-            // nv.utils.windowResize(chart1.update);
 
-            // LISTEN TO CLICK EVENTS ON SLICES OF THE PIE/DONUT
-            // chart.pie.dispatch.on('elementClick', function() {
-            //     code...
-            // });
 
-            // chart.pie.dispatch.on('chartClick', function() {
-            //     code...
-            // });
+            d3.selectAll('.nv-label text')
+                .each(function(d, i) {
+                    d3.select(this).style('fill', '#ffff')
+                    // d3.select(this).style('font-weight', 700)
+                    d3.select(this).style('font-size', 9)
+                })
 
-            // LISTEN TO DOUBLECLICK EVENTS ON SLICES OF THE PIE/DONUT
-            // chart.pie.dispatch.on('elementDblClick', function() {
-            //     code...
-            // });
 
-            // LISTEN TO THE renderEnd EVENT OF THE PIE/DONUT
-            // chart.pie.dispatch.on('renderEnd', function() {
-            //     code...
-            // });
-
-            // OTHER EVENTS DISPATCHED BY THE PIE INCLUDE: elementMouseover, elementMouseout, elementMousemove
-            // @see nv.models.pie
-
+            d3.selectAll('.nv-legend .nv-series text')
+                .each(function(d, i) {
+                    d3.select(this).style('fill', '#6c757d')
+                    d3.select(this).style('font-weight', 100)
+                    // d3.select(this).style('font-size', 16)
+                });
             return chart1;
 
         });

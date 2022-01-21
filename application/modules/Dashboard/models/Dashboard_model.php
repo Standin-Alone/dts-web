@@ -3,8 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Dashboard_model extends CI_Model
 {
-
-
     public function incoming_documents()
     {
         $user_id = $this->session->userdata('user_id');
@@ -20,7 +18,7 @@ class Dashboard_model extends CI_Model
             ->from("document_profile as dp")
             ->where("recipient_office_code", $office_code)
             ->like('date_created', $date_now)
-            // ->where("dr.active", "1")
+            ->where("dr.active", "1")
             ->where("dp.status", "Verified")
             ->join("document_recipients as dr", "dp.document_number = dr.document_number")
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
@@ -374,6 +372,7 @@ class Dashboard_model extends CI_Model
             ->like("rcl.log_date", $date_now)
             ->where("transacting_user_id", $transacting_user_id)
             ->group_by('rcl.document_number')
+            ->order_by("rcl.log_date", "desc")
             ->get()->result();
 
         // echo '<pre>', print_r($query), '</pre>';
@@ -408,7 +407,7 @@ class Dashboard_model extends CI_Model
             ->where("rcl.transacting_office", $office_code)
             ->where("rcl.transacting_user_id", $transacting_user_id)
             ->like('rcl.log_date', $date_now)
-            ->group_by('rcl.log_date')
+            ->group_by('rcl.document_number')
             ->order_by('rcl.log_date', "desc")
             ->get()->result();
 
@@ -525,7 +524,6 @@ class Dashboard_model extends CI_Model
         ];
         return $data;
     }
-
     public function get_received_documents()
     {
         $transacting_user_id = $this->session->userdata('user_id');
@@ -554,7 +552,6 @@ class Dashboard_model extends CI_Model
 
         return $query;
     }
-
     public function get_released_documents()
     {
         $transacting_user_id = $this->session->userdata('user_id');
@@ -568,7 +565,7 @@ class Dashboard_model extends CI_Model
                         dp.subject,
                         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as document_origin,
                         rcl.status,
-                        rcl.log_date as date
+                        rcl.log_date
                          ")
             ->from("receipt_control_logs as rcl")
             ->join("document_profile as dp", "dp.document_number = rcl.document_number")
@@ -610,142 +607,6 @@ class Dashboard_model extends CI_Model
         } else {
             return 'fail';
         }
-    }
-
-    public function receive_document()
-    {
-        $result = '';
-
-        $document_number = $this->input->post('document_number', TRUE);
-        $office_code = $this->session->userdata('office');
-        $user_id = $this->session->userdata('user_id');
-        $fullname = $this->session->userdata('fullname');
-
-
-        try {
-
-            $check_if_exist = $this->db->where("document_number", $document_number)->get("document_profile");
-
-            if ($check_if_exist->num_rows() == 0) {
-                //document does not exist
-                $result = ["status" => "", "error" => "true", "message" => "No records found"];
-            } else {
-                $check_if_verified = $this->db->select("*")->from("document_profile")->where("document_number", $document_number)->get()->result();
-
-                if ($check_if_verified[0]->status == "Archived") {
-                    $result = ["status" => "", "error" => "true", "message" => "Document process is already finished"];
-                } else if ($check_if_verified[0]->status == "Draft") {
-                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released"];
-                } else {
-                    //else exist, if exist, check if receiver is owner
-                    $check_if_owner =  $this->db->select("*")
-                        ->from("document_profile")
-                        ->where("document_number", "$document_number")
-                        ->where("office_code", $office_code)
-                        ->where("created_by_user_id", $user_id)
-                        ->get()
-                        ->result();
-
-                    if ($check_if_owner) {
-                        //if owner, check if recevied
-                        $check_last_transaction = $this->db->select("*")
-                            ->from("receipt_control_logs")
-                            ->where("document_number", $document_number)
-                            ->where("transacting_office", $check_if_owner[0]->office_code)
-                            ->where("status", 1)
-                            ->order_by("log_date", "desc")
-                            ->limit(1)->get()->result();
-                        if ($check_last_transaction[0]->type == "Received") {
-                            //promp error
-                            $result = ["status" => "", "error" => "true", "message" => "Document already received by origin"];
-                        } else if ($check_last_transaction[0]->type == "Released") {
-                            //received document
-                            $received_data = [
-                                'type' => 'Received',
-                                'document_number' => $document_number,
-                                'office_code' => $office_code,
-                                'action' => 'Received',
-                                'remarks' => '',
-                                'file' => '',
-                                'attachment' => '',
-                                'transacting_user_id' => $user_id,
-                                'transacting_user_fullname' => $fullname,
-                                'transacting_office' => $office_code,
-                                'status' => "1"
-                            ];
-                            $insert_data = $this->insert_logs($received_data);
-                            if ($insert_data) {
-                                $data = ['active' => '0'];
-                                $this->db->set($data);
-                                $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
-                                $this->db->update('document_recipients');
-                            }
-                            $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
-                        }
-                    } else {
-                        //if not owner, check if valid recipient
-                        $check_if_recipient = $this->db
-                            ->select("dp.office_code")
-                            ->from("document_recipients as dr")
-                            ->join("document_profile as dp", "dp.document_number = dr.document_number")
-                            ->where("dr.document_number", "$document_number")
-                            ->where("recipient_office_code", $office_code)
-                            #->order_by("sequence", "desc")
-                            ->limit(1)
-                            ->get()
-                            ->result();
-
-                        if (empty($check_if_recipient)) {
-                            //unautorized recipient
-                            $result = ["status" => "", "error" => "true", "message" => "Unauthorized Recipient"];
-                        } else {
-                            //then valid recipient
-                            //if valid recipient, check if already received
-                            $check_if_received = $this->db->select("*")
-                                ->from("receipt_control_logs")
-                                ->where("document_number", $document_number)
-                                ->where("transacting_office", $office_code)
-                                ->where("status", 1)
-                                ->where("type", "Received")
-                                ->order_by("log_date", "desc")
-                                ->limit(1)->get()->result();
-
-                            if ($check_if_received) {
-                                //promp error
-                                $result = ["status" => "", "error" => "true", "message" => "Document already received"];
-                            } else {
-                                //received document
-                                $received_data = [
-                                    'type' => 'Received',
-                                    'document_number' => $document_number,
-                                    'office_code' => $office_code,
-                                    'action' => 'Received',
-                                    'remarks' => '',
-                                    'file' => '',
-                                    'attachment' => '',
-                                    'transacting_user_id' => $user_id,
-                                    'transacting_user_fullname' => $fullname,
-                                    'transacting_office' => $office_code,
-                                    'status' => "1"
-                                ];
-                                $insert_data = $this->insert_logs($received_data);
-                                if ($insert_data) {
-                                    $data = ['active' => '0'];
-                                    $this->db->set($data);
-                                    $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
-                                    $this->db->update('document_recipients');
-                                }
-                                $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (\Exception $e) {
-            $result = ["status" => "fail", "error" => $e->getMessage()];
-        }
-
-        return $result;
     }
 
     public function check_status($document_number)
@@ -790,7 +651,7 @@ class Dashboard_model extends CI_Model
         return $get_document_type;
     }
 
-    public function get_document_type_data()
+    public function get_document_type_data_incoming()
     {
         $user_id = $this->session->userdata('user_id');
         $office_code = $this->session->userdata('office');
@@ -825,6 +686,114 @@ class Dashboard_model extends CI_Model
         return $doc_type_data;
     }
 
+    public function get_document_type_data_outgoing()
+    {
+        $user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $doc_type_data = $this
+            ->db
+            ->select("
+            type,
+            count(type) as type_count,
+            type_desc
+            ")
+            ->from("
+            ( 
+                SELECT 
+                dp.`type`, 
+                dt.`type` as type_desc 
+                FROM document_profile as dp 
+                JOIN document_recipients as dr 
+                ON dp.`document_number` = dr.`document_number` 
+                JOIN doc_type as dt ON dp.`document_type` = dt.`type_id` 
+                WHERE dr.`recipient_office_code` = '$office_code' 
+                AND owner = 'N' 
+                GROUP BY dp.`document_number` 
+                )  as document
+            ")
+            ->group_by("document.type")
+            ->order_by("type_count", "desc")
+            ->get()->result();
+
+
+        return $doc_type_data;
+    }
+    public function get_origin_type_data()
+    {
+        $transacting_user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $query = $this->db
+            ->select("
+                origin_type,
+                COUNT(origin_type) AS origin_type_count
+            ")
+            ->from("
+            (SELECT 
+                `rcl`.`document_number`, 
+                `dt`.`type` as `document_type`, 
+                `dp`.`origin_type`, `dp`.`subject`, 
+                CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as document_origin, 
+                `rcl`.`status`, `rcl`.`log_date` 
+                FROM `receipt_control_logs` as `rcl` 
+                JOIN `document_profile` as `dp` ON `dp`.`document_number` = `rcl`.`document_number` 
+                JOIN `lib_office` as `lo` ON `dp`.`office_code` = `lo`.`OFFICE_CODE` 
+                JOIN `doc_type` as `dt` ON `dp`.`document_type` = `dt`.`type_id` 
+                WHERE `transacting_office` = '$office_code' 
+                AND `origin_type` IS NOT NULL
+                AND `rcl`.`type` = 'Received' 
+                GROUP BY `rcl`.`document_number`)
+                AS
+                docuement
+            ")
+            ->group_by('origin_type')
+            ->order_by('origin_type_count', "desc")
+            ->get()->result();
+
+        // echo '<pre>', print_r($query), '</pre>';
+        return $query;
+    }
+
+    public function get_origin_type_data_release()
+    {
+        $transacting_user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $query = $this->db
+            ->select("
+                origin_type,
+                COUNT(origin_type) AS origin_type_count
+            ")
+            ->from("
+            (SELECT 
+                `rcl`.`document_number`, 
+                `dt`.`type` as `document_type`, 
+                `dp`.`origin_type`, `dp`.`subject`, 
+                CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as document_origin, 
+                `rcl`.`status`, `rcl`.`log_date` 
+                FROM `receipt_control_logs` as `rcl` 
+                JOIN `document_profile` as `dp` ON `dp`.`document_number` = `rcl`.`document_number` 
+                JOIN `lib_office` as `lo` ON `dp`.`office_code` = `lo`.`OFFICE_CODE` 
+                JOIN `doc_type` as `dt` ON `dp`.`document_type` = `dt`.`type_id` 
+                WHERE `transacting_office` = '$office_code' 
+                AND `origin_type` IS NOT NULL
+                AND `rcl`.`type` = 'Released' 
+                GROUP BY `rcl`.`document_number`)
+                AS
+                docuement
+            ")
+            ->group_by('origin_type')
+            ->order_by('origin_type_count', "desc")
+            ->get()->result();
+
+        // echo '<pre>', print_r($query), '</pre>';
+        return $query;
+    }
+
     public function get_over_due_incoming()
     {
         $user_id = $this->session->userdata('user_id');
@@ -841,6 +810,7 @@ class Dashboard_model extends CI_Model
             ->where("dr.recipient_office_code", $office_code)
             ->where("dp.status", "Verified")
             ->group_by("dr.document_number")
+            ->order_by("date_created", "desc")
             ->get()->result();
 
         $latest_transaction = [];
@@ -864,7 +834,7 @@ class Dashboard_model extends CI_Model
                 ->where("rcl.transacting_office", $office_code)
                 ->where("rcl.status", "1")
                 ->limit(1)
-                ->order_by("rcl.log_date", "desc")
+                ->order_by("log_date", "asc")
                 ->group_by("rcl.document_number")
                 ->get()->result();
 
@@ -873,7 +843,7 @@ class Dashboard_model extends CI_Model
                     $log_date = $get_latest_transaction[0]->log_date;
 
                     $datetime1 = strtotime($log_date);
-                    $datetime2 = strtotime(date("Y-m-d h:i:sa"));
+                    $datetime2 = strtotime(date("Y-m-d h:i:s"));
                     $secs = $datetime2 - $datetime1; // == <seconds between the two times>
                     $days = $secs / 86400;
 
@@ -894,8 +864,30 @@ class Dashboard_model extends CI_Model
         }
         // print_r($latest_transaction);
 
-
-
+        // return   $helikapter = "";
         return $latest_transaction;
+    }
+
+    public function get_dissemination_documents()
+    {
+        $query = $this->db
+            ->select("
+            a.document_number,UPPER(a.subject) 
+            AS subject,
+            a.date_created,
+            b.type_id AS doc_type_id,
+            b.type AS doc_type,
+            b.code AS doc_code,
+            c.OFFICE_CODE AS office_code,
+            c.INFO_SERVICE AS origin_service,
+            c.ORIG_SHORTNAME AS origin_orig_shortname,
+            c.INFO_DIVISION AS origin_division
+        ")
+            ->from("document_profile as a")
+            ->join("doc_type as b", "a.document_type = b.type_id", "left")
+            ->join("lib_office as c", "a.office_code = c.OFFICE_CODE", "left")
+            ->where("a.for", 3);
+
+        return $query->get()->result();
     }
 }

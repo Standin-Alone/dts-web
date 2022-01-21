@@ -52,11 +52,11 @@ class View_document_model extends CI_Model {
 		   	->limit('1')
 		   	->get();
 
-        $check_if_archived = $this->db->where("document_number", $doc_number)
-                ->where("added_by_user_id", $this->session->userdata('user_id'))
-                ->where("active", "0")
-                ->from("document_recipients")
-                ->get();
+        // $check_if_archived = $this->db->where("document_number", $doc_number)
+        //         ->where("added_by_user_id", $this->session->userdata('user_id'))
+        //         ->where("active", "0")
+        //         ->from("document_recipients")
+        //         ->get();
 
 		$data = array(
 			'document_details' => $information->result(),
@@ -65,8 +65,8 @@ class View_document_model extends CI_Model {
 			'document_signatories' => $document_signatories->result(),
 			'document_recipients' => $document_recipients->result(),
 			'document_status' => $document_status->num_rows(),
-			'document_current_status' => $document_current_status->result(),
-			'check_if_archived' => $check_if_archived->num_rows()
+			'document_current_status' => $document_current_status->result()
+			//'check_if_archived' => $check_if_archived->num_rows()
 
 		);
 
@@ -82,8 +82,8 @@ class View_document_model extends CI_Model {
 		$document_number = $this->input->post('document_number', true);
 
 		$data = array(
-			'date' 	=> date("Y-m-d", strtotime($this->input->post('date', true))),
-			'document_type' 	=> $this->input->post('document_type', true),
+			//'date' 	=> date("Y-m-d", strtotime($this->input->post('date', true))),
+			//'document_type' 	=> $this->input->post('document_type', true),
 			'sender_name' 	=> strtoupper($this->input->post('sender_name', true)),
 			'sender_position' 	=> $this->input->post('sender_position', true),
 			'sender_address' 	=> $this->input->post('sender_address', true),
@@ -256,10 +256,13 @@ class View_document_model extends CI_Model {
 	}
 
 	public function get_offices(){
+		$doc_number = $this->input->get('document_number', true);
 		$term = $this->input->get('term', true); //search input field value
 
 		$this->db->select('*')
 				 ->from('lib_office')
+				 ->where('NOT EXISTS (SELECT * FROM document_recipients WHERE document_recipients.recipient_office_code = lib_office.OFFICE_CODE AND document_recipients.document_number="'.$doc_number.'" )', '', FALSE)
+				 //->where('document_number', $doc_number)
 				 ->where('STATUS_CODE', '1');
 
 		if($term != ''){
@@ -383,9 +386,11 @@ class View_document_model extends CI_Model {
 		$result   = 'failed';
 		$id   = $this->input->post('id_rec', true);
 
-    	$remove_sig = $this->db->where('recipient_id', $id)
-    					       ->set('active', '0')
-                               ->update('document_recipients');
+    	// $remove_sig = $this->db->where('recipient_id', $id)
+    	// 				       ->set('active', '0')
+     //                           ->update('document_recipients');
+		$remove_sig = $this->db->where('recipient_id', $id)
+					 				->delete('document_recipients');
 		if($remove_sig){
 			$result = 'success';
 		}
@@ -524,9 +529,20 @@ class View_document_model extends CI_Model {
 		$query = $this->db->where('document_number', $doc_number)
             			  ->update('document_profile', $archive);
 
-
 		if($query){
-			$result = 'success';
+			$logs = array(
+				'type'						=> 'Completed',
+				'document_number' 			=> $doc_number,
+				'transacting_office' 		=> $this->session->userdata('office'),
+				'action'					=> 'Marked as Completed',
+				'transacting_user_id'		=> $this->session->userdata('user_id'),
+				'transacting_user_fullname'	=> $this->session->userdata('fullname')
+			);
+
+			$query_logs = $this->db->insert('receipt_control_logs', $logs);
+			if($query_logs){
+				$result = 'success';
+			}
 		}
 
 		return $result;

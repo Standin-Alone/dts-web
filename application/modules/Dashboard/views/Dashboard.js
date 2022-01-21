@@ -245,10 +245,7 @@ $(function () {
         search_released(data)
     })
 
-
-    $(document).find('#track_document_btn').on('click', function () {
-        var document_number = $(document).find('#track_document').val()
-
+    function track_document(document_number) {
         $(document).find("#type").text('')
         $(document).find("#subject").text('')
         $(document).find("#origin").text('')
@@ -417,7 +414,15 @@ $(function () {
                 text: 'Please Input Document Number',
             })
         }
+    }
+
+
+    $(document).find('#track_document_btn').on('click', function () {
+        var document_number = $(document).find('#track_document').val()
+        track_document(document_number)
     })
+
+
 
     $(document.body).on('submit', '#received_document', function (e) {
         e.preventDefault();
@@ -513,7 +518,7 @@ $(function () {
 
             $.ajax({
                 type: "post",
-                url: base_url+'Dashboard',
+                url: base_url + 'Dashboard',
                 data: document_number,
                 dataType: "dataType",
                 success: function (response) {
@@ -522,4 +527,73 @@ $(function () {
             });
         })
     })
+
+    $(document).find(".logs").each(function (i) {
+        var check_status_btn = $(this)
+
+        check_status_btn.on('click', function () {
+            var document_number = $(this).parents(".row").find(".incoming_document_number").text()
+
+            console.log(document_number);
+            track_document(document_number)
+        })
+    })
+
+    $(document.body).on('submit', '#form_receive', function (e) {
+        e.preventDefault();
+
+        var input = $("#document_number")
+
+        if (input.val()) {
+            $('#receive_btn').attr('disabled', true);
+            var form_data = $(this).serializeArray();
+            console.log(form_data);
+            $.ajax({
+                type: "post",
+                url: base_url + "Receipt_Control_Center/receive_document",
+                data: form_data,
+                dataType: "json",
+                success: function (result) {
+                    if (result.error == "false") {
+                        Swal.fire({
+                            icon: 'success',
+                            type: 'success',
+                            title: 'Well Done!',
+                            text: result.message,
+                        }).then((result) => {
+                            setTimeout(function () {
+                                $('#receive_btn').removeAttr('disabled')
+                                track_document(input.val())
+                            }, 200);
+                        });
+                    }
+
+                    if (result.error == "true") {
+                        Swal.fire({
+                            icon: 'info',
+                            type: 'warning',
+                            title: 'Oops!',
+                            text: result.message,
+                        }).then((result) => {
+                            setTimeout(function () {
+                                $('#receive_btn').removeAttr('disabled')
+                                track_document(input.val())
+                            }, 200);
+                        });
+                    }
+                }
+            });
+
+        } else {
+            Swal.fire({
+                icon: 'info',
+                type: 'warning',
+                title: 'Oops!',
+                text: 'Please Input Document Number'
+            })
+        }
+
+        return false;
+    });
+
 });

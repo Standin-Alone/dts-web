@@ -136,6 +136,23 @@
 				dataType: 'json',
 				success: function(results){
 					console.log(results)
+					if(results.result == 'success'){
+			            Swal.fire({
+			              title: 'Email Sent',
+			              text: "An email has been sent for recovery of your account.",
+			              icon: 'success',
+			              confirmButtonColor: '#3085d6',
+			              cancelButtonColor: '#d33',
+			              confirmButtonText: 'Ok',
+			              allowOutsideClick: false
+			            }).then((result) => {
+			              if (result.isConfirmed) {
+			                setTimeout(function() {
+			                  window.location = base_url + 'Login';
+			                }, 200);
+			              }
+			            });
+			          }
 
                     if(results.result == 'failed'){
                         var error_msg = '<div id="error_login" class="alert alert-danger alert-dismissible fade show" role="alert">'+

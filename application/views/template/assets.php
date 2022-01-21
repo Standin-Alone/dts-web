@@ -19,6 +19,7 @@
 <link href="<?php echo base_url(); ?>assets/plugins/jquery-simplecolorpicker/jquery.simplecolorpicker-glyphicons.css" rel="stylesheet" />
 <link href="<?php echo base_url(); ?>assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 <link href="<?php echo base_url(); ?>assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+<link href="<?php echo base_url(); ?>assets/css/custom.css" rel="stylesheet" />
 <!-- ================== END PAGE LEVEL STYLE ================== -->
 
 <!-- ================== BEGIN BASE JS ================== -->
@@ -62,10 +63,11 @@
 <script src="<?php echo base_url(); ?>assets/plugins/DataTables/extensions/Scroller/js/dataTables.scroller.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/plugins/printThis/printThis.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/custom.js"></script>
 <!--     <script src="<?php echo base_url(); ?>assets/js/demo/table-manage-responsive.demo.min.js"></script> -->
 <!-- ================== END PAGE LEVEL JS ================== -->
 <script>
-	$(document).ready(function() {
-		App.init();
-	});
+    $(document).ready(function() {
+        App.init();
+    });
 </script>

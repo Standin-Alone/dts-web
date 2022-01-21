@@ -557,7 +557,7 @@ $(document).ready(function(){
                 //     });
                 // }
 
-                $('#add_profile_button').attr('disabled', false);
+                $('#add_profile_button').attr('disabled', true);
                 var formData = $('#add_profile').serializeArray();
 
                 $.ajax({
@@ -917,7 +917,7 @@ $(document).ready(function(){
                         if(r == 'success'){
                             console.log(r);
                             Swal.fire({
-                                type: 'question',
+                                icon: 'success',
                                 title: 'Completed',
                                 text: 'Document Released.'
                             }).then((result) => {
@@ -1023,7 +1023,7 @@ $(document).ready(function(){
                 if(check_upload != false){
                     Swal.fire({
                         allowOutsideClick: false,
-                        type: 'success',
+                        icon: 'success',
                         title: 'Success!',
                         text: 'Document Uploaded: '+doc_number,
                     }).then((result) => {
@@ -1120,7 +1120,7 @@ $(document).ready(function(){
                 if(check_upload != false){
                     Swal.fire({
                         allowOutsideClick: false,
-                        type: 'success',
+                        icon: 'success',
                         title: 'Success!',
                         text: 'Document Uploaded: '+doc_number,
                     }).then((result) => {

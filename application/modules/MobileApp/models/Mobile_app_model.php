@@ -348,213 +348,127 @@ public function get_scanned_document(){
 		$office_code = $request->office_code;
 		$user_id = $request->user_id;
 		$full_name = $request->full_name;
+		
+		$check_document_if_exist  = $this->db
+										->select('*')
+										->from('document_profile')
+										->where('document_number', $document_number)
+										->get()->row();
 
+		$check_last_log  = $this->db
+								->limit(1)
+								->select('*')
+								->from('receipt_control_logs')
+								->where('document_number', $document_number)																
+								->where('status', '1')																
+								->order_by('log_date', 'desc')
+								->get()->row();
 
-		// $check_if_release = $this->check_if_release($document_number, $office_code);
-
-		$check_document_exist = $this->db
-									->limit(1)
-									->select('*')
-									->from('receipt_control_logs')
-									->where('document_number',$document_number)
-									->order_by('log_date','desc')									
-									->get()
-									->result();
-		$check_dp_status = $this->db									
-									->select('*')
-									->from('document_profile')
-									->where('document_number',$document_number)																		
-									->get()
-									->row()->status;
-
-		$check_if_recipient =  $this->db->select('*')
+		// check if document exist.
+		if($check_document_if_exist ){
+			
+			$check_if_recipient  = $this->db
+								->select('*')
 								->from('document_recipients')
-								->where('document_number',$document_number)
-								->where('recipient_office_code',$office_code)	
-								->get()->result();
-		
-		// check if the document is exist
-		if($check_document_exist){
-			if($check_dp_status == 'Verified'){
-				if($check_if_recipient){
+								->where('document_number', $document_number)								
+								->where('recipient_office_code', $office_code)
+								->where('active', '1')
+								->get()->row();
+
+			// condition if receive
+			if($check_if_recipient && $check_last_log->type == 'Released'){
+
 				
-			
-		
-			$check_if_receive = $this->db
-										->limit(1)
-										->select("*,
-										
-										(select lo_sender.INFO_DIVISION as sender_division  from users as u
-										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-										where u.user_id = dr.added_by_user_id)  as sender_division,
-									(select lo_sender.INFO_SERVICE as sender_service   from users as u
-										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-										where u.user_id = dr.added_by_user_id)  as sender_service,
-									(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
-										inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-										where u.user_id = dr.added_by_user_id)  as sender_office_code,
 
-
-										
-										(select log_origin.INFO_DIVISION as origin_division  from users as u
-										inner join lib_office as log_origin on log_origin.office_code = u.office_code
-										where u.user_id =  dp.created_by_user_id)  as origin_division,
-									(select log_origin.INFO_SERVICE as origin_service   from users as u
-										inner join lib_office as log_origin on log_origin.office_code = u.office_code
-										where u.user_id =  dp.created_by_user_id)  as origin_service,
-									(select log_origin.OFFICE_CODE as origin_office_code   from users as u
-										inner join lib_office as log_origin on log_origin.office_code = u.office_code
-										where u.user_id =  dp.created_by_user_id)  as origin_office_code,
-
-									(select remarks from receipt_control_logs where document_number = dr.document_number  and type = 'Released' order by log_date DESC limit 1)
-									as rcl_remarks
-										
-										
-										")
-										->from('document_profile as dp')
-										->join('document_recipients as dr','dr.document_number = dp.document_number')
-										->join('lib_office as lo','lo.office_code = dr.recipient_office_code')
-										
-										->where('dr.document_number',$document_number)
-										->where('dr.recipient_office_code',$office_code)
-										->where('dr.active','1')
-										->get()
-										->result();
 
 			
-			//check if valid to receive
-			if($check_if_receive){
-				$check_if_last_log_release = $this->db->limit(1)->select('*')->from('receipt_control_logs')->where('document_number',$document_number)->order_by('log_date','DESC')->get()->row();
-
-				if($check_if_last_log_release->type == 'Released'){
-				
-					$get_doc_info = $check_if_receive;
-					$type="receive";
-
-					$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
-				}else{
-					$result = ["Message" => "This document is not yet release."];
-				}
-						
-			}else{
-
-				// check scanned document if for release
-				$check_if_release = $this->db
-											->limit(1)
-											->select("*,(select lo_sender.INFO_DIVISION as sender_division  from users as u
-											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-											where u.user_id = dr.added_by_user_id)  as sender_division,
-										(select lo_sender.INFO_SERVICE as sender_service   from users as u
-											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-											where u.user_id = dr.added_by_user_id)  as sender_service,
-										(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
-											inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
-											where u.user_id = dr.added_by_user_id)  as sender_office_code,
-
-
-										(select log_origin.INFO_DIVISION as origin_division  from users as u
-											inner join lib_office as log_origin on log_origin.office_code = u.office_code
-											where u.user_id = dp.created_by_user_id)  as origin_division,
-										(select log_origin.INFO_SERVICE as origin_service   from users as u
-											inner join lib_office as log_origin on log_origin.office_code = u.office_code
-											where u.user_id = dp.created_by_user_id)  as origin_service,
-										(select log_origin.OFFICE_CODE as origin_office_code   from users as u
-											inner join lib_office as log_origin on log_origin.office_code = u.office_code
-											where u.user_id = dp.created_by_user_id)  as origin_office_code,
-
-										(select remarks from receipt_control_logs where document_number = dr.document_number  and type = 'Released' order by log_date DESC limit 1) as rcl_remarks,
-										dp.type as document_type
-											
-											")
-											->from('document_profile as dp')																						
-											->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')
-											->join('document_recipients as dr','dr.document_number = rcl.document_number')											
-											->join('lib_office as lo','lo.office_code = dp.office_code')											
-											->where('dp.document_number',$document_number)
-											->where('rcl.transacting_office',$office_code)																						
-											->where('rcl.status','1')		
-											->where('dr.active','0')											
-											->order_by('log_date','DESC')																			
-											->get()
-											->result();
-				
-				if($check_if_release[0]->transacting_office == $office_code && $check_if_release[0]->type == 'Received'  ){
-
-					// $get_previous_sender = $this->db
-					// 							->select('recipient_office_code')
-					// 							->from('document_recipients as dr')
-					// 							->join('receipt_control_logs as rcl','dr.document_number = rcl.document_number')		
-					// 							->where('dr.document_number',$document_number)
-					// 							->where('dr.recipient_office_code != ',$office_code)
-					// 							->where('dr.active', '0')
-					// 							->where('rcl.type', 'Received')
-					// 							->where('rcl.status', '1')	
-					// 							->group_by('dr.recipient_office_code')
-					// 							->get()
-					// 							->result_array();
-
-
-					// array_push($check_if_release,["last_receivers"=>array_column($get_previous_sender,"recipient_office_code")]);
-				
-												
-												
-
-					$get_doc_info = $check_if_release;
-					$type="release";
-					$result = ["Message" => "true", "type" => $type,"doc_info" => $get_doc_info];		
-
-				}else{
-
-					// insert to logs not valid to receive
-					$this->db->insert('receipt_control_logs',[
-						'type' => 'Received',
-						'document_number' => $document_number,						
-						'action' => 'Received',
-						'remarks' => '',
-						'file' => '',
-						'attachment' => '',
-						'transacting_user_id' => $user_id,
-						'transacting_user_fullname' => $full_name,
-						'transacting_office' => $office_code,
-						'status' => '0'
-					]);
-					$result = ["Message" => "Not Authorize"];
-
-				}
-
-
-				
 			}
+			//condition if release
+			else{
+
+
+				// check if return to sender condition if release
+				if($check_last_log->action == 'Return to Sender'){
+
+					$check_if_already_recipient  = $this->db
+								->select('*')
+								->from('document_recipients')
+								->where('document_number', $document_number)								
+								
+								->where('added_by_user_office', $office_code)
+								->or_where('recipient_office_code', $office_code)
+								->where('active', '0')
+								->get()->row();
+
+					// check if already recipient 
+					if($check_if_already_recipient){
+
+						// get the document_info
+						$get_document_info = $this->db
+												
+												->select("*,
+												(select lo_sender.INFO_DIVISION as sender_division  from users as u
+												inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+												where u.user_id = '".$check_last_log->transacting_user_id."')  as sender_division,
+											(select lo_sender.INFO_SERVICE as sender_service   from users as u
+												inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+												where u.user_id = '".$check_last_log->transacting_user_id."')  as sender_service,
+											(select lo_sender.OFFICE_CODE as sender_office_code   from users as u
+												inner join lib_office as lo_sender on lo_sender.office_code = u.office_code
+												where u.user_id = '".$check_last_log->transacting_user_id."')  as sender_office_code,
 	
 	
+											(select log_origin.INFO_DIVISION as origin_division  from users as u
+												inner join lib_office as log_origin on log_origin.office_code = u.office_code
+												where u.user_id = dp.created_by_user_id)  as origin_division,
+											(select log_origin.INFO_SERVICE as origin_service   from users as u
+												inner join lib_office as log_origin on log_origin.office_code = u.office_code
+												where u.user_id = dp.created_by_user_id)  as origin_service,
+											(select log_origin.OFFICE_CODE as origin_office_code   from users as u
+												inner join lib_office as log_origin on log_origin.office_code = u.office_code
+												where u.user_id = dp.created_by_user_id)  as origin_office_code,
+
+											(select remarks from receipt_control_logs where document_number = dr.document_number  and type = 'Released' order by log_date DESC limit 1) as rcl_remarks,
+											dp.type as document_type
+												
+												")
+												->from('document_profile as dp')
+												->join('document_recipients as dr','dp.document_number = dr.document_number')
+												->join('receipt_control_logs as rcl','rcl.document_number = dr.document_number')
+												->where('dr.document_number', $document_number)								
+												->where('added_by_user_office', $office_code)
+												->order_by('log_date','desc')
+												->get()->row();
+						
+					
+
+						$result = ["Message" => "true", "type" => 'receive',"doc_info" => array($get_document_info)];		
+
+					}else{
+
+						$result = ["Message" => 'Not Authorize to Receive' ];
+					}
+						
+				}else{
+					$result = ["Message" => 'Not Authorize to Receive' ];
+
+				}
+
+
+
+				
+
+			}
+
+
 		}else{
-
-			$this->db->insert('receipt_control_logs',[
-				'type' => 'Received',
-				'document_number' => $document_number,						
-				'action' => 'Received',
-				'remarks' => '',
-				'file' => '',
-				'attachment' => '',
-				'transacting_user_id' => $user_id,
-				'transacting_user_fullname' => $full_name,
-				'transacting_office' => $office_code,
-				'status' => '0'
-			]);
-			
-			$result = ["Message" => "Not Authorize"];	
+			$result = ["Message" => "Invalid document number or document does not exist."];
 		}
-	}else if ($check_dp_status == 'Archived'){
 
-		$result = ["Message" => "This document process is already finished."];	
-	}else{
-
-		$result = ["Message" => "This document is not yet release."];	
-	}
-		}else{
-			$result = ["Message" => "Document not found."];		
-		}
 		
+	
+
+
 
 		
 	}catch(\Exception $e){
@@ -584,36 +498,33 @@ public function receive_document(){
 		$info_service = $request->info_service;
 
 
-		$check_document =$this->check_document($document_number,$office_code);
 
 		
-		if($check_document){
 
-			foreach($check_document as $value){
-				$this->db
-						->where('document_number',$value->document_number)
-						->where('recipient_office_code',$value->recipient_office_code)						
+
+
+		$update_document_recipient =$this->db
+						->where('document_number',$document_number)
+						->where('recipient_office_code',$office_code)						
 						->update('document_recipients',[
 							'active' => '0',							
 						]);						
-				$this->db->insert('receipt_control_logs',[
+		$insert_record = $this->db->insert('receipt_control_logs',[
 					'type' => 'Received',
-					'document_number' => $value->document_number,					
+					'document_number' => $document_number,					
 					'action' => 'Received',
-					'remarks' => $value->remarks,
+					'remarks' => '',
 					'file' => '',
 					'attachment' => '',
 					'transacting_user_id' => $user_id,
 					'transacting_user_fullname' => $full_name,
 					'transacting_office' => $office_code,
 					'status' => '1',
-
-
 				]);
-	
-			}
-		
-			$result = ["Message" => "true", "doc_info" =>$check_document];
+
+		if($insert_record && $update_document_recipient){
+
+			$result = ["Message" => "true"];
 		}else{
 			$result = ["Message" => "false"];
 		};
@@ -719,7 +630,7 @@ public function release_document(){
 						'attachment' => '',
 						'transacting_user_id' => $user_id,
 						'transacting_user_fullname' => $full_name,
-						'transacting_office' => $office_code
+						'transacting_by_user_office' => $office_code
 					]);
 			}
 
@@ -732,17 +643,13 @@ public function release_document(){
 									->get()->row()->office_code;
 
 
-			if($action == 'Return to Sender'){
+			
 
 
-			}else{
+			if($action != 'Return to Sender'){
 			// insert recipients
 			foreach($recipients_office_code as $value){
 				
-
-
-
-
 				$get_document_recipients = $this->db
 								->select('recipient_office_code')
 								->from('document_recipients')
@@ -750,6 +657,7 @@ public function release_document(){
 								->where('active','1')
 								->get()->result_array();
 
+								
 				if(!in_array($value,array_column($get_document_recipients,"recipient_office_code"))){
 					$this->db->insert('document_recipients',[					
 						'document_number' => $document_number,
@@ -759,9 +667,7 @@ public function release_document(){
 						'added_by_user_fullname' => $full_name			
 					]);	
 				}
-				
-							
-		
+
 			}
 			}
 			$result = ["Message" => "true"];
@@ -823,6 +729,7 @@ public function check_document($document_number,$office_code){
 						->where('rcl.type', 'Released')
 						->order_by("dr.date_added", "desc")
 						->get()->result();
+						
 	if($get_records){
 		return $get_records;
 	}

@@ -7,6 +7,15 @@
 <!-- ================== END ADDITIONALS STYLE ================== -->
 
 <style>
+    sup {
+        top: -0.7em;
+        left: -1em;
+        position: relative;
+        font-size: 100%;
+        line-height: 0;
+        vertical-align: baseline;
+    }
+
     ul.timeline {
         list-style-type: none;
         position: relative;
@@ -172,40 +181,139 @@ $my_archives_count = $count_data['my_archives_data'];
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="col d-lg-block d-sm-none">
                         <img class="img-fluid px-3 py-3 ml-5" src="assets/img/dashboard/dts-dashboard-banner.svg" alt="Card image" style="max-width: 70%;">
+                        <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                            <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Quick Receive</h3>
+                            <p class="h5 text-white mx-auto">
+                                Enter Document Number to log document
+                            </p>
+                            <form id="form_receive">
+                                <div class="input-group p-5">
+                                    <input name="document_number" id="document_number" type="text" class="form-control" placeholder="Document Number">
+                                    <button type="submit" id="receive_btn" name="receive_btn" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="col-lg-4 col-md-1 my-3 d-flex flex-row mx-sm-auto">
+                    <div class="col-lg-6 col-md-6 my-3 d-flex flex-row mx-sm-auto">
                         <div class="col mh-400 mb-auto my-2 d-flex flex-column my-auto" style="border-radius: 10px; background: rgba(255, 255, 255, 0.2); ">
                             <div class="my-auto h-auto">
-                                <div class="card p-lg-4 h-auto my-md-3 my-lg-3 shadow bg-warning d-flex " style="border-radius: 10px; background: rgba(255, 255, 255, 0.7); box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
+                                <!-- <div class="card p-lg-4 h-auto my-md-3 my-lg-3 shadow bg-warning d-flex " style="border-radius: 10px; background: rgba(255, 255, 255, 0.7); box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
                                     <a class="btn btn-lg wrap" href="<?php echo base_url() . 'Create_profile' ?>">
                                         <h3 class="text-white"><i class="fa fa-book mr-3"></i>Create Profile</h3>
                                         <p class="h5 text-white mx-auto my-0">
                                             Profile your document for a documented transaction
                                         </p>
                                     </a>
-                                </div>
-                                <div class="card p-4 h-auto my-md-3 my-md-1 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
-                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-search-location mr-2 text-lg"></i>Track Document</h3>
-                                    <p class="h5 text-white mx-auto">
-                                        Tracks document transaction history
-                                    </p>
-                                    <div class="input-group p-5">
-                                        <input name="track_document" id="track_document" type="text" class="form-control" placeholder="Document Number">
-                                        <button id="track_document_btn" type="button" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
-                                    </div>
-                                </div>
-                                <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                                </div> -->
+                                <!-- <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
                                     <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Quick Receive</h3>
                                     <p class="h5 text-white mx-auto">
                                         Enter Document Number to log document
                                     </p>
-                                    <form id="received_document">
+                                    <form id="form_receive">
                                         <div class="input-group p-5">
-                                            <input name="received_document_btn" id="received_document_btn" type="text" class="form-control" placeholder="Document Number">
-                                            <button type="submit" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
+                                            <input name="document_number" id="document_number" type="text" class="form-control" placeholder="Document Number">
+                                            <button type="submit" id="receive_btn" name="receive_btn" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
                                         </div>
                                     </form>
+                                </div> -->
+
+
+                                <div class="card p-4 h-auto my-md-3 my-md-1 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
+                                    <!--Carousel Wrapper-->
+                                    <h3 class="mx-auto text-white mt-3">FOR DISSEMINATION DOCUMENTS</h3>
+                                    <div id="multi-item-example" class="carousel slide carousel-multi-item" data-ride="carousel">
+
+                                        <!--Indicators-->
+                                        <ol class="carousel-indicators">
+                                            <?php
+                                            // print_r($get_dissemination_documents);
+                                            // echo count($get_dissemination_documents);
+                                            foreach ($get_dissemination_documents as $key => $row) {
+                                            ?>
+                                                <li data-target="#multi-item-example" data-slide-to="<?php echo $key ?>" class="<?php echo $active = $key == 0 ? 'active' : ""  ?>"></li>
+                                            <?php } ?>
+                                            <!-- <li data-target="#multi-item-example" data-slide-to="0"></li>
+                                            <li data-target="#multi-item-example" data-slide-to="1"></li> -->
+                                        </ol>
+                                        <!--/.Indicators-->
+
+                                        <!--Slides-->
+                                        <div class="carousel-inner" role="listbox" style="height: 180px;">
+                                            <?php
+                                            // print_r($get_dissemination_documents);
+                                            // echo count($get_dissemination_documents);
+                                            foreach ($get_dissemination_documents as $key => $row) {
+                                            ?>
+                                                <!--First slide-->
+                                                <div class="carousel-item <?php echo $active = $key == 0 ? 'active' : ""  ?>">
+                                                    <div class="col-md-12" style="float:left">
+                                                        <div class="card mb-2">
+                                                            <div class="card-body">
+                                                                <h4 class="card-title"><?php echo $row->doc_type ?></h4>
+                                                                <p class="card-text"><?php echo $row->subject ?></p>
+                                                                <a target="_blank" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" class="btn border">View</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <!--/.First slide-->
+                                                <!--Second slide-->
+                                                <!-- <div class="carousel-item">
+                                                    <div class="col-md-12" style="float:left">
+                                                        <div class="card mb-2">
+                                                            <div class="card-body">
+                                                                <h4 class="card-title">Memorandum of Agreement</h4>
+                                                                <p class="card-text">Special Order for National Livestock and Poultry M</p>
+                                                                <button class="btn btn-primary">View</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div> -->
+                                            <?php } ?>
+                                            <!--/.Second slide-->
+                                        </div>
+                                        <!--Controls-->
+                                        <div class="controls-top col-md-12">
+                                            <div class="col-2 mx-auto">
+                                                <a class="btn-floating" href="#multi-item-example" data-slide="prev"><i class="fas fa-chevron-left"></i></a>
+                                                <a class="btn-floating" href="#multi-item-example" data-slide="next"><i class="fas fa-chevron-right"></i></a>
+                                            </div>
+                                        </div>
+                                        <!--/.Controls-->
+                                        <!--/.Slides-->
+                                    </div>
+                                    <!--/.Carousel Wrapper-->
+                                    <div class="card">
+                                        <ul class="list-group scrollbar" style="height: 100px;">
+                                            <?php
+                                            foreach ($get_dissemination_documents as $key => $row) {
+                                            ?>
+                                                <li class="list-group-item">
+                                                    <span class="d-flex justify-content-between">
+                                                        <span class="d-flex flex-column">
+                                                            <span>
+                                                                <?php echo $row->document_number ?>
+                                                            </span>
+                                                            <span>
+                                                                Document Type: <?php echo $row->doc_type ?>
+                                                            </span>
+                                                            <span>
+                                                                Subject: <?php echo $row->subject ?>
+                                                            </span>
+                                                        </span>
+                                                        <a target="_blank" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" class="btn border">View</a>
+                                                    </span>
+                                                </li>
+                                            <?php } ?>
+                                        </ul>
+                                    </div>
+                                    <a href="<?php echo base_url() ?>Dashboard" class="btn btn-sm text-white fs-10px ps-2 pe-2 px-3">
+                                        <i class="fa fa-th-list mr-1"></i>
+                                        View All
+                                    </a>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -226,7 +334,13 @@ $my_archives_count = $count_data['my_archives_data'];
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
-                            <a href="<?php echo base_url() ?>Dashboard/Incoming_documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> View All</a>
+                            <a href="<?php echo base_url() ?>Dashboard/Incoming_documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3">
+                                <i class="fa fa-th-list mr-1"></i>
+                                View All
+                            </a>
+                            <?php if ($get_over_due_incoming) {
+                                echo '<sup><span class="mx-0 badge badge-danger badge-pill">' . count($get_over_due_incoming) . '</span></sup>';
+                            } ?>
                         </span>
                     </div>
                 </div>
@@ -236,24 +350,26 @@ $my_archives_count = $count_data['my_archives_data'];
                         if ($incoming_documents) {
                             foreach ($incoming_documents as $row) {
                         ?>
+
                                 <div class="list-group-item list-group-item-action">
                                     <div class="d-flex flex-column">
                                         <div class="row d-flex flex-row justify-content-between">
                                             <div class="col-md-8 d-flex flex-column">
-                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 "><?php echo $row->document_number ?></label>
+                                                <a href="<?php echo base_url() . 'Receipt_Control_Center/Receive/' . $row->document_number ?>" target="_blank" class="fs-14px lh-12 mb-2px font-weight-bold text-secondary mb-1 incoming_document_number"><?php echo $row->document_number ?></a>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">From: <?php echo $row->from_office ?></span>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
                                             </div>
-                                            <div class="col-md-4 d-flex flex-column justify-content-between align-items-end">
+                                            <div class="col-md-4 d-flex flex-column justify-content-between align-items-end mx-0 px-0">
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo date("g:i a", strtotime($row->date_created)) ?></span>
-                                                <span class="d-flex flex-row justify-content-between align-self-end">
-                                                    <button class="btn btn-sm btn-outline-secondary mx-1"><i class="fa fa-search-location mr-1"></i> Logs</button>
-                                                    <button class="btn btn-sm btn-secondary mx-1"><i class="fa fa-file-alt mr-1"></i> View</button>
+                                                <span class="d-flex flex-row justify-content-between align-self-end mx-0">
+                                                    <button class="btn btn-sm btn-outline-secondary mx-1 logs"><i class="fa fa-search-location mr-1"></i> Logs</button>
+                                                    <a href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank" class="btn btn-sm btn-secondary ml-1"><i class="fa fa-file-alt mr-1"></i> View</a>
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             <?php }
                         } else { ?>
                             <div class="text-center my-4">
@@ -412,29 +528,7 @@ $my_archives_count = $count_data['my_archives_data'];
                         <div class="col-lg-12 mx-auto m-3 rounded scrollbar" style="max-height: 500px; background-color: #d7dfe6;">
                             <!-- Timeline -->
                             <ul id="timeline" class="timeline">
-                                <!-- <li class="timeline-item bg-white rounded ml-3 p-4 shadow-sm">
-                                    <div class="timeline-arrow"></div>
-                                    <div class="d-flex flex-column p-4">
-                                        <div class="d-flex flex-column">
-                                            <div>
-                                                <span class=" badge badge-lg badge-success">
-                                                    <h2 class="h5 mb-0">Received</h2>
-                                                </span>
-                                            </div>
-                                            <span class="small text-gray mt-2"><i class="fa fa-clock-o mr-1"></i>21 March, 2019</span>
-                                        </div>
-                                        <span class="d-flex flex-row mt-2">
-                                            Received By: <h5 class=" ml-2"> Information Communications Technology Service</h5>
-                                        </span>
-                                        <span class="d-flex flex-row">
-                                            Assigned Personnel: <h5 class=" ml-2"> Ling Hayabusa</h5>
-                                        </span>
-                                    </div>
-                                    <div class="p-4">
-                                        <label>Remarks</label>
-                                        <p class="text-small mt-2 font-weight-light">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
-                                    </div>
-                                </li> -->
+
                             </ul><!-- End -->
 
                         </div>
