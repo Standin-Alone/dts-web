@@ -64,10 +64,17 @@
 <script src="<?php echo base_url(); ?>assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/plugins/printThis/printThis.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/custom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
 <!--     <script src="<?php echo base_url(); ?>assets/js/demo/table-manage-responsive.demo.min.js"></script> -->
 <!-- ================== END PAGE LEVEL JS ================== -->
 <script>
     $(document).ready(function() {
         App.init();
+
+
+        var socket = io.connect('wss://devsysadd.da.gov.ph/dts',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+
+
+
     });
 </script>
