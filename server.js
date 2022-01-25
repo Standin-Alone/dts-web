@@ -9,7 +9,7 @@ io.on('connection', function(socket){
   socket.setMaxListeners(0);
   console.warn('connected server side');
   socket.on('push notification',function(message){
-    console.warn('pushed');
+    console.warn(message);
     io.emit('get notification',message)
   });
   
@@ -18,7 +18,7 @@ io.on('connection', function(socket){
 
 
 
-http.listen(7980, '172.17.150.112', function(data) {
+http.listen(7980, '192.168.1.8', function(data) {
 
   console.log('Listening on Port 7980');
 });

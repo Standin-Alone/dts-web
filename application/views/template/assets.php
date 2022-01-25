@@ -20,6 +20,8 @@
 <link href="<?php echo base_url(); ?>assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 <link href="<?php echo base_url(); ?>assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
 <link href="<?php echo base_url(); ?>assets/css/custom.css" rel="stylesheet" />
+<link href="<?php echo base_url(); ?>assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
+	
 <!-- ================== END PAGE LEVEL STYLE ================== -->
 
 <!-- ================== BEGIN BASE JS ================== -->
@@ -65,14 +67,41 @@
 <script src="<?php echo base_url(); ?>assets/plugins/printThis/printThis.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/custom.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+<script src="<?php echo base_url(); ?>assets/plugins/gritter/js/jquery.gritter.js"></script>
+<script src="<?php echo base_url(); ?>assets/js/demo/ui-modal-notification.demo.min.js"></script>
 <!--     <script src="<?php echo base_url(); ?>assets/js/demo/table-manage-responsive.demo.min.js"></script> -->
+<style>
+
+</style>
 <!-- ================== END PAGE LEVEL JS ================== -->
 <script>
     $(document).ready(function() {
         App.init();
+        Notification.init();
+
+        // var socket = io.connect('wss://devsysadd.da.gov.ph/dts',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+        var socket = io.connect('http://192.168.1.8:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+        
+        socket.on("connect", function() {
+                // check if connected
+                console.warn('connected');
+        
+                //get notification
+                socket.on('get notification',function(message){               
+                    
+                    if(message.channel == "<?php echo $this->session->userdata('office'); ?>"){
+                        
+                        $.gritter.add({
+                            title: 'Notification',
+                            text: message.message,
+                            sticky:true
+                        });
+                    }
+                });
 
 
-        var socket = io.connect('wss://devsysadd.da.gov.ph/dts',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+            });
+
 
 
 
