@@ -472,7 +472,8 @@ public function get_scanned_document(){
 												->join('document_recipients as dr','dp.document_number = dr.document_number')
 												->join('receipt_control_logs as rcl','rcl.document_number = dr.document_number')
 												->where('dr.document_number', $document_number)								
-												->where('added_by_user_office', $office_code)
+												->where('recipient_office_code', $office_code)
+												->or_where('added_by_user_office', $office_code)
 												->order_by('log_date','desc')
 												->get()->row();
 						
