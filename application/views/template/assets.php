@@ -79,8 +79,11 @@
         App.init();
         Notification.init();
 
+
+        //https
         // var socket = io.connect('wss://devsysadd.da.gov.ph/dts',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
-        var socket = io.connect('http://192.168.1.8:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+        //http
+        var socket = io.connect('http://172.17.150.112:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
         
         socket.on("connect", function() {
                 // check if connected
