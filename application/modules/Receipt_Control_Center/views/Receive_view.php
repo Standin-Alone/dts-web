@@ -420,7 +420,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                         <?php } ?>
                         </div>
                     </div>
-                    <button class="btn btn-primary btn-block">View All</button>
+                    <!-- <button class="btn btn-primary btn-block">View All</button> -->
                 </div>
             </div>
         </div>
@@ -453,7 +453,11 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
             $('meta[name=viewport]').remove();
             $('head').append('<meta name="viewport" content="width=device-width, initial-scale=yes">');
         });
+
+       
     });
+
+
 </script>
 
 

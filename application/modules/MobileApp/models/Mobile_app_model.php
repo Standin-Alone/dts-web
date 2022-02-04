@@ -306,36 +306,44 @@ public function outgoing_documents($my_office_code){
 
 	try{
 			
-		$get_outgoing  =  $this->db											
-									->select("*,
-									(SELECT count(*) FROM receipt_control_logs as rcl2
-									WHERE rcl.log_id > rcl2.log_id and rcl2.type= 'Released'
-									ORDER BY log_id ASC LIMIT 1) as check_next_log_if_release
+		// $get_outgoing  =  $this->db											
+		// 							->select("*,
+		// 							(SELECT count(*) FROM receipt_control_logs as rcl2
+		// 							WHERE rcl.log_id > rcl2.log_id and rcl2.type= 'Released'
+		// 							ORDER BY log_id ASC LIMIT 1) as check_next_log_if_release
 									
-									")
-									->from('document_profile as dp')																															
-									->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')																													
-									->where('dp.office_code',$my_office_code)
-									->where('rcl.transacting_office',$my_office_code)									
-									->where('rcl.status','1')
-									->where('dp.status','Verified')
-									->order_by('log_date','desc')
-									->get()
-									->result();
+		// 							")
+		// 							->from('document_profile as dp')																															
+		// 							->join('receipt_control_logs as rcl','rcl.document_number = dp.document_number')																													
+		// 							->where('dp.office_code',$my_office_code)
+		// 							->where('rcl.transacting_office',$my_office_code)									
+		// 							->where('rcl.status','1')
+		// 							->where('dp.status','Verified')
+		// 							->order_by('log_date','desc')
+		// 							->get()
+		// 							->result();
 
-		$consolidate_outgoing = array();
-		foreach($get_outgoing as  $item){
 
-			if($item->check_next_log_if_release == 0){
+		$get_outgoing = $this->db
+								->select('*')
+								->from('document_profile')
+								->where('office_code',$my_office_code)
+								->where('status','Verified')
+								->get()
+								->result();
+		// $consolidate_outgoing = array();
+		// foreach($get_outgoing as  $item){
 
-				array_push($consolidate_outgoing,$item);
-			}
+		// 	if($item->check_next_log_if_release == 0){
+
+		// 		array_push($consolidate_outgoing,$item);
+		// 	}
 
 										
-		}
+		// }
 		
 		
-		$result = ["Message" => "true", "doc_info" => $consolidate_outgoing];	
+		$result = ["Message" => "true", "doc_info" => $get_outgoing];	
 	}catch(\Exception $e){
 		$result = ["Message" => "false", "error" => $e->getMessage()];				
 	}
@@ -390,6 +398,7 @@ public function get_scanned_document(){
 								->where('document_number', $document_number)								
 								->where('recipient_office_code', $office_code)
 								->where('received', '1')
+								->where('active', '1')
 								->get()->row();
 
 			// check if created
@@ -741,7 +750,7 @@ public function release_document(){
 		$remarks = json_decode($this->input->post('remarks'));
 		$doc_prefix = json_decode($this->input->post('doc_prefix'));
 		$file=json_decode($this->input->post('file_attachments'));
-
+		var_dump(count($file));
 		// file upload
 		if(count($file) != 0 ){
 			for($i = 0 ; $i < count($file) ; $i++){
@@ -962,18 +971,21 @@ public function get_history($document_number){
 							->order_by("rcl.log_date", "desc")									
 							->get()->result();
 
+		$get_document_info = $this->db->select('*')
+									->from('document_profile')
+									->where('document_number', $document_number)
+									->get()->row();
 		$get_recipients = $this->db			
 								->select('*')
 								->from('document_recipients as dr')
 								->join('lib_office as lo','lo.office_code = dr.recipient_office_code')
-								->where('document_number', $document_number)	
-								->where('received','1')
+								->where('document_number', $document_number)																	
 								->get()
 								->result();																				
 								
 								
 		if($get_records){
-			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients];
+			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients,"document_info" => $get_document_info];
 		}
 		
 	}catch(\Exception $e){

@@ -45,6 +45,41 @@ $(document).ready(function () {
             success: function (result) {
                 console.log(result);
                 if (result.error == "false") {
+                    if(result.recipient_details){
+                        var subject = result.recipient_details.subject
+                        var from_office = result.recipient_details.from_office
+                        $.map(result.recipient_details.recipients, function (recipient, indexOrKey) {
+                           
+                            //incoming
+                            var message = `Your have an incoming document from ${from_office} with a subject of ${subject}`
+                            socket().emit('push notification', {
+                            channel: recipient,
+                            message:
+                                message,
+                            });
+                        });
+
+                         //previous office
+                        var sender_office = result.sender_details.office_code
+                         socket().emit('push notification', {
+                            channel: { sender_office },
+                            message:
+                                `Your document with a subject of ${subject} has been released from ${from_office}`,
+                        });
+                        
+                    }else{
+                        var subject = result.recipient_details.subject
+                        var from_office = result.recipient_details.from_office
+                        var message = `Your document with a subject of ${subject} has been released from ${from_office}`
+    
+                        socket().emit('push notification', {
+                        channel: result.sender_details.office_code,
+                        message:
+                            message,
+                        });
+                    }
+                    
+
                     Swal.fire({
                         icon: 'success',
                         type: 'success',

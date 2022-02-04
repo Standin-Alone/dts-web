@@ -28,7 +28,6 @@ $(document).ready(function () {
     })
 
     function track_document(document_number) {
-
         // loading.show()
         setTimeout(() => {
             $('#modal_track').modal('show')
@@ -199,13 +198,25 @@ $(document).ready(function () {
                 data: form_data,
                 dataType: "json",
                 success: function (result) {
+                    console.log(result);
+
+                  
                     if (result.error == "false") {
+                        var office = result.sender_details.office
+                        var office_code = result.sender_details.office_code
                         Swal.fire({
                             icon: 'success',
                             type: 'success',
                             title: 'Well Done!',
                             text: result.message,
                         }).then((result) => {
+                            var message = `Your document has been received by ${office}`
+
+                            socket().emit('push notification', {
+                            channel: {office_code},
+                            message:
+                                message,
+                            });
                             setTimeout(function () {
                                 $('#receive_btn').removeAttr('disabled')
                                 track_document(input.val())
@@ -219,6 +230,7 @@ $(document).ready(function () {
                             title: 'Oops!',
                             text: result.message,
                         }).then((result) => {
+                           
                             setTimeout(function () {
                                 $('#receive_btn').removeAttr('disabled')
                                 track_document(input.val())

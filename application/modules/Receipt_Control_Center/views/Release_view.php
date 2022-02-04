@@ -190,7 +190,7 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                             ->get()->result();
                                     ?>
                                         <div class="col note note-secondary mb-2">
-                                            <div class="note-icon"><i class="fa fa-file-alt"></i></div>
+                                            <!-- <div class="note-icon"><i class="fa fa-file-alt"></i></div> -->
                                             <div class="note-content">
                                                 <h4><b>Document Details</b></h4>
                                                 <span class="d-flex flex-row align-items-end justify-content-between">
@@ -312,8 +312,13 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
             <div class="col-md-12 <?php echo $class = !empty($received_documents) ? 'scrollbar' : ''; ?>" style="height: 400px; background-color: #c6ced5;">
                 <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
                     <?php
+
+                    $office_code = $office_code = $this->session->userdata('office');
                     if ($received_documents) {
                         foreach ($received_documents as $row) {
+                            $last_transaction = $this->db->select("type")->from("receipt_control_logs")->where("document_number", $row->document_number)->where("transacting_office", $office_code)->limit(1)->order_by("log_date", "desc")->get()->result();
+                    if ($last_transaction){
+                      if ($last_transaction[0]->type == 'Received'){
                     ?>
                             <a href="<?php echo base_url() . "/Receipt_Control_Center/Release/" . $row->document_number ?>" style="text-decoration: none;" <?php echo $disabled = $row->action == "Released" ? "disabled" : ""; ?>>
                                 <div class="col list-group-item list-group-item-action border-bottom bg-white">
@@ -338,6 +343,8 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                 </div>
                             </a>
                         <?php }
+                            }
+                        }
                     } else { ?>
                         <div class="text-center mt-5">
                             <span class="h4 text-dark mb-2 text-center mx-auto">No new transaction</span>
@@ -346,8 +353,8 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                 </div>
             <?php } ?>
             </div>
-            <button class="btn btn-primary btn-block">View All</button>
         </div>
+        <!-- <button class="btn btn-primary btn-block">View All</button> -->
     </div>
 </div>
 

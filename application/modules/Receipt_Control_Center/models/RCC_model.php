@@ -68,7 +68,7 @@ class RCC_model extends CI_Model
         return $get_assign_doc;
     }
 
-
+   
     // public function receive_document()
     // {
     //     $result = '';
@@ -223,6 +223,36 @@ class RCC_model extends CI_Model
     //     return $result;
     // }
 
+    public function get_sender($document_number){
+        $get_sender = $this->db
+        ->select("rcl.transacting_office, CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office")
+        ->from("receipt_control_logs as rcl")
+        ->join("lib_office as lo", "rcl.transacting_office = lo.OFFICE_CODE")
+        ->where("rcl.document_number", $document_number)
+        ->where("rcl.type", "Released")
+        ->where("rcl.status", '1')
+        ->limit(1)
+        ->order_by("rcl.log_date", "desc")
+        ->get()->row();
+
+        $receiver_office_code = $this->session->userdata('office');
+        $get_receiver_office = $this->db
+       ->select("CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as receiver_office")
+       ->from("lib_office")
+       ->where("OFFICE_CODE", $receiver_office_code)
+       ->get()->row();
+
+        // print_r($get_sender);
+
+        // $get_sender_office = 
+        // $get_sender_office_code = $get_sender->transacting_office;
+
+        return [
+            'office' => $get_receiver_office ? $get_receiver_office->receiver_office : null,
+            'office_code' => $get_sender ? $get_sender->transacting_office : null
+        ];
+    }
+
     public function receive_document()
     {
         try {
@@ -252,7 +282,7 @@ class RCC_model extends CI_Model
                 if ($check_if_verified[0]->status == "Archived") {
                     $result = ["status" => "", "error" => "true", "message" => "Document process is already finished"];
                 } else if ($check_if_verified[0]->status == "Draft") {
-                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released"];
+                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from origin"];
                 } else if ($check_if_verified[0]->status == "" || $check_if_verified[0]->status == null) {
                     $result = ["status" => "", "error" => "true", "message" => "Document is unverified by the system, Please reprofile the document"];
                 } else {
@@ -300,7 +330,7 @@ class RCC_model extends CI_Model
                                     $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                                     $this->db->update('document_recipients');
                                 }
-                                $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully", "sender_details" => $this->get_sender($document_number)];
                             }
                         } else {
                             $check_latest_transaction = $this->db->select("*")
@@ -334,7 +364,7 @@ class RCC_model extends CI_Model
                                     $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                                     $this->db->update('document_recipients');
                                 }
-                                $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully", "sender_details" => $this->get_sender($document_number)];
                             } else {
                                 $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from previous office"];
                             }
@@ -425,7 +455,7 @@ class RCC_model extends CI_Model
                                             $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                                             $this->db->update('document_recipients');
                                         }
-                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully", "sender_details" => $this->get_sender($document_number)];
                                     }
                                 } else {
                                     $check_latest_transaction = $this->db->select("*")
@@ -459,7 +489,7 @@ class RCC_model extends CI_Model
                                             $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                                             $this->db->update('document_recipients');
                                         }
-                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully", "sender_details" => $this->get_sender($document_number)];
                                     } elseif ($check_latest_transaction[0]->type == "Received") {
                                         $result = ["status" => "", "error" => "true", "message" => "Document already received"];
                                     } else {
@@ -499,7 +529,7 @@ class RCC_model extends CI_Model
                                             $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                                             $this->db->update('document_recipients');
                                         }
-                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully"];
+                                        $result = ["status" => $insert_data, "error" => "false", "message" => "Document has been received successfully", "sender_details" => $this->get_sender($document_number)];
                                     } elseif ($check_latest_transaction[0]->type == "Received") {
                                         $result = ["status" => "", "error" => "true", "message" => "Document already received"];
                                     } else {
@@ -520,8 +550,20 @@ class RCC_model extends CI_Model
         return $result;
     }
 
+    public function get_recipient($office_code, $document_number){
+        $data = [];
 
-    // Receive Document Screen
+        foreach ($office_code as $row){
+            $get_doc_details = $this->db->select("*");
+
+            return  [
+                'office' => $get_receiver_office->receiver_office,
+                'office_code' => $get_sender->transacting_office
+            ];
+        }
+    }
+
+
     public function release_document()
     {
         try {
@@ -537,6 +579,10 @@ class RCC_model extends CI_Model
             $action = $this->input->post('action', true);
             $recipients = $this->input->post('recipients', true);
 
+            $doc_details = $this->db->select("subject")->from("document_profile")->where("document_number", $document_number)->get()->row();
+            $office_details = $this->db->select("CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office")->from("lib_office")->where("OFFICE_CODE", $office_code)->get()->row();
+
+            $sender_details = $this->get_sender($document_number);
             // "<pre>";
             // print_r($recipients);
             // "<pre>";
@@ -553,7 +599,7 @@ class RCC_model extends CI_Model
                 if ($check_if_verified[0]->status == "Archived") {
                     $result = ["status" => "", "error" => "true", "message" => "Document process is already finished"];
                 } else if ($check_if_verified[0]->status == "Draft") {
-                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released"];
+                    $result = ["status" => "", "error" => "true", "message" => "Document is not yet released from origin"];
                 } else if ($check_if_verified[0]->status == "" || $check_if_verified[0]->status == null) {
                     $result = ["status" => "", "error" => "true", "message" => "This Document is unverified by the system, please reprofile the document"];
                 } else {
@@ -617,7 +663,18 @@ class RCC_model extends CI_Model
                                         }
                                     }
                                 }
-                                $result = ["status" => "", "error" => "false", "message" => "Document has been released succesfully"];
+                                $recipient_details = [
+                                    "subject" => $doc_details->subject,
+                                    "from_office" => $office_details->from_office,
+                                    "recipients" => $recipients
+                                ];
+                                $result = [
+                                    "status" => "", 
+                                    "error" => "false", 
+                                    "message" => "Document has been released succesfully",
+                                    "recipient_details" => $recipient_details,
+                                    "sender_details" => $sender_details
+                                ];
                             }
                         } else {
                             $check_latest_transaction = $this->db->select("*")
@@ -754,7 +811,18 @@ class RCC_model extends CI_Model
                                                 }
                                             }
                                         }
-                                        $result = ["status" => "", "error" => "false", "message" => "Document has been released succesfully"];
+                                        $recipient_details = [
+                                            "subject" => $doc_details->subject,
+                                            "from_office" => $office_details->from_office,
+                                            "recipients" => $recipients
+                                        ];
+                                        $result = [
+                                            "status" => "", 
+                                            "error" => "false", 
+                                            "message" => "Document has been released succesfully",
+                                            "recipient_details" => $recipient_details,
+                                            "sender_details" => $sender_details
+                                        ];
                                     }
                                 } else {
                                     $check_latest_transaction = $this->db->select("*")

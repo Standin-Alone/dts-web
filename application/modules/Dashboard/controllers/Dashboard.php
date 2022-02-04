@@ -50,6 +50,11 @@ class Dashboard extends MY_Controller
 		$results = $this->Dashboard_model->get_document_type_data_incoming();
 		echo json_encode($results);
 	}
+	public function get_over_due_incoming()
+	{
+		$results =  $this->Dashboard_model->get_over_due_incoming();
+		echo json_encode($results);
+	}
 	public function get_origin_type_data()
 	{
 		$results = $this->Dashboard_model->get_origin_type_data();

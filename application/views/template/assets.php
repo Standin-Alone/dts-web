@@ -84,11 +84,7 @@
         // var socket = io.connect('wss://devsysadd.da.gov.ph/dts',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
         //http
         // var socket = io.connect('http://172.17.211.9:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
-        socket().emit('push notification',{
-            channel:['0100010200'],
-            message:'You have incoming document from sample offices',
-            document_number:'DA-CO-ICTS-MOA20220202-00013'
-        })
+        
         socket().on("connect", function() {
                 // check if connected
                 console.warn('connected');

@@ -20,6 +20,74 @@ $(function () {
         })
     })
 
+    function promp_toast(count) {
+        // storage sample
+        // localStorage.setItem('date-registered', '07/12/2020')
+        var date_registered = localStorage.getItem('date-registered')
+        // get current date
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+        var yyyy = today.getFullYear();
+        today = mm + '/' + dd + '/' + yyyy;
+
+        if (today != date_registered) {
+            localStorage.setItem('date-registered', today)
+
+            var notif_message = 'You have <span class="text-danger font-weight-bold">'+count+'</span> over due documents'
+
+            iziToast.show({
+                timeout: 200000,
+                theme: 'dark',
+                backgroundColor: '#212529',
+                icon: 'error',
+                image: base_url + 'assets/img/web_icon.png',
+                overlayClose : true,
+                overlay: true,
+                icon: 'user',
+                closeOnEscape: true,
+                closeOnClick: true,
+                close: false,
+                title: 'Welcome!',
+                message: notif_message,
+                // closeOnClick: 'false',
+                position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
+                progressBarColor: '#f59c1a',
+                buttons: [
+                    ['<button><b>Open</b></button>', function (instance, toast) {
+                        location.href = base_url+"Dashboard/Incoming_documents_view/?target='over_due'";
+                    }, true],
+                    ['<button><b>Later</b></button>', function (instance, toast) {
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    }],
+                ],
+                onClosing: function(instance, toast, closedBy){
+                    console.info('Closing | closedBy: ' + closedBy);
+                },
+                onClosed: function(instance, toast, closedBy){
+                    console.info('Closed | closedBy: ' + closedBy);
+                }
+            });
+        }
+
+        console.log(today);
+        console.log(date_registered);
+    }
+
+    $.ajax({
+        type: "get",
+        url: base_url + "/Dashboard/get_over_due_incoming",
+        dataType: "json",
+        success: function (response) {
+            if (response.length > 0){
+                promp_toast(response.length)
+            }
+        }
+    });
+
+
+   
+
     // var myTable = $('#logs_table').DataTable({
     //     dom: 'lfrtip',
     //     processing: true,
@@ -422,23 +490,23 @@ $(function () {
         track_document(document_number)
     })
 
-
-
     $(document.body).on('submit', '#received_document', function (e) {
         e.preventDefault();
         var input = $(document).find("#received_document_btn")
 
         if (input.val()) {
-
+            $('#receive_btn').attr('disabled', true);
+            var form_data = $(this).serializeArray();
             console.log(form_data);
-
             $.ajax({
                 type: "post",
-                url: base_url + "Dashboard/receive_document",
+                url: base_url + "Receipt_Control_Center/receive_document",
                 data: form_data,
                 dataType: "json",
                 success: function (result) {
 
+                    var office = result.office
+                    var office_code = result.office_code
                     if (result.error == "false") {
                         Swal.fire({
                             icon: 'success',
@@ -446,12 +514,19 @@ $(function () {
                             title: 'Well Done!',
                             text: result.message,
                         }).then((result) => {
+                            var message = `Your document has been received by ${office}`
+
+                            socket().emit('push notification', {
+                            channel: office_code,
+                            message:
+                                message,
+                            });
                             setTimeout(function () {
+                                $('#receive_btn').removeAttr('disabled')
                                 track_document(input.val())
                             }, 200);
                         });
                     }
-
                     if (result.error == "true") {
                         Swal.fire({
                             icon: 'info',
@@ -459,12 +534,13 @@ $(function () {
                             title: 'Oops!',
                             text: result.message,
                         }).then((result) => {
+
                             setTimeout(function () {
+                                $('#receive_btn').removeAttr('disabled')
                                 track_document(input.val())
                             }, 200);
                         });
                     }
-
                     // console.log(result);
                     // if (result.Message == 'true') {
                     //     console.log(result);
