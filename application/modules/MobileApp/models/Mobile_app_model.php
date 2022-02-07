@@ -329,6 +329,7 @@ public function outgoing_documents($my_office_code){
 								->from('document_profile')
 								->where('office_code',$my_office_code)
 								->where('status','Verified')
+								->or_where('status','Archived')
 								->get()
 								->result();
 		// $consolidate_outgoing = array();
@@ -749,8 +750,7 @@ public function release_document(){
 		$action = json_decode($this->input->post('action'));
 		$remarks = json_decode($this->input->post('remarks'));
 		$doc_prefix = json_decode($this->input->post('doc_prefix'));
-		$file=json_decode($this->input->post('file_attachments'));
-		var_dump(count($file));
+		$file=json_decode($this->input->post('file_attachments'));		
 		// file upload
 		if(count($file) != 0 ){
 			for($i = 0 ; $i < count($file) ; $i++){
@@ -960,7 +960,8 @@ public function get_history($document_number){
 										rcl.transacting_user_fullname,  
 										rcl.status as rcl_status,  
 										CONCAT( DATE_FORMAT(rcl.log_date,"%M %e, %Y"),"\n", TIME_FORMAT(rcl.log_date,"%r")) as time,
-										rcl.remarks as rcl_remarks
+										rcl.remarks as rcl_remarks,
+										dp.origin_type
 										
 										')
 							->from('document_profile as dp')															
