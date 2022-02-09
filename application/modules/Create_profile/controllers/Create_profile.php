@@ -140,14 +140,6 @@ class Create_profile extends MY_Controller {
 		$this->output->set_content_type('text/javascript');
 		$this->load->view('Create_profile.js');
 	}
-	
-    public function check_exists(){
-      	if (isset($_GET['params'])) {
-	        $params = strtoupper($_GET['params']);
-	        $results = $this->Create_profile_model->check_exists($params);
-	      	echo json_encode($results);
-    	}
-	}
 
 	public function get_recipients(){
 		if (isset($_GET['term'])){

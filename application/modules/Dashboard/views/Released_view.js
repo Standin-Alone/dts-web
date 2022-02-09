@@ -31,7 +31,7 @@ $(document).ready(function () {
 
     var picked_start = '';
     var picked_end   = '';
-    var type         = 'Received';
+    var type         = 'Released';
     var status       = '';
     var origin_type  = '';
     var document_type= '';
@@ -57,7 +57,7 @@ $(document).ready(function () {
             dataType: 'json',
         }).responseJSON;
     */
-  var table =  $('#received_table').DataTable({
+  var table =  $('#release_table').DataTable({
         //data: received_data,
         dom: 'Blfrtip',
         processing: true,

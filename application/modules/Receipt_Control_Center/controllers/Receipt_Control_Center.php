@@ -67,9 +67,19 @@ class Receipt_Control_Center extends MY_Controller
 		$result = $this->RCC_model->receive_document();
 		echo json_encode($result);
 	}
+	public function get_received()
+	{
+		$result = $this->RCC_model->get_received();
+		echo json_encode($result);
+	}
 	public function release_document()
 	{
 		$result = $this->RCC_model->release_document();
+		echo json_encode($result);
+	}
+	public function get_released_documents()
+	{
+		$result = $this->RCC_model->get_released_documents();
 		echo json_encode($result);
 	}
 
@@ -83,7 +93,6 @@ class Receipt_Control_Center extends MY_Controller
 		$result = $this->RCC_model->get_origin_current_office($document_number);
 		echo json_encode($result);
 	}
-
 	public function upload_file()
 	{
 

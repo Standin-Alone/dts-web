@@ -102,6 +102,15 @@
 <div id="content" class="content">
     <!-- begin row -->
     <div class="row">
+        <?php 
+        //echo $owner;
+        //array_push($valid_recipients, array('recipient_office_code' => $owner));
+        //echo '</br>';
+        echo '<pre>';
+        //print_r($valid_recipients);
+        echo '</pre>';
+        //echo '</br>';
+        ?>
         <!-- begin col-8 -->
         <div class="col-lg-4">
             <div class="row">
@@ -118,15 +127,9 @@
                                 <a href="javascript:;" class="btn btn-sm btn-icon btn-success release_btn" title="Release"><i class="fas fa-share"></i></a>
                                 <?php } ?>
                                 <?php
-                                    //if($document_information['document_details'][0]->office_code == $this->session->userdata('office')){
-                                        if($document_information['document_current_status'][0]->action == 'Received' && $document_information['document_current_status'][0]->transacting_office == $this->session->userdata('office')){
-                                            echo '<a href="javascript:;" class="btn btn-sm btn-danger archive_btn" title="Archived">Mark as Completed</a>';
-                                        }
-                                    // } else {
-                                    //     if($document_information['document_current_status'][0]->action == 'Received' && $document_information['document_current_status'][0]->transacting_office == $this->session->userdata('office')){
-                                    //         echo '<a href="javascript:;" class="btn btn-sm btn-danger archive_btn" title="Archived">Mark as Completed</a>';
-                                    //     }
-                                    // }
+                                    if($document_information['document_current_status'][0]->action == 'Received' && $document_information['document_current_status'][0]->transacting_office == $this->session->userdata('office')){
+                                        echo '<a href="javascript:;" class="btn btn-sm btn-danger archive_btn" title="Archived">Mark as Completed</a>';
+                                    }
                                 ?>
                             </div>
                             <h4 class="panel-title">Document Information</h4>
@@ -147,7 +150,10 @@
                                         <td class="bg-silver-lighter">Status</td>
                                         <td>
                                             <span class="text-black-lighter label label-success text-white">
-                                            <?php echo $document_information['document_current_status'][0]->action; ?>
+                                            <?php
+                                                $action_val = $document_information['document_current_status'][0]->action;
+                                                if($action_val == 'Marked as Completed'){ echo 'Completed'; } else { echo $action_val; } 
+                                            ?>
                                             </span>
                                         </td>
                                     </tr>
@@ -167,6 +173,7 @@
                                         <td class="bg-silver-lighter">Origin Type</td>
                                         <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->origin_type; ?></span></td>
                                     </tr>
+                                    <?php if($document_information['document_details'][0]->origin_type == 'External'){ ?>
                                     <tr>
                                         <td class="bg-silver-lighter">Sender Name</td>
                                         <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->sender_name; ?> </span></td>
@@ -179,6 +186,7 @@
                                         <td class="bg-silver-lighter">Sender Address</td>
                                         <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->sender_address; ?></span></td>
                                     </tr>
+                                    <?php } ?>
                                     <tr>
                                         <td class="bg-silver-lighter">Subject</td>
                                         <td><span class="text-black-lighter"><?php echo $document_information['document_details'][0]->subject; ?></span></td>
@@ -541,14 +549,14 @@
                     <div class="form-group row m-b-15">
                         <label class="col-md-3 col-form-label text-md-right">Subject</label>
                         <div class="col-md-7">
-                            <textarea class="textarea form-control" name="subject" id="subject" placeholder="Enter text ..." rows="10"></textarea>
+                            <textarea class="textarea form-control" name="subject" id="subject_update" placeholder="Enter text ..." rows="10"></textarea>
                         </div>
                         <div class="col-md-2">&nbsp;</div>
                     </div>
                     <div class="form-group row m-b-15">
                         <label class="col-md-3 col-form-label text-md-right">Remarks</label>
                         <div class="col-md-7">
-                            <textarea class="textarea form-control" name="remarks" id="remarks" placeholder="Enter text ..." rows="10"></textarea>
+                            <textarea class="textarea form-control" name="remarks" id="remarks_update" placeholder="Enter text ..." rows="10"></textarea>
                         </div>
                         <div class="col-md-2">&nbsp;</div>
                     </div>
@@ -584,6 +592,7 @@
                         <div class="form-group">
                             <label>Employee Name:</label>
                             <input type="text"  id="signatory_emp" name="signatory_emp" class="form-control" placeholder="Search by Employee Lastname, Click & Select.">
+                            <input type="hidden"  id="signatory_user_id" name="signatory_user_id" class="form-control" placeholder="Search by Employee Lastname, Click & Select.">
                         </div>
                         <div class="form-group">
                             <label>Position/Designation:</label>

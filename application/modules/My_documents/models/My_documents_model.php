@@ -12,43 +12,6 @@ class My_documents_model extends CI_Model {
 		return Uuid::uuid4();
 	}
 
-	public function update_user(){
-		//$result = 'fail';
-		$result['event'] = 'success';
-		$user_id = $this->input->post('user_id', true);
-		// $name = $this->input->post('name', true);
-		//$email = $this->input->post('email', true);
-		$status = $this->input->post('status', true);
-
-		$pras_data = array(
-
-			// 'name'   => trim(strtoupper($name)),
-			//'email'   => trim(strtoupper($email)),
-			'active'   => trim(strtoupper($status)),
-		);
-
-		$pras = $this->db->where('user_id', $user_id)->update('users', $pras_data);
-
-		if($pras){
-			// $last_query 	= $this->db->get_where('pras_table', array('pras_id' => $pras_id));
-			// $result['data'] = $last_query->result();
-			// $result['data'][0]->pras_id;
-			return $result;
-		}
-		$result['event'] = 'fail';
-		return $result;
-	}
-
-	public function check_exists($params){
-		$query = $this->db->where('pras_num', $params)
-						  ->get('pras_table');
-		$output['dedup'] = $query->num_rows();
-
-		if($query){
-			return $output;
-		}
-	}
-
 	public function get_by_user(){
 		$draw   = $this->input->post('draw', true);
 		$start  = $this->input->post('start', true);
@@ -182,53 +145,6 @@ class My_documents_model extends CI_Model {
 		$query = $this->db->get();
 
 		return $query->num_rows();
-	}
-
-
-	public function get_users_update(){
-		$user_id = $this->input->post('user_id', true);
-		$query = $this->db->where('user_id', $user_id)
-						  ->get('users');
-		if($query){
-			return $query->result_array();
-		}
-	}
-
-  	public function register($pw_update_data){
-		$result = 'fail';
-
-		$register_id = Uuid::Uuid4()->toString();
-        $register_data = array(
-            'user_id' => $register_id,
-            "email" => trim(strtoupper($pw_update_data['email'])),
-            "name" => trim(strtoupper($pw_update_data['fullname'])),
-            "username" => trim(strtoupper($pw_update_data['username'])),
-            "password" => $pw_update_data['password'],
-            "type" => 'admin'
-        );
-
-		$query = $this->db->insert('users', $register_data);
-
-		if($query){
-			$create_token = $this->insertToken($register_id);
-			if($create_token){
-				$result = 'success';
-			}
-		}
-		return $result;
-	}
-
-    public function insertToken($register_id){
-		$token = substr(sha1(rand()), 0, 30);
-		$date  = date('Y-m-d');
-		$string = array(
-			'token'   => $token,
-			'user_id' => $register_id,
-			'date' 	  => $date
-		);
-
-		$query = $this->db->insert('users_token', $string);
-		return $token.$register_id;
 	}
 
 }

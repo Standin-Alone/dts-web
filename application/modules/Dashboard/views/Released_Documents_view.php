@@ -25,6 +25,10 @@
         display: block;
     }
 
+    .dt-buttons{
+        display: none;
+    }
+
     #test1 {
         height: 343px !important;
         width: 343px !important;
@@ -128,9 +132,10 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                     </div>
                     <div class="d-flex align-items-center justify-content-between mb-1">
                         <div class="btn-group ml-3" role="group" aria-label="Basic example">
-                            <button class="btn btn-danger"><i class="fa fa-file-pdf mr-1"></i> PDF</button>
-                            <button class="btn btn-success"><i class="fa fa-file-csv mr-1"></i> CSV</button>
-                            <button class="btn btn-primary"><i class="fa fa-file-word mr-1"></i> WORD</button>
+                            <button class="btn btn-warning" id="btn_print"><i class="fas fa-print mr-1"></i> Print</button>
+                            <button class="btn btn-danger" id="btn_pdf"><i class="fa fa-file-pdf mr-1"></i> PDF</button>
+                            <button class="btn btn-success" id="btn_csv"><i class="fa fa-file-csv mr-1"></i> CSV</button>
+                            <button class="btn btn-primary" id="btn_excel"><i class="fa fa-file-excel mr-1"></i> Excel</button>
                         </div>
                         <button class="btn btn-warning"><i class="fa fa-print mr-1"></i> Generate Report</button>
                     </div>
@@ -143,11 +148,15 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                     </div>
                     <div class="d-lg-flex flex-sm-row align-items-end mb-1 justify-content-between">
                         <div class="col-lg-4 col-md-12 d-lg-flex flex-row align-items-end mb-2">
-                            <a href="#" class="btn btn-dark text-truncate" id="daterange-filter">
+                            <!-- <a href="#" class="btn btn-dark text-truncate" id="daterange-filter">
                                 <i class="fa fa-calendar fa-fw text-white text-opacity-50 ms-n1"></i>
                                 <span>22 November 2021 - 21 December 2021</span>
                                 <b class="caret ms-1 opacity-5"></b>
-                            </a>
+                            </a> -->
+                            <div id="reportrange" class="rounded border form-control ml-2" style="background: #fff; cursor: pointer; border: 1px solid #ccc; width: 100%">
+                                <i class="fa fa-calendar"></i>&nbsp;
+                                <span data-column="6" id="date_range"></span> <i class="fa fa-caret-down"></i>
+                            </div>
                         </div>
                         <div class="col-lg-8 col-md-12 d-lg-flex flex-row align-items-end">
                             <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
@@ -295,7 +304,26 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
 
 <script>
     $(document).ready(function() {
-        $('#release_table').DataTable();
+
+        var start = moment().subtract(29, 'days');
+        var end = moment();
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY')).trigger('change');
+        }
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+        cb(start, end);
     });
 </script>
 <script>

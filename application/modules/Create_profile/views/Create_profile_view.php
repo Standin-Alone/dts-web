@@ -414,7 +414,7 @@
                         <div class="form-group">
                             <label>Employee Name:</label>
                             <input type="text"  id="signatory_emp" class="form-control" placeholder="Search by Employee Lastname, Click & Select.">
-                            <input type="hidden" id="modal_sig_emp_code" name="modal_sig_emp_code">
+                            <input type="hidden" id="signatory_id" name="signatory_id">
                         </div>
                         <div class="form-group">
                             <label>Position/Designation:</label>
@@ -624,7 +624,7 @@ $(document).ready(function(){
     $("#signatory_emp").autocomplete({
         source: function( request, response ) {
             var sig_emp_code = $('#signatory_emp').val();
-            $.getJSON( 'View_document/get_signature_da_name', {
+            $.getJSON( 'Create_profile/get_signature_da_name', {
                 // 'agency_id': '9304df8f-a323-453d-a458-ab728e1bc419',
                 'term': request.term
             }, response );
@@ -635,7 +635,7 @@ $(document).ready(function(){
             event.preventDefault();
             // manually update the textbox and hidden field
             $(this).val(ui.item.label);
-            //$('#modal_sig_emp_code').val(ui.item.value);
+            $('#signatory_id').val(ui.item.value);
         }
         // ,
         // change: function (event, ui) {
@@ -698,7 +698,7 @@ $(document).ready(function(){
         var signatory_emp    = $('#signatory_emp').val();
         var designation      = $('[name="sinatory_designation"]').val();
         var signatory_office = $('#signatory_office').val();
-        //var signatory_emp_code    = $('[name="modal_sig_emp_code"]').val();
+        var signatory_user_id    = $('[name="signatory_id"]').val();
         var signatory_office_code = $('[name="modal_sig_office_code"]').val();
 
         if(signatory_emp == ''){
@@ -732,7 +732,7 @@ $(document).ready(function(){
                     '<td class="text-center td_emp">'+signatory_emp+'</td>'+
                     '<td class="text-center td_desig">'+designation+'</td>'+
                     '<td class="text-center"><span class="td_office">'+signatory_office+'</span>'+
-                        //'<input type="hidden" name="signatory_emp_code[]" value="'+signatory_emp_code+'">'+
+                        '<input type="hidden" name="signatory_user_id[]" value="'+signatory_user_id+'">'+
                         '<input type="hidden" name="signatory_designation_desc[]" value="'+designation+'">'+
                         '<input type="hidden" name="signatory_office_code[]" value="'+signatory_office_code+'">'+
                         '<input type="hidden" name="signatory_user_fullname[]" value="'+signatory_emp+'">'+

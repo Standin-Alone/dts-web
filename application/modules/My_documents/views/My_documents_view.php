@@ -1,10 +1,18 @@
+<style type="text/css">
+    .nav.nav-tabs.nav-tabs-inverse>li>a {
+        background: #00acac; 
+    }
+    .nav.nav-tabs.nav-tabs-inverse>li>a:hover {
+        background: #00acac;
+    }
+</style>
 <div id="content" class="content">
     <!-- begin row -->
     <div class="row">
 <!--         <div class="col-lg-12 mb-1">
                 <a href="javascript:void(0)" class="btn btn-sm btn-danger pull-right btn-lg" data-toggle="modal" id="add-user">Add User</a>
         </div> -->
-        <div class="col-lg-12 mb-1">
+<!--         <div class="col-lg-12 mb-1">
             <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
             <button type="submit" class="btn btn-success" id="add_profile_button">
                 <span class="icon text-white-50">
@@ -12,7 +20,7 @@
                 </span>
                 <span class="text">Create Profile</span>
             </button>
-        </div>
+        </div> -->
         <!-- begin col-8 -->
         <div class="col-lg-12">
                     <!-- begin panel -->
@@ -108,63 +116,15 @@
     </div>
     <!-- end row -->
 </div>
-<!-- #modal-alert -->
-<div class="modal fade" id="modal-add-user">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add New User</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            </div>
-            <form id="add_useradmin" autocomplete="off">
-            <div class="modal-body">
-                <fieldset>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <label for="add_username">Username</label>
-                            <input type="text" class="form-control" name="add_username" id="add_username"/>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="form-group col-lg-12">
-                            <label for="add_email">Email</label>
-                            <input type="text" class="form-control" name="add_email" id="add_email"/>
-                        </div>
-                    </div>
-                </fieldset>
-            </div>
-            <div class="modal-footer">
-                <input type="hidden" name="<?php echo $this->security->get_csrf_token_name(); ?>" value="<?php echo $this->security->get_csrf_hash(); ?>">
-                <button type="button" class="btn btn-danger" data-dismiss="modal"><i class="fa fa-lock"></i> Close</button>
-                <button type="submit" class="btn btn-success" id="add_admin"><i class="fa fa-save"></i> Add User</button>
-            </div>
-            </form>
-        </div>
-    </div>
-</div>
 
-<script>
-var $add_useradmin = $('#add_useradmin');
-var result_email;
-var result_username;
-
-$.validator.addMethod("email", function (value, element) {
-    return this.optional(element) || /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/i.test(value);
-}, "Invalid email address.");
-
-$.validator.addMethod("lettersAndNumbersOnly", function (value, element) {
-    return this.optional(element) || /^[a-zA-Z0-9]+$/i.test(value);
-}, "Please enter letters and numbers only.");
-
+<script type="text/javascript">
 $(document).ready(function() {
-    //App.init();
-    // TableManageResponsive.init();
 
-$('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
-   $($.fn.dataTable.tables(true)).DataTable()
-      .columns.adjust()
-      .responsive.recalc();
-});
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
+       $($.fn.dataTable.tables(true)).DataTable()
+          .columns.adjust()
+          .responsive.recalc();
+    });
 
     $('#my_docs').DataTable({
         //responsive: true,
@@ -215,7 +175,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
             {
                 className: 'text-center align-middle',
                 render: function(data, type, row){
-                var link = '<a href="'+base_url + "View_document/document/"+row.document_number+'" target="_blank" id="view_users" data-id="'+row.document_id+'" data-toggle="tooltip" data-placement="top" title="View Document"><i class="fas fa-folder-open"></i></a>';
+                var link = '<a href="'+base_url + "View_document/document/"+row.document_number+'" target="_blank" data-id="'+row.document_id+'" data-toggle="tooltip" data-placement="top" title="View Document"><i class="fas fa-folder-open"></i></a>';
                     return link;
                 }
 
@@ -223,7 +183,7 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function(e){
         ]
     });
 
-$('#all_docs').DataTable({
+    $('#all_docs').DataTable({
         dom: 'lfrtip',
         processing: true,
         ordering: false,
@@ -276,244 +236,10 @@ $('#all_docs').DataTable({
         ]
     });
 
-    $(document.body).on('click', '#add-user', function(){
-        $('#submit_btn').attr('disabled', true);
-        pras_id = $(this).data('id');
-        $('#modal-add-user').modal('show');
-    });
-
-    // Code for the Validator
-    $('#edit_useradmin').submit(function(e) {
-        e.preventDefault();
-        }).validate({
-            rules: {
-                name: {
-                lettersDashonly: true,
-                required: true
-                },
-                email: {
-                email: true,
-                required: true
-                }
-        },
-        errorPlacement: function ( error, element ) {
-            error.css({"font-size": "12px"});
-            error.addClass( "text-danger" );
-            error.addClass( "invalid-feedback" );
-
-            if( element.prop( "type" ) === "checkbox" ) {
-                error.insertAfter( element.next( "label" ) );
-            } else {
-                error.insertAfter( element );
-            }
-        },
-        highlight: function ( element, errorClass, validClass ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-            console.log(element);
-        },
-        unhighlight: function (element, errorClass, validClass) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-            console.log(element);
-        },
-        submitHandler: function() {
-
-                var formData = $('#edit_useradmin').serializeArray();
-
-                $.ajax({
-                     url:"<?php echo base_url(); ?>My_documents/update_user",   
-                     method:"POST",  
-                     data: formData,
-                     dataType: 'json', 
-                     success:function(results)  
-                     {
-                        if(results.event == 'success'){
-                            // pras_id = results.data[0].pras_id;
-                            //$("#submit_upload").click();
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'User account has been successfully updated.'
-                            }).then((result) => {
-                                //$("#submit_upload").click();
-                                if(result.value){
-                                    location.reload();
-                                }
-                            });
-                        }
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire({
-                            allowOutsideClick: false,
-                            icon: 'warning',
-                            title: 'Something went wrong.',
-                            text: 'Please try again.'
-                        });
-                    }
-
-                });
-        }
-    });
-
-   $(document.body).on('keyup', '#add_email', function(){
-        var email_value = $.trim(this.value);
-            $.ajax({
-                type:"GET",
-                //async: false,
-                url: base_url + 'Login/check_email_exists',
-                dataType: 'json',
-                data: { email_value: email_value },
-                success:function(results) {
-                console.log(results);
-                    //if(results.result == 'success'){
-                        if(results.dedup > 0){
-                            result_email = false;
-                        } else {
-                            result_email = true;
-                        }
-                    //}
-                }
-            });
-    });
-
-    $.validator.addMethod("email_check", 
-        function(value, element) {
-            return result_email;
-        },
-        "Email already exist."
-    );
-
-    $(document.body).on('keyup', '#add_username', function(){
-        var username_value = $.trim(this.value);
-            $.ajax({
-                type:"GET",
-                //async: false,
-                url: base_url + 'Login/check_username_exists',
-                dataType: 'json',
-                data: { username_value: username_value },
-                success:function(results) {
-                console.log(results);
-                    //if(results.result == 'success'){
-                        if(results.dedup > 0){
-                            result_username = false;
-                        } else {
-                            result_username = true;
-                        }
-                    //}
-                }
-            });
-    });
-
-    $.validator.addMethod("username_check", 
-        function(value, element) {
-            return result_username;
-        },
-        "Username already exist."
-    );
-    
-    $add_useradmin.on('submit', function(e) {
-        e.preventDefault();
-        }).validate({
-            rules: {
-                add_email: {
-                    required: true,
-                    minlength: 10,
-                    email: true,
-                    email_check: true
-                },
-                add_username: {
-                    required: true,
-                    minlength: 5,
-                    lettersAndNumbersOnly: true,
-                    username_check: true
-                }
-        },
-        errorPlacement: function ( error, element ) {
-            error.css({"font-size": "12px"});
-            error.addClass( "text-danger" );
-            error.addClass( "invalid-feedback" );
-
-            if( element.prop( "type" ) === "checkbox" ) {
-                error.insertAfter( element.next( "label" ) );
-            } else {
-                error.insertAfter( element );
-            }
-        },
-        highlight: function ( element, errorClass, validClass ) {
-            $( element ).addClass( "is-invalid" ).removeClass( "is-valid" );
-            console.log(element);
-        },
-        unhighlight: function (element, errorClass, validClass) {
-            $( element ).addClass( "is-valid" ).removeClass( "is-invalid" );
-            console.log(element);
-        },
-        submitHandler: function() {
-
-                var formData = $('#add_useradmin').serializeArray();
-
-                $.ajax({
-                    url:"<?php echo base_url(); ?>My_documents/register",   
-                    method:"POST",  
-                    data: formData,
-                    dataType: 'json', 
-                    success:function(r)  
-                    {
-                        if(r == 'success'){
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Added New User',
-                                text: 'New user has been added successfully.'
-                            }).then((result) => {
-                                if(result.value){
-                                    location.reload();
-                                }
-                            });
-                        }
-                    },
-                    error: function (jqXHR, textStatus, errorThrown)
-                    {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Something went wrong.',
-                            text: 'Please try again.'
-                        }).then((result) => {
-                            if(result.value){
-                                location.reload();
-                            }
-                        });
-                    }
-                });
-        }
-    });
-
     $('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
         $.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
     } );   
 
-    $(document.body).on('click', '#view_users', function(){
-        var user_id = $(this).data('id');
-            $.ajax({
-                type:"POST",
-                //async: false,
-                url: base_url + 'My_documents/get_users_update',
-                dataType: 'json',
-                data: { user_id: user_id},
-                success:function(results) {
-                    $.each(results, function(k,v){
-                        $('#update_view').css('display','');
-                        $('#name').val(v.name);
-                        $('#email').val(v.email);
-                        $('#user_id').val(v.user_id);
-                        $('#username').val(v.username);
-                        if(v.active == 'active'){ 
-                            $('input:radio[name="status"][value="active"]').attr('checked', true);
-                        } else {
-                            $('input:radio[name="status"][value="inactive"]').attr('checked', true);
-                        }
-                    });
-                }
-            });
-    });
 });
 </script>
 

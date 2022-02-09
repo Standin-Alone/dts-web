@@ -73,7 +73,7 @@ class Dashboard_model extends CI_Model
                             ")
             ->from("document_recipients")
             ->where("recipient_office_code", $office_code)
-            ->where("owner", "N")
+            // ->where("owner", "N")
             ->where("date_added !=", $date_now)
             ->order_by("date_added", "desc")
             ->group_by("document_number")
@@ -154,7 +154,7 @@ class Dashboard_model extends CI_Model
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
             ->where("dp.office_code", $office_code)
             ->like("dp.date_created", $date_now)
-            ->where("status !=", "Draft")
+            ->where("status", "Verified")
             ->order_by("dp.date_created", "desc")
             ->get()->result();
 
@@ -172,6 +172,7 @@ class Dashboard_model extends CI_Model
         dp.document_number,
         dp.subject,
         dt.type as document_type,
+        dp.status,
         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
         dp.date_created as date
         ")
@@ -179,8 +180,9 @@ class Dashboard_model extends CI_Model
             ->join("doc_type as dt", "dp.document_type = dt.type_id")
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
             ->where("dp.office_code", $office_code)
-            ->where("dp.date_created !=", $date_now)
-            ->where("status !=", "Draft")
+            // ->where("dp.date_created !=", $date_now)
+            ->where("(status='Verified' OR status='Archived')")
+            ->group_by("dp.document_number")
             ->order_by("dp.date_created", "desc")
             ->get()->result();
 
@@ -379,6 +381,76 @@ class Dashboard_model extends CI_Model
         return $query;
     }
 
+    // public function get_by_user()
+    // {
+    //     $draw   = $this->input->post('draw', true);
+    //     $start  = $this->input->post('start', true);
+    //     $length = $this->input->post('length', true);
+    //     $search = $this->input->post('search', true);
+    //     $user_id = $this->session->userdata('user_id', true);
+
+
+    //     $this->db->select('*')
+    //         ->from('vw_document_profile_info')
+    //         ->where('office_code', $this->session->userdata('office'));
+
+    //     if ($search != '') {
+    //         $this->db->group_start()
+    //             ->like('document_number', $search['value'])
+    //             ->or_like('date', $search['value'])
+    //             ->or_like('sender_name', $search['value'])
+    //             ->or_like('sender_address', $search['value'])
+    //             ->or_like('subject', $search['value'])
+    //             ->or_like('remarks', $search['value'])
+    //             ->or_like('type', $search['value'])
+    //             ->group_end();
+    //     }
+
+    //     // $this->db->group_by('pras_num')
+    //     $this->db->order_by('date_created', 'DESC')
+    //         ->limit($length, $start);
+
+    //     $query = $this->db->get();
+
+    //     //echo $this->db->last_query();
+
+    //     $data = array(
+    //         'draw'               => $draw,
+    //         'recordsTotal'       => $this->get_total_records($search['value'], $user_id),
+    //         'recordsFiltered' => $this->get_total_records($search['value'], $user_id),
+    //         'data'               => $query->result()
+    //     );
+
+    //     return $data;
+    // }
+
+
+    // public function received_doc_table(){
+    //     $this->db->select('*')
+    //     ->from('vw_document_profile_info')
+    //     ->where('office_code', $this->session->userdata('office'));
+
+    //     if($search != ''){
+    //         $this->db->group_start()
+    //                     ->like('document_number', $search)
+    //                     ->or_like('date', $search)
+    //                     ->or_like('sender_name',$search)
+    //                     ->or_like('sender_address', $search)
+    //                     ->or_like('subject',$search)
+    //                     ->or_like('remarks', $search)
+    //                     ->or_like('type',$search)
+    //                     ->group_end();
+    //         }
+
+    //     // $this->db->group_by('document_number')
+    //     $this->db->order_by('date_created', 'DESC');
+
+    //     $query = $this->db->get();
+
+    //     return $query->num_rows();
+    // }
+
+
     public function released_documents()
     {
         $transacting_user_id = $this->session->userdata('user_id');
@@ -488,8 +560,26 @@ class Dashboard_model extends CI_Model
                     ->group_by('rcl.log_date')
                     ->order_by("rcl.log_date", "desc")
                     ->get()->result();
+
+                $get_binded_documents = $this->db
+                    ->select("
+                    db.binded_doc_number,
+                    db.date_created,
+                    dp.subject,
+                    dt.type,
+                    dt.code,
+                    CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as origin_office,
+                    ")
+                    ->from("document_bind as db")
+                    ->join("document_profile as dp", "db.binded_doc_number = dp.document_number")
+                    ->join('lib_office as lo',  ' dp.office_code = lo.OFFICE_CODE')
+                    ->join('doc_type as dt', 'dt.type_id = dp.document_type')
+                    ->where("orig_doc_number", $document_number)
+                    ->get()->result();
+                // $get_binded_documents = $this->db->select("*")->from("document_bind")->where("doc")
+
                 if ($get_records) {
-                    $result = ["Message" => "true", "document_details" => $document_details, "history" => $get_records];
+                    $result = ["Message" => "true", "document_details" => $document_details, "history" => $get_records, "binded_documents" => $get_binded_documents];
                 }
             } else {
                 //no record
@@ -524,6 +614,7 @@ class Dashboard_model extends CI_Model
         ];
         return $data;
     }
+
     public function get_received_documents()
     {
         $transacting_user_id = $this->session->userdata('user_id');
@@ -537,7 +628,7 @@ class Dashboard_model extends CI_Model
                         dp.subject,
                         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as document_origin,
                         rcl.status,
-                        rcl.log_date
+                        max(log_date) log_date
                          ")
             ->from("receipt_control_logs as rcl")
             ->join("document_profile as dp", "dp.document_number = rcl.document_number")
@@ -545,11 +636,12 @@ class Dashboard_model extends CI_Model
             ->join("doc_type as dt", "dp.document_type = dt.type_id")
             ->where("transacting_office", $office_code)
             ->where("rcl.type", "Received")
-            ->group_by('rcl.document_number')
+            ->order_by("rcl.log_date", "desc")
+            ->group_by('dp.document_number')
             ->get()->result();
-
-        // echo '<pre>', print_r($query), '</pre>';
-
+         /*echo '<pre>'; 
+         echo $this->db->last_query(); 
+         echo '</pre>';*/
         return $query;
     }
     public function get_released_documents()
@@ -573,7 +665,6 @@ class Dashboard_model extends CI_Model
             ->join("doc_type as dt", "dp.document_type = dt.type_id")
             ->where("transacting_office", $office_code)
             ->where("rcl.type", "Released")
-            ->where("transacting_user_id", $transacting_user_id)
             ->group_by('rcl.document_number')
             ->get()->result();
 
@@ -674,7 +765,6 @@ class Dashboard_model extends CI_Model
                 ON dp.`document_number` = dr.`document_number` 
                 JOIN doc_type as dt ON dp.`document_type` = dt.`type_id` 
                 WHERE dr.`recipient_office_code` = '$office_code' 
-                AND owner = 'N' 
                 GROUP BY dp.`document_number` 
                 )  as document
             ")
@@ -705,12 +795,9 @@ class Dashboard_model extends CI_Model
                 dp.`type`, 
                 dt.`type` as type_desc 
                 FROM document_profile as dp 
-                JOIN document_recipients as dr 
-                ON dp.`document_number` = dr.`document_number` 
                 JOIN doc_type as dt ON dp.`document_type` = dt.`type_id` 
-                WHERE dr.`recipient_office_code` = '$office_code' 
-                AND owner = 'N' 
-                GROUP BY dp.`document_number` 
+                WHERE dp.`office_code` = '$office_code'
+                AND (dp.`status` = 'Verified' || dp.`status` = 'Archived') 
                 )  as document
             ")
             ->group_by("document.type")
@@ -794,80 +881,25 @@ class Dashboard_model extends CI_Model
         return $query;
     }
 
+    function array_orderby()
+        {
+            $args = func_get_args();
+            $data = array_shift($args);
+            foreach ($args as $n => $field) {
+                if (is_string($field)) {
+                    $tmp = array();
+                    foreach ($data as $key => $row)
+                        $tmp[$key] = $row[$field];
+                    $args[$n] = $tmp;
+                }
+            }
+            $args[] = &$data;
+            call_user_func_array('array_multisort', $args);
+            return array_pop($args);
+        }
+
     public function get_over_due_incoming()
     {
-        // $user_id = $this->session->userdata('user_id');
-        // $office_code = $this->session->userdata('office');
-        // $date_now = date("Y-m-d");
-
-        // $query = $this->db
-        //     ->select("
-        //     dr.document_number,
-        //     dr.date_added as date,
-        //     ")
-        //     ->from("document_recipients as dr")
-        //     ->join("document_profile as dp", "dr.document_number = dp.document_number")
-        //     ->where("dr.recipient_office_code", $office_code)
-        //     ->where("dp.status", "Verified")
-        //     ->group_by("dr.document_number")
-        //     ->order_by("date_created", "desc")
-        //     ->get()->result();
-
-        // $latest_transaction = [];
-        // foreach ($query as $row) {
-        //     $get_latest_transaction = $this->db
-        //         ->select("
-        //         rcl.document_number, 
-        //         dt.type as doc_type,
-        //         dp.subject,
-        //         rcl.transacting_user_fullname, 
-        //         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
-        //         rcl.type, 
-        //         rcl.log_date
-        //         ")
-        //         ->from("receipt_control_logs as rcl")
-        //         ->join("document_profile as dp", "rcl.document_number = dp.document_number")
-        //         ->join("doc_type as dt", "dp.document_type = dt.type_id")
-        //         ->join("document_recipients as dr", "rcl.document_number = dr.document_number")
-        //         ->join("lib_office as lo", "dr.added_by_user_office = lo.OFFICE_CODE")
-        //         ->where("rcl.document_number", $row->document_number)
-        //         ->where("rcl.transacting_office", $office_code)
-        //         ->where("rcl.status", "1")
-        //         ->limit(1)
-        //         ->order_by("log_date", "asc")
-        //         ->group_by("rcl.document_number")
-        //         ->get()->result();
-
-        //     if ($get_latest_transaction) {
-        //         if ($get_latest_transaction[0]->type == "Received") {
-        //             $log_date = $get_latest_transaction[0]->log_date;
-
-        //             $datetime1 = strtotime($log_date);
-        //             $datetime2 = strtotime(date("Y-m-d h:i:s"));
-        //             $secs = $datetime2 - $datetime1; // == <seconds between the two times>
-        //             $days = $secs / 86400;
-
-        //             if ($days > 3) {
-        //                 $latest_transaction[] = [
-        //                     'interval' => round($days),
-        //                     'details' => [
-        //                         'document_number' =>   $get_latest_transaction[0]->document_number,
-        //                         'doc_type' => $get_latest_transaction[0]->doc_type,
-        //                         'subject' => $get_latest_transaction[0]->subject,
-        //                         'from_office' => $get_latest_transaction[0]->from_office,
-        //                         'log_date' => $get_latest_transaction[0]->log_date,
-        //                     ]
-        //                 ];
-        //             }
-        //         }
-        //     }
-        // }
-        // // print_r($latest_transaction);
-
-        // // return   $helikapter = "";
-        // return $latest_transaction;
-
-
         $transacting_user_id = $this->session->userdata('user_id');
         $office_code = $this->session->userdata('office');
         $date_now = date("Y-m-d");
@@ -888,34 +920,36 @@ class Dashboard_model extends CI_Model
             ->where("transacting_office", $office_code)
             ->where("rcl.type", "Received")
             ->where("rcl.status", "1")
+            ->where("dp.status", "Verified")
             // ->like("rcl.log_date", $date_now)
-            ->where("transacting_user_id", $transacting_user_id)
             ->group_by('rcl.document_number')
             ->order_by("rcl.log_date", "desc")
             ->get()->result();
 
         $overdue = [];
-        if ($query){
+        if ($query) {
             foreach ($query as $row) {
                 $last_transaction = $this->db
-                ->select("
+                    ->select("
                 rcl.document_number,
                 rcl.type,
                 dt.type as doc_type,
                 dp.subject,
                 rcl.log_date
                 ")
-                ->from("receipt_control_logs as rcl")
-                ->join("document_profile as dp", "rcl.document_number = dp.document_number")
-                ->join("doc_type as dt", "dp.document_type = dt.type_id")
-                ->where("rcl.document_number", $row->document_number)
-                ->where("rcl.transacting_office", $office_code)
-                ->limit(1)
-                ->order_by("rcl.log_date", "desc")
-                ->get()
-                ->row();
-                if ($last_transaction){
-                    if ($last_transaction->type == 'Received'){
+                    ->from("receipt_control_logs as rcl")
+                    ->join("document_profile as dp", "rcl.document_number = dp.document_number")
+                    ->join("doc_type as dt", "dp.document_type = dt.type_id")
+                    ->where("rcl.document_number", $row->document_number)
+                    ->where("rcl.status", "1")
+                    ->where("dp.status", "Verified")
+                    ->where("rcl.transacting_office", $office_code)
+                    ->limit(1)
+                    ->order_by("rcl.log_date", "desc")
+                    ->get()
+                    ->row();
+                if ($last_transaction) {
+                    if ($last_transaction->type == 'Received') {
                         $log_date = $last_transaction->log_date;
 
                         $datetime1 = strtotime($log_date);
@@ -924,19 +958,19 @@ class Dashboard_model extends CI_Model
                         $days = $secs / 86400;
 
                         $from_office = $this->db
-                        ->select("
+                            ->select("
                         CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as from_office,
                         ")
-                        ->from("document_recipients as dr")
-                        ->join("lib_office as lo", "dr.added_by_user_office = lo.OFFICE_CODE")
-                        ->where("document_number", $last_transaction->document_number)
-                        ->where("recipient_office_code", $office_code)
-                        ->limit(1)
-                        ->get()->row();
+                            ->from("document_recipients as dr")
+                            ->join("lib_office as lo", "dr.added_by_user_office = lo.OFFICE_CODE")
+                            ->where("document_number", $last_transaction->document_number)
+                            ->where("recipient_office_code", $office_code)
+                            ->limit(1)
+                            ->get()->row();
 
                         if ($days > 3) {
                             $overdue[] = [
-                                'interval' => round($days),
+                                'interval' => $days,
                                 'details' => [
                                     'document_number' =>   $row->document_number,
                                     'doc_type' => $row->doc_type,
@@ -951,10 +985,121 @@ class Dashboard_model extends CI_Model
             }
         }
 
+        
+
+        $sorted = $this->array_orderby($overdue, 'interval', SORT_ASC);
+
+        return $sorted;
+    }
 
 
-        // echo '<pre>', print_r($query), '</pre>';
-        return $overdue;
+    public function get_over_due_outgoing()
+    {
+        $transacting_user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        //get all profiled documents
+        $query = $this->db->select("
+                        dp.document_number,
+                        dt.type as doc_type,
+                        dp.origin_type,
+                        dp.subject,
+                        CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as from_office,
+                        dp.status,
+                        dp.date_created
+                         ")
+            ->from("document_profile as dp")
+            ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
+            ->join("doc_type as dt", "dp.document_type = dt.type_id")
+            ->where("dp.office_code", $office_code)
+            ->where("dp.status", "Verified")
+            // ->like("rcl.log_date", $date_now)
+            ->order_by("dp.date_created", "desc")
+            ->get()->result();
+      
+    //   print_r($query);
+        $overdue = [];
+        if ($query) {
+            foreach ($query as $row) {
+                //get the last transaction
+                $last_transaction = $this->db
+                    ->select("
+                rcl.document_number,
+                CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as current_office,
+                rcl.type,
+                dt.type as doc_type,
+                dp.subject,
+                rcl.log_date
+                ")
+                    ->from("receipt_control_logs as rcl")
+                    ->join("document_profile as dp", "rcl.document_number = dp.document_number")
+                    ->join("doc_type as dt", "dp.document_type = dt.type_id")
+                    ->join("lib_office as lo", "rcl.transacting_office = lo.OFFICE_CODE")
+                    ->where("rcl.document_number", $row->document_number)
+                    ->where("rcl.status", "1")
+                    ->where("dp.status", "Verified")
+                    // ->where("rcl.transacting_office", $office_code)
+                    ->limit(1)
+                    ->order_by("rcl.log_date", "desc")
+                    ->get()
+                    ->row();
+
+              
+                if ($last_transaction) {
+                    if ($last_transaction->type == 'Received') {
+                        $log_date = $last_transaction->log_date;
+
+                        $datetime1 = strtotime($log_date);
+                        $datetime2 = strtotime(date("Y-m-d h:i:s"));
+                        $secs = $datetime2 - $datetime1; // == <seconds between the two times>
+                        $days = $secs / 86400;
+
+                        $from_office = $this->db
+                            ->select("
+                        CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as from_office,
+                        ")
+                            ->from("document_recipients as dr")
+                            ->join("lib_office as lo", "dr.added_by_user_office = lo.OFFICE_CODE")
+                            ->where("document_number", $last_transaction->document_number)
+                            ->where("recipient_office_code", $office_code)
+                            ->limit(1)
+                            ->get()->row();
+
+                        if ($days > 3) {
+                            $overdue[] = [
+                                'interval' => $days,
+                                'details' => [
+                                    'document_number' =>   $row->document_number,
+                                    'doc_type' => $row->doc_type,
+                                    'subject' => $row->subject,
+                                    'current_office' => $last_transaction->current_office,
+                                    'log_date' => $last_transaction->log_date,
+                                ]
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+        // print_r($overdue);
+        
+        $sorted = $this->array_orderby($overdue, 'interval', SORT_ASC);
+
+        return $sorted;
+    }
+
+    public function count_overdue(){
+        $incoming = count($this->get_over_due_incoming());
+        $outgoing = count($this->get_over_due_outgoing());
+
+
+        return [
+            'count_incoming' => $incoming,
+            'count_outgoing' => $outgoing,
+            'count_total' => $incoming + $outgoing
+        ];
+        
     }
 
     public function get_dissemination_documents()
@@ -978,5 +1123,145 @@ class Dashboard_model extends CI_Model
             ->where("a.for", 3);
 
         return $query->get()->result();
+    }
+    public function get_recent_incoming()
+    {
+        $user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $first_date = date("Y-m-d", strtotime($date_now . '-2 days'));
+        $second_date = date("Y-m-d", strtotime($date_now . '-1 day'));
+
+        $get_assign_doc = $this->db->select("
+                                dp.document_number,
+                                dp.subject,
+                                dt.type as document_type,
+                                CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
+                                dp.date_created as date,
+                                dr.active
+        ")
+            ->from("document_profile as dp")
+            ->where("recipient_office_code", $office_code)
+            ->where("dp.date >=", $first_date)
+            ->where("dp.date <=", $second_date)
+            // ->like('dp.date_created', $date_now)
+            // ->where("dr.active", "1")
+            ->where("dp.status", "Verified")
+            ->join("doc_type as dt", "dp.document_type = dt.type_id")
+            ->join("document_recipients as dr", "dp.document_number = dr.document_number")
+            ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
+            ->where("recipient_office_code", $office_code)
+            ->group_by("dp.document_number")
+            ->order_by("date_added", "desc")
+            ->get()->result();
+
+        // print_r($get_assign_doc);
+
+        return $get_assign_doc;
+    }
+
+    public function get_documents(){
+        $transacting_user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $draw   = $this->input->post('draw', true);
+        $start  = $this->input->post('start', true);
+        $length = $this->input->post('length', true);
+        $search = $this->input->post('search', true);
+        $type   = $this->input->post('type', true);
+
+        $date_start    = $this->input->post('date_start', true);
+        $date_end      = $this->input->post('date_end', true);
+        $status        = $this->input->post('status', true);
+        $origin_type   = $this->input->post('origin_type', true);
+        $document_type = $this->input->post('document_type', true);
+
+        $this->db->select('*')
+                 ->from('vw_latest_rnc')
+                 ->where('transacting_office', $office_code)
+                 ->where('type', $type);
+
+        if($date_start != ''){
+            $this->db->where("DATE(log_date) BETWEEN '$date_start' AND '$date_end'");
+        }
+
+        if($status != ''){
+            $this->db->where('status', $status);
+        }
+
+        if($origin_type != ''){
+            $this->db->where('origin_type', $origin_type);
+        }
+
+        if($document_type != ''){
+            $this->db->where('document_type', $document_type);
+        }
+
+        if($search['value'] != ''){
+            $this->db->group_start()
+                     ->like('document_number', $search['value'])
+                     ->or_like('document_type', $search['value'])
+                     ->or_like('origin_type', $search['value'])
+                     ->or_like('subject', $search['value'])
+                     ->or_like('document_origin', $search['value'])
+                     ->group_end();
+        }
+
+        $this->db->order_by('log_date', 'DESC')
+                 ->limit($length, $start);
+
+        $query = $this->db->get();
+
+        $data = array(
+            'draw'            => $draw,
+            'recordsTotal'    => $this->get_total_documents($search['value'], $type, $date_start, $date_end, $status, $origin_type, $document_type),
+            'recordsFiltered' => $this->get_total_documents($search['value'], $type, $date_start, $date_end, $status, $origin_type, $document_type),
+            'data'            => $query->result()
+        );
+
+        return $data;
+    }
+
+    public function get_total_documents($search, $type,  $date_start, $date_end, $status, $origin_type, $document_type){
+        $transacting_user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $this->db->select('*')
+                 ->from('vw_latest_rnc')
+                 ->where('transacting_office', $office_code)
+                 ->where('type', $type);
+
+        if($date_start != ''){
+            $this->db->where("DATE(log_date) BETWEEN '$date_start' AND '$date_end'");
+        }
+
+        if($status != ''){
+            $this->db->where('status', $status);
+        }
+
+        if($origin_type != ''){
+            $this->db->where('origin_type', $origin_type);
+        }
+
+        if($document_type != ''){
+            $this->db->where('document_type', $document_type);
+        }
+
+        if($search != ''){
+            $this->db->group_start()
+                     ->like('document_number', $search)
+                     ->or_like('document_type', $search)
+                     ->or_like('origin_type', $search)
+                     ->or_like('subject', $search)
+                     ->or_like('document_origin', $search)
+                     ->group_end();
+        }
+
+        $query = $this->db->get();
+
+        return $query->num_rows();
     }
 }

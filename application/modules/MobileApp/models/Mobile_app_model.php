@@ -1169,11 +1169,16 @@ public function get_history($document_number){
 								->join('lib_office as lo','lo.office_code = dr.recipient_office_code')
 								->where('document_number', $document_number)																	
 								->get()
-								->result();																				
+								->result();		
+								
+		$get_binded_document_number = 	$this->db->select('*')
+												->from('document_bind')
+												->where('orig_doc_number', 'DA-CO-ICTS-PY20220202-00001')
+												->get()->row();															
 								
 								
 		if($get_records){
-			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients,"document_info" => $get_document_info];
+			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients,"document_info" => $get_document_info,"binded_doc_number" => $get_binded_document_number->binded_doc_number];
 		}
 		
 	}catch(\Exception $e){

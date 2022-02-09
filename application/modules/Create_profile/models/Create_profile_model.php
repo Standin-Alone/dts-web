@@ -18,7 +18,7 @@ class Create_profile_model extends CI_Model
 
 		$result['event'] = 'success';
 		$recipients = $this->input->post('recipients', true);
-		//$signatory_emp_code = $this->input->post('signatory_emp_code', true);
+		$signatory_user_id = $this->input->post('signatory_user_id', true);
 		$signatory_designation_desc = $this->input->post('signatory_designation_desc', true);
 		$signatory_office_code = $this->input->post('signatory_office_code', true);
 		$signatory_user_fullname = $this->input->post('signatory_user_fullname', true);
@@ -93,7 +93,7 @@ class Create_profile_model extends CI_Model
 					foreach ($signatory_user_fullname as $k => $v) {
 						$data_signatories[$k] = array(
 							'document_number' => $result['data'][0]->document_number,
-							//'signatory_user_fullname' => $signatory_emp_code[$k],
+							'signatory_user_id' => $signatory_user_id[$k],
 							'signatory_user_fullname' => $signatory_user_fullname[$k],
 							'designation' 	  => $signatory_designation_desc[$k],
 							'office_code' 		  => $signatory_office_code[$k],
@@ -136,39 +136,6 @@ class Create_profile_model extends CI_Model
 		//echo $output;
 		if ($query) {
 			return $output[0]->for;
-		}
-	}
-
-	public function insert_logs($pras_id)
-	{
-
-		//$check = $this->check_logs($doc_number);
-
-		//if($check == 0){
-		$log = array(
-			'log_id'   			   => Uuid::uuid4(),
-			'pras_id'  => $pras_id,
-			'encoder_id'	   => $this->session->userdata('user_id')
-		);
-
-		$query = $this->db->insert('pras_logs_insert', $log);
-
-		if ($query) {
-			return 'success';
-		} else {
-			return 'fail';
-		}
-		//}
-	}
-
-	public function check_exists($params)
-	{
-		$query = $this->db->where('pras_num', $params)
-			->get('pras_table');
-		$output['dedup'] = $query->num_rows();
-
-		if ($query) {
-			return $output;
 		}
 	}
 
@@ -393,6 +360,7 @@ class Create_profile_model extends CI_Model
 			'document_number' => $doc_number,
 			'type'		  => $mode_type,
 			'file_name'		  => $file_name,
+			'uploaded_by_user_office'		=> $this->session->userdata('office'),
 			'uploaded_by_user_id'		=> $this->session->userdata('user_id'),
 			'uploaded_by_user_fullname'		=> $this->session->userdata('fullname')
 		);

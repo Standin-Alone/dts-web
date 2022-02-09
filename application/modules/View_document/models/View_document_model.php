@@ -35,7 +35,7 @@ class View_document_model extends CI_Model {
 		$document_recipients = $this->db->select('*')
 		   	->from('vw_document_recipients')
 		   	->where('document_number', $doc_number)
-		   	//->where('active', '1')
+		   	->where('active', '1')
 		   	->order_by('date_added', 'ASC')
 		   	->get();
 
@@ -176,28 +176,28 @@ class View_document_model extends CI_Model {
 	{
 		$this->db->select('*')
 			->from('vw_document_recipients')
-			->where('document_number', $this->input->post('document_number', true));
-			//->where('active', '1');
+			->where('document_number', $this->input->post('document_number', true))
+			->where('active', '1');
 		$query = $this->db->get();
 		return $query->result();
 	}
 
 	// function check_in_recipients()
- //    {
+	//    {
 	// 	$this->db->select('*')
 	// 		->from('vw_document_recipients')
 	// 		->where('document_number', $this->input->post('document_number', true))
 	// 		->where('active', '1');
- //        $rows = array(); //will hold all results
- //        $query = $this->db->get();
+	//        $rows = array(); //will hold all results
+	//        $query = $this->db->get();
 
- //        foreach($query->result_array() as $row)
- //        {    
- //            $rows[] = $row; //add the fetched result to the result array;
- //        }
+	//        foreach($query->result_array() as $row)
+	//        {    
+	//            $rows[] = $row; //add the fetched result to the result array;
+	//        }
 
- //        return $rows; // returning rows, not row
- //    }
+	//        return $rows; // returning rows, not row
+	//    }
 
 	public function insert_logs($doc_number){
 		
@@ -261,8 +261,7 @@ class View_document_model extends CI_Model {
 
 		$this->db->select('*')
 				 ->from('lib_office')
-				 ->where('NOT EXISTS (SELECT * FROM document_recipients WHERE document_recipients.recipient_office_code = lib_office.OFFICE_CODE AND document_recipients.document_number="'.$doc_number.'" )', '', FALSE)
-				 //->where('document_number', $doc_number)
+				 ->where('NOT EXISTS (SELECT * FROM document_recipients WHERE document_recipients.recipient_office_code = lib_office.OFFICE_CODE AND document_recipients.document_number="'.$doc_number.'" AND document_recipients.active="1" )', '', FALSE)
 				 ->where('STATUS_CODE', '1');
 
 		if($term != ''){
@@ -386,23 +385,28 @@ class View_document_model extends CI_Model {
 		$result   = 'failed';
 		$id   = $this->input->post('id_rec', true);
 
-    	// $remove_sig = $this->db->where('recipient_id', $id)
-    	// 				       ->set('active', '0')
-     //                           ->update('document_recipients');
-		$remove_sig = $this->db->where('recipient_id', $id)
-					 				->delete('document_recipients');
+    	$remove_sig = $this->db->where('recipient_id', $id)
+    					       ->set('active', '0')
+                               ->update('document_recipients');
+		// $remove_sig = $this->db->where('recipient_id', $id)
+		// 			 				->delete('document_recipients');
 		if($remove_sig){
 			$result = 'success';
 		}
 		return $result;
 	}
 
-	public function get_signature_da_name($q){
+	public function get_signature_da_name($q,$w){
+		// $this->db->select('first_name, middle_name, last_name, ext_name, profile_id')
+		// 	->from('employees')
+		// 	->like('last_name', $q)
+		// 	->limit('50');
+
 		$this->db->select('first_name, middle_name, last_name, ext_name, profile_id')
-			->from('employees')
-			//->where('agency_id', $w)
-			->like('last_name', $q)
-			->limit('50');
+				 ->from('employees')
+				 ->where('NOT EXISTS (SELECT * FROM document_signatories WHERE document_signatories.signatory_user_id = employees.profile_id AND document_signatories.document_number="'.$w.'" AND document_signatories.active="1" )', '', FALSE)
+				 ->like('last_name', $q)
+				 ->limit('50');
 
 		$query = $this->db->get();
 		if ($query->num_rows() > 0) {
@@ -463,6 +467,7 @@ class View_document_model extends CI_Model {
 			'signatory_user_fullname' => $this->input->post('signatory_emp', true),
 			'designation' 	  => $this->input->post('signatory_designation', true),
 			'office_code' 		  => $this->input->post('modal_sig_office_code', true),
+			'signatory_user_id' 		  => $this->input->post('signatory_user_id', true),
 			'added_by_user_id'			=> $this->session->userdata('user_id'),
 			'added_by_user_fullname'	=> $this->session->userdata('fullname')
 		);
@@ -548,5 +553,47 @@ class View_document_model extends CI_Model {
 		return $result;
 
     }
+
+  	public function check_document_no($document_number){
+	    $query = $this->db->where('document_number', $document_number)
+	              ->get('document_profile');
+
+    	return $query->num_rows();
+  	}
+
+  	public function check_archived($document_number){
+	    $query = $this->db->where('document_number', $document_number)
+	    		  ->where('status', 'Archived')
+	              ->get('document_profile');
+
+    	return $query->num_rows();
+  	}
+
+  	public function check_released($document_number){
+	    $query = $this->db->where('document_number', $document_number)
+	    		  ->where('action', 'Profiled')
+	              ->get('receipt_control_logs');
+
+    	return $query->num_rows();
+  	}
+
+  	public function valid_recipients($document_number){
+	    $query = $this->db->select('recipient_office_code')
+	    		   		  ->where('document_number', $document_number)
+	    		   		  //->where('active', '1')
+	              		  ->get('document_recipients');
+
+	    return $query->result_array();
+  	}
+
+  	public function owner($document_number){
+	    $query = $this->db->select('office_code as recipient_office_code')
+	    		   		  ->where('document_number', $document_number)
+	              		  ->get('document_profile');
+	    
+	    //return $query->result_array();
+	    $result = $query->result();
+	    return $result[0]->recipient_office_code;
+  	}
 
 }

@@ -169,7 +169,7 @@ class Login_model extends CI_Model {
 
 			return $output;
 		}else {
-			$this->deactivate_token($uid);
+			#$this->deactivate_token($uid);
 			return $output;
 		}
 	}

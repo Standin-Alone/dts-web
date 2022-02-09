@@ -274,7 +274,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
             </div> -->
 
 
-            <table id="received_table" class="table table-responsive-sm table-bordered align-middle bg-light mx-auto">
+            <table id="received_table2" class="table table-responsive-sm table-bordered align-middle bg-light mx-auto">
                 <thead class="bg-white">
                     <tr>
                         <th width="10%">Document Number</th>
@@ -289,50 +289,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($get_received_documents as $key => $val) {
-                    ?>
-                        <tr>
-                            <td><?php echo $val->document_number ?></td>
-                            <td><?php echo $val->document_type ?></td>
-                            <td><?php echo $val->origin_type ?></td>
-                            <td><?php echo $val->subject ?></td>
-                            <td><?php echo $val->document_origin ?></td>
-                            <td class="text-center align-middle"><?php if ($val->status == "0") {
-                                                                        echo "
-                                        <h5>
-                                        <span class=' badge badge-danger'>
-                                        Invalid Log
-                                        </span>
-                                        </h5>
-                                        ";
-                                                                    } else {
-                                                                        echo "
-                                        <h5>
-                                        <span class=' badge badge-success'>
-                                        Valid Log
-                                            </span>
-                                            </h5>
-                                            ";
-                                                                    }
-                                                                    ?></td>
-                            <td><?php echo $val->log_date ?></td>
-                            <td class="text-center align-middle">
-                                <div class="btn-group">
-                                    <a type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" caret="false">
-                                        <i class="fa fa-sliders-h"></i> More
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class=" dropdown-item d-flex justify-content-between align-items-center text-secondary"> <i class="fa fa-file-alt"></i> View Document</a>
-                                        <button class="dropdown-item d-flex justify-content-between align-items-center text-secondary track_btn" type="button"><i class="fa fa-search-location"></i> Track Document</button>
-                                        <!-- <button class="dropdown-item" type="button">Another action</button>
-                                                <button class="dropdown-item" type="button">Something else here</button> -->
-                                    </div>
-                                </div>
-                                <!-- <a href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-success">Track</a>
-                                        <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-primary">View</a> -->
-                            </td>
-                        </tr>
-                    <?php } ?>
                 </tbody>
             </table>
         </div>
@@ -444,8 +400,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 <script>
     document.body.style.zoom = "90%"
     $(document).ready(function() {
-        $('#received_table').DataTable();
-
         $("input, textarea").focusout(function() {
             $('meta[name=viewport]').remove();
             $('head').append('<meta name="viewport" content="width=device-width, maximum-scale=0.9, user-scalable=0">');
@@ -453,11 +407,7 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
             $('meta[name=viewport]').remove();
             $('head').append('<meta name="viewport" content="width=device-width, initial-scale=yes">');
         });
-
-       
     });
-
-
 </script>
 
 

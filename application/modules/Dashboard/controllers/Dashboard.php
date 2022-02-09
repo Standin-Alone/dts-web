@@ -23,6 +23,7 @@ class Dashboard extends MY_Controller
 		$this->data['incoming_documents'] = $this->Dashboard_model->incoming_documents();
 		$this->data['outgoing_documents'] = $this->Dashboard_model->outgoing_documents();
 		$this->data['get_over_due_incoming'] = $this->Dashboard_model->get_over_due_incoming();
+		$this->data['get_over_due_outgoing'] = $this->Dashboard_model->get_over_due_outgoing();
 		$this->data['get_dissemination_documents'] = $this->Dashboard_model->get_dissemination_documents();
 		// $this->data['check_status'] = $this->Dashboard_model->check_status();
 		$this->data['title'] 		 = 'DTS | Dashboard';
@@ -50,16 +51,28 @@ class Dashboard extends MY_Controller
 		$results = $this->Dashboard_model->get_document_type_data_incoming();
 		echo json_encode($results);
 	}
+	public function get_document_type_data_outgoing()
+	{
+		$results = $this->Dashboard_model->get_document_type_data_outgoing();
+		echo json_encode($results);
+	}
 	public function get_over_due_incoming()
 	{
 		$results =  $this->Dashboard_model->get_over_due_incoming();
 		echo json_encode($results);
 	}
+	public function get_over_due_outgoing()
+	{
+		$results =  $this->Dashboard_model->get_over_due_outgoing();
+		echo json_encode($results);
+	}
+
 	public function get_origin_type_data()
 	{
 		$results = $this->Dashboard_model->get_origin_type_data();
 		echo json_encode($results);
 	}
+	
 	public function get_origin_type_data_release()
 	{
 		$results = $this->Dashboard_model->get_origin_type_data_release();
@@ -76,7 +89,7 @@ class Dashboard extends MY_Controller
 		$this->data['get_over_due_incoming'] = $this->Dashboard_model->get_over_due_incoming();
 		$this->data['get_released_documents'] = $this->Dashboard_model->get_released_documents();
 		$this->data['get_origin_type_data_release'] = $this->Dashboard_model->get_origin_type_data_release();
-		$this->data['title'] 		 = 'DTS | Received Documents';
+		$this->data['title'] 		 = 'DTS | Released Documents';
 		$this->middle 		 		 = 'Released_Documents_view';
 		$this->layout();
 	}
@@ -89,7 +102,7 @@ class Dashboard extends MY_Controller
 		$this->data['get_latest_incoming'] = $this->Dashboard_model->get_latest_incoming();
 		$this->data['get_document_type_data_incoming'] = $this->Dashboard_model->get_document_type_data_incoming();
 		$this->data['get_over_due_incoming'] = $this->Dashboard_model->get_over_due_incoming();
-
+		$this->data['get_recent_incoming'] = $this->Dashboard_model->get_recent_incoming();
 		$this->data['title'] 		 = 'DTS | Incoming Documents';
 		$this->middle 		 		 = 'Incoming_Documents_view';
 		$this->layout();
@@ -99,11 +112,21 @@ class Dashboard extends MY_Controller
 		$this->data = [];
 		$this->data['get_outgoing_documents'] = $this->Dashboard_model->get_outgoing_documents();
 		$this->data['get_latest_outgoing'] = $this->Dashboard_model->get_latest_outgoing();
+		$this->data['get_document_type_data_outgoing'] = $this->Dashboard_model->get_document_type_data_outgoing();
+		$this->data['get_over_due_outgoing'] = $this->Dashboard_model->get_over_due_outgoing();
 		$this->data['title'] 		 = 'DTS | Outgoing Documents';
 		$this->middle 		 		 = 'Outgoing_Documents_view';
 		$this->layout();
 	}
-
+	
+	public function Print_Logs($document_number)
+	{
+		$this->data = [];
+		$this->data['document_logs'] = $this->Dashboard_model->get_history($document_number);
+		$this->data['title'] 		 = 'DTS | Print Logs';
+		$this->middle 		 		 = 'Print_logs';
+		$this->layout();
+	}
 	public function Dashboard_js()
 	{
 		$this->output->set_content_type('text/javascript');
@@ -118,6 +141,16 @@ class Dashboard extends MY_Controller
 	public function received_documents()
 	{
 		$results = $this->Dashboard_model->received_documents();
+		echo json_encode($results);
+	}
+	public function get_received_documents()
+	{
+		$results = $this->Dashboard_model->get_received_documents();
+		echo json_encode($results);
+	}
+	public function received_doc_table()
+	{
+		$results = $this->Dashboard_model->received_doc_table();
 		echo json_encode($results);
 	}
 	public function released_documents()
@@ -141,5 +174,20 @@ class Dashboard extends MY_Controller
 	{
 		$result = $this->Dashboard_model->receive_document($document_number);
 		echo json_encode($result);
+	}
+
+	public function get_documents(){
+		$result = $this->Dashboard_model->get_documents();
+		echo json_encode($result);
+	}
+
+	public function count_overdue(){
+		$result = $this->Dashboard_model->count_overdue();
+		echo json_encode($result);
+	}
+
+	public function Released_js(){
+		$this->output->set_content_type('text/javascript');
+		$this->load->view('Released_view.js');
 	}
 }

@@ -31,16 +31,20 @@ $(function () {
         var yyyy = today.getFullYear();
         today = mm + '/' + dd + '/' + yyyy;
 
-        if (today != date_registered) {
+        if (today == date_registered) {
             localStorage.setItem('date-registered', today)
 
-            var notif_message = 'You have <span class="text-danger font-weight-bold">'+count+'</span> over due documents'
+            var notif_message = `
+            <span class="col d-flex flex-column">
+                <span>You have <span class="text-danger font-weight-bold">${count.count_total}</span> <span class="text-danger">overdue</span> documents</span><br>
+            </span>
+            `
 
             iziToast.show({
                 timeout: 200000,
                 theme: 'dark',
                 backgroundColor: '#212529',
-                icon: 'error',
+                // icon: 'error',
                 image: base_url + 'assets/img/web_icon.png',
                 overlayClose : true,
                 overlay: true,
@@ -54,19 +58,23 @@ $(function () {
                 position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
                 progressBarColor: '#f59c1a',
                 buttons: [
-                    ['<button><b>Open</b></button>', function (instance, toast) {
+                    [`<button><i class="fa fa-arrow-down"></i><b>Incoming </b>${count.count_incoming}</button>`, function (instance, toast) {
                         location.href = base_url+"Dashboard/Incoming_documents_view/?target='over_due'";
-                    }, true],
-                    ['<button><b>Later</b></button>', function (instance, toast) {
+                    }, ],
+                    [`<button><i class="fa fa-arrow-down"></i><b>Outgoing </b>${count.count_outgoing}</button>`, function (instance, toast) {
+                        location.href = base_url+"Dashboard/Outgoing_documents_view/?target='over_due'";
                         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
-                    }],
+                    },],
+                    [`<button><b>Later</b></button>`, function (instance, toast) {
+                        instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+                    },]
                 ],
-                onClosing: function(instance, toast, closedBy){
-                    console.info('Closing | closedBy: ' + closedBy);
-                },
-                onClosed: function(instance, toast, closedBy){
-                    console.info('Closed | closedBy: ' + closedBy);
-                }
+                // onClosing: function(instance, toast, closedBy){
+                //     console.info('Closing | closedBy: ' + closedBy);
+                // },
+                // onClosed: function(instance, toast, closedBy){
+                //     console.info('Closed | closedBy: ' + closedBy);
+                // }
             });
         }
 
@@ -76,15 +84,17 @@ $(function () {
 
     $.ajax({
         type: "get",
-        url: base_url + "/Dashboard/get_over_due_incoming",
+        url: base_url + "/Dashboard/count_overdue",
         dataType: "json",
         success: function (response) {
-            if (response.length > 0){
-                promp_toast(response.length)
+            // console.log(response.count_incoming);
+            if (response.count_total > 0){
+                promp_toast(response)
             }
         }
     });
 
+    // promp_toast(1)
 
    
 

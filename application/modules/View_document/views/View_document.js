@@ -44,8 +44,7 @@ $(function() {
         source: function( request, response ) {
             //var sig_emp_code = $('#signatory_emp').val();
             $.getJSON( base_url+'View_document/get_signature_da_name', {
-            //$.getJSON( 'View_document/../get_signature_da_name', {
-                // 'agency_id': '9304df8f-a323-453d-a458-ab728e1bc419',
+                'document_number': doc_number,
                 'term': request.term
             }, response );
         },
@@ -55,7 +54,7 @@ $(function() {
             event.preventDefault();
             // manually update the textbox and hidden field
             $(this).val(ui.item.label);
-            //$('#modal_sig_emp_code').val(ui.item.value);
+            $('#signatory_user_id').val(ui.item.value);
         }
         // ,
         // change: function (event, ui) {
@@ -134,8 +133,8 @@ $(function() {
                             $('#origin_type').trigger('change');
                             $('#sender_name,#sender_position,#sender_address').val('');
                         }
-                        $('#subject').val(v.subject);
-                        $('#remarks').val(v.remarks);
+                        $('#subject_update').val(v.subject);
+                        $('#remarks_update').val(v.remarks);
                     });
                 }
         });
@@ -553,6 +552,18 @@ $('#edit_recipient').submit(function(e) {
                                 }
                             });
                         }
+                        if(r == 'already'){
+                            console.log(r);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Warning!',
+                                text: 'Document is already Released.'
+                            }).then((result) => {
+                                if(result.value){
+                                    location.reload();
+                                }
+                            });
+                        }
                     },
                     error: function (jqXHR, textStatus, errorThrown)
                     {
@@ -594,6 +605,19 @@ $('#edit_recipient').submit(function(e) {
                                 }
                             });
                         }
+                        if(r == 'already'){
+                            console.log(r);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Warning!',
+                                text: 'Document is already in archived.'
+                            }).then((result) => {
+                                if(result.value){
+                                    location.reload();
+                                }
+                            });
+                        }
+
                     },
                     error: function (jqXHR, textStatus, errorThrown)
                     {

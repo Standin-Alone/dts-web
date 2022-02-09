@@ -104,53 +104,6 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($get_released_documents as $key => $val) {
-
-                    ?>
-                        <tr>
-                            <td><?php echo $val->document_number ?></td>
-                            <td><?php echo $val->document_type ?></td>
-                            <td><?php echo $val->origin_type ?></td>
-                            <td><?php echo $val->subject ?></td>
-                            <td><?php echo $val->document_origin ?></td>
-                            <td class="text-center"><?php if ($val->status == "0") {
-                                                        echo "
-                                                <h5>
-                                                <span class=' badge badge-danger'>
-                                                    Invalid Log
-                                                </span>
-                                                </h5>
-                                                ";
-                                                    } else {
-                                                        echo "
-                                                <h5>
-                                                <span class=' badge badge-success'>
-                                                    Valid Log
-                                                </span>
-                                                </h5>
-                                            ";
-                                                    }
-
-                                                    ?></td>
-                            <td><?php echo $val->date ?></td>
-
-                            <td class="text-center align-middle">
-                                <div class="btn-group">
-                                    <a type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" caret="false">
-                                        <i class="fa fa-sliders-h"></i> More
-                                    </a>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class=" dropdown-item d-flex justify-content-between align-items-center text-secondary"> <i class="fa fa-file-alt"></i> View Document</a>
-                                        <button class="dropdown-item d-flex justify-content-between align-items-center text-secondary track_btn" type="button"><i class="fa fa-search-location"></i> Track Document</button>
-                                        <!-- <button class="dropdown-item" type="button">Another action</button>
-                                                <button class="dropdown-item" type="button">Something else here</button> -->
-                                    </div>
-                                </div>
-                                <!-- <a href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-success">Track</a>
-                                        <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-primary">View</a> -->
-                            </td>
-                        </tr>
-                    <?php } ?>
                 </tbody>
             </table>
         </div>
@@ -213,14 +166,6 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                         </div>
                                     <?php } ?>
                                 </div>
-                                <div class="row mb-2">
-                                    <div class="col-md-12 text-center">
-                                        <label class="">Document Number</label>
-                                        <input name="document_no" id="document_no" type="text" class="form-control" value="<?php if ($this->uri->segment('3')) {
-                                                                                                                                echo $this->uri->segment('3');
-                                                                                                                            } ?>" placeholder="Document Number" />
-                                    </div>
-                                </div>
                                 <div hidden class="row mb-2">
                                     <div class="col-md-12 text-center">
                                         <label class="">Originating Office</label>
@@ -237,12 +182,6 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                 </div>
                                 <div class="row mb-2">
                                     <div class="col-md-12 text-center">
-                                        <label class="text-center">Remarks</label>
-                                        <textarea name="remarks" id="remarks" class="form-control" rows="3"></textarea>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-md-12 text-center">
                                         <label class="">Action</label>
                                         <select name="action" id="action" class="form-control">
                                             <option selected value="No Action">No Action</option>
@@ -255,6 +194,13 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                     </div>
                                 </div>
                                 <div class="row mb-2">
+                                    <div class="col-md-12 text-center">
+                                        <label class="text-center">Remarks</label>
+                                        <textarea name="remarks" id="remarks" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-2 recipients">
                                     <div class="col-md-12 col-lg-12">
                                         <div class="col text-center">
                                             <label class="">Recipients</label>
@@ -268,10 +214,17 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                         </select>
                                     </div>
                                 </div>
-                            </form>
-                            <!-- <div class="row mb-3">
-                                <div class="col-md-12 text-center">
-                                    <label class="">Files</label>
+                                <div class="row mb-2">
+                                    <div class="col-md-12 text-center">
+                                        <label class="">Document Number</label>
+                                        <input name="document_no" id="document_no" type="text" class="form-control" value="<?php if ($this->uri->segment('3')) {
+                                                                                                                                echo $this->uri->segment('3');
+                                                                                                                            } ?>" placeholder="Document Number" />
+                                    </div>
+                                </div>
+                                <!-- <div class="row mb-3">
+                                    <div class="col-md-12 text-center">
+                                        <label class="">Files</label>
                                     <form action="<?php echo base_url() ?>/Receipt_Control_Center/upload_file" class="dropzone">
                                         <div class="fallback">
                                             <input name="attachment" type="file" multiple />
@@ -290,12 +243,13 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
                                     </form>
                                 </div>
                             </div> -->
-
+                            
                             <div class="row">
                                 <div class="col-md-12 mx-auto ">
-                                    <button id="release_btn" type="button" class="btn btn-primary btn btn-block">Release</button>
+                                    <button id="release_btn" type="submit" class="btn btn-primary btn btn-block">Release</button>
                                 </div>
                             </div>
+                        </form>
                         </div>
                     </div>
                 </div>
@@ -361,7 +315,4 @@ $invalid_release_count = $invalid_data['invalid_release_count'];
 <script src="<?php echo base_url() ?>Receipt_Control_Center/Release_js"></script>
 <script>
     document.body.style.zoom = "90%"
-    $(document).ready(function() {
-        $('#Released_table').DataTable();
-    });
 </script>

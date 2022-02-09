@@ -39,25 +39,24 @@
 $office_code = $this->session->userdata('office');
 ?>
 <div id="content" class="content">
-    <h1 class="page-header mb-3">Incoming Documents</h1>
     <ol class="breadcrumb float-xl-end">
         <li class="breadcrumb-item"><a href="<?php echo base_url() ?>Dashboard">Dashboard</a></li>
         <li class="breadcrumb-item active">Incoming Documents</li>
     </ol>
+    <h1 class="page-header mb-3">Incoming Documents</h1>
+
     <div class="row">
         <div class="col-md-12">
             <div class="row">
 
             </div>
             <div class="row mt-4">
-                <div class="col-md-8">
+                <div class="col-lg-8 col-md-12 col-sm-12">
                     <div class="card border-0 mb-3">
                         <div class="card-body">
                             <div class="mb-3 text-gray-500">
-                                <b>LATEST TRANSACTIONS</b>
+                                <b class="text-success">LATEST TRANSACTIONS</b>
                                 <span class="ms-2 "><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Incoming documents for today"></i></span>
-
-
                                 <ul class="list-group my-0 mt-3">
                                     <?php
                                     // print_r($get_latest_incoming);
@@ -67,7 +66,6 @@ $office_code = $this->session->userdata('office');
                                             <li class="list-group-item ">
                                                 <div class="col-md-12 d-flex flex-column justify-content-between p-0 m-0">
                                                     <div class="mx-0 px-0 d-flex flex-row col-md-12 justify-content-between">
-
                                                     </div>
                                                     <div class="mx-0 px-0 d-flex flex-row col-md-12">
                                                         <div class="mx-0 px-0 d-flex flex-column col-md-8">
@@ -90,7 +88,7 @@ $office_code = $this->session->userdata('office');
 
                                                                 $logdate =  $date_sent ? $date_sent[0]->log_date : "";
 
-                                                                // echo date(":ga", strtotime($logdate));
+
                                                                 echo date("g:i a", strtotime($logdate));
                                                                 ?>
                                                             </span>
@@ -187,6 +185,149 @@ $office_code = $this->session->userdata('office');
                                         ?>
                                         <div class="text-center">
                                             <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
+                                            <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
+                                        </div>
+                                    <?php  } ?>
+                                </ul>
+                            </div>
+                            <div class="mb-3 text-gray-500">
+                                <b class="text-warning">RECENT TRANSACTIONS</b>
+                                <span class="ms-2 "><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="Recent incoming documents"></i></span>
+                                <ul class="list-group my-0 mt-3">
+                                    <?php
+
+                                    // print_r($get_recent_incoming);
+                                    if ($get_recent_incoming) {
+                                        foreach ($get_recent_incoming as $row) {
+                                    ?>
+                                            <li class="list-group-item ">
+                                                <div class="col-md-12 d-flex flex-column justify-content-between p-0 m-0">
+                                                    <div class="mx-0 px-0 d-flex flex-row col-md-12 justify-content-between">
+
+                                                    </div>
+                                                    <div class="mx-0 px-0 d-flex flex-row col-md-12">
+                                                        <div class="mx-0 px-0 d-flex flex-column col-md-8">
+                                                            <h5><?php echo $row->document_number ?></h5>
+                                                            <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $row->document_type ?></span>
+                                                            <span><label class="my-0 text-secondary">Subject: </label> <?php echo $row->subject ?></span>
+                                                            <span><label class="my-0 text-secondary">From: </label> <?php echo $row->from_office  ?></span>
+                                                        </div>
+                                                        <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
+                                                            <span>
+                                                                <?php
+                                                                $date_sent = $this->db->select("log_date")
+                                                                    ->from("receipt_control_logs")
+                                                                    ->where("document_number", $row->document_number)
+                                                                    ->where("status", "1")
+                                                                    ->where("type", "Released")
+                                                                    ->order_by("log_date", "asc")
+                                                                    ->limit(1)
+                                                                    ->get()->result();
+
+                                                                $logdate =  $date_sent ? $date_sent[0]->log_date : "";
+
+                                                                $datetime1 = strtotime($logdate);
+                                                                $datetime2 = strtotime(date("Y-m-d h:i:s"));
+                                                                $secs = $datetime2 - $datetime1; // == <seconds between the two times>
+                                                                $days = $secs / 86400;
+
+                                                                echo 'Received ' . floor($days) . ' days ago';
+                                                                // echo date(":ga", strtotime($logdate));
+                                                                ?>
+                                                            </span>
+                                                            <!-- <span class=" text-success"><label class="my-0 text-secondary">Date last received: </label>
+                                                                <?php
+                                                                $date_last_received = $this->db->select("log_date")
+                                                                    ->from("receipt_control_logs")
+                                                                    ->where("document_number", $row->document_number)
+                                                                    ->where("transacting_office", $office_code)
+                                                                    ->where("status", "1")
+                                                                    ->where("type", "Received")
+                                                                    ->order_by("log_date", "desc")
+                                                                    ->limit(1)
+                                                                    ->get()->result();
+                                                                echo $date_last_received =  $date_last_received ? $date_last_received[0]->log_date : "";
+                                                                ?>
+                                                            </span>
+                                                            <span class=" text-warning"><label class="my-0 text-secondary">Date last released: </label>
+                                                                <?php
+                                                                $date_last_received = $this->db->select("log_date")
+                                                                    ->from("receipt_control_logs")
+                                                                    ->where("document_number", $row->document_number)
+                                                                    ->where("transacting_office", $office_code)
+                                                                    ->where("status", "1")
+                                                                    ->where("type", "Released")
+                                                                    ->order_by("log_date", "desc")
+                                                                    ->limit(1)
+                                                                    ->get()->result();
+
+                                                                echo $date_last_received =  $date_last_received ? $date_last_received[0]->log_date : "";
+                                                                ?>
+                                                            </span> -->
+                                                            <span>
+                                                                <?php
+                                                                if ($row->active == '1') {
+                                                                ?>
+                                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                    <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
+                                                                    <?php
+                                                                } else if ($row->active == '0') {
+                                                                    $last_log = $this->db->select("type ,action")
+                                                                        ->from("receipt_control_logs")
+                                                                        ->where("document_number", $row->document_number)
+                                                                        ->where("status", "1")
+                                                                        ->order_by("log_date", "desc")
+                                                                        ->limit(1)
+                                                                        ->get()->result();
+                                                                    if ($last_log[0]->action == 'Return to Sender') {
+                                                                    ?>
+                                                                        <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                        <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
+                                                                        <?php
+                                                                    } else {
+                                                                        $latest_log = $this->db->select("type ,log_date")
+                                                                            ->from("receipt_control_logs")
+                                                                            ->where("document_number", $row->document_number)
+                                                                            ->where("transacting_office", $office_code)
+                                                                            ->where("status", "1")
+                                                                            ->order_by("log_date", "desc")
+                                                                            ->limit(1)
+                                                                            ->get()->result();
+                                                                        if ($latest_log[0]->type == 'Released') {
+                                                                        ?>
+                                                                            <span class="d-flex align-items-end">
+                                                                                Latest Status:
+                                                                                <span>
+                                                                                    <?php
+
+                                                                                    $latest_log_date =  $latest_log ? $latest_log[0]->log_date : "";
+                                                                                    echo $latest_log[0]->type;
+                                                                                    echo ' at ';
+                                                                                    echo date("g:i a", strtotime($latest_log_date));
+                                                                                    ?>
+                                                                                </span>
+                                                                            </span>
+                                                                        <?php
+                                                                        } else {
+                                                                        ?>
+                                                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                            <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $row->document_number ?>" target="_blank" class="btn btn-warning">Release</a>
+                                                                <?php
+                                                                        }
+                                                                    }
+                                                                }
+                                                                ?>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        <?php
+                                        }
+                                    } else {
+                                        ?>
+                                        <div class="text-center">
+                                            <span class="h4 text-dark mb-2 text-center mx-auto my-3">No Recent Transaction Found</span>
                                             <img src="<?php echo base_url() ?>/assets/img/dashboard/no_records.svg" height="100" class="d-none d-lg-block mx-auto">
                                         </div>
                                     <?php  } ?>
@@ -298,6 +439,7 @@ $office_code = $this->session->userdata('office');
                         </div>
                     </div>
                 </div>
+
                 <div class="col-xl-4 col-lg-6 ">
                     <ul class="list-group mb-4">
                         <li class="list-group-item">
@@ -351,6 +493,17 @@ $office_code = $this->session->userdata('office');
                                 "#fb5597",
                                 "#00acac",
                                 "#32a932",
+                                "#90ca4b",
+                                "#727cb6",
+                                "#8753de",
+                                "#348fe2",
+                                "#49b6d6",
+                                "#ffd900",
+                                "#f59c1a",
+                                "#ff5b57",
+                                "#fb5597",
+                                "#00acac",
+                                "#32a932",
                                 "#90ca4b"
                             ];
                             foreach ($get_document_type_data_incoming as $key => $row) {
@@ -367,11 +520,11 @@ $office_code = $this->session->userdata('office');
                         </div>
                     </ul>
 
-                    <ul class="list-group mt-2">
+                    <ul class="list-group mt-2" id="over_due">
                         <li class="list-group-item d-flex justify-content-between">
                             <span>
                                 <b class="text-danger mb-2 mt-3">
-                                    OVER DUE DOCUMENTS
+                                    OVERDUE DOCUMENTS
                                 </b>
                                 <span class="ms-2 "><i class="fa fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="Received documents without action for more than 3 day"></i></span>
                             </span>
@@ -401,9 +554,10 @@ $office_code = $this->session->userdata('office');
                                             <!-- <span><label class=" my-0 text-secondary">Date sent: </label>
 
                                                 </span> -->
-                                                <span><label class="my-0 text-secondary"> </label> Received <?php echo $data['interval'] ?> days ago</span>
-                                                <span class="d-flex flex-column">
+                                                <span><label class="my-0 text-secondary"> </label> Received <?php echo floor($data['interval']) ?> days ago</span>
+                                                <span class="d-flex flex-column mt-3">
                                                     <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1">Release</a>
+                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm text-danger border mb-1">Mark As Completed</a>
                                                     <!-- <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                                     Details
                                                 </a> -->
@@ -449,6 +603,20 @@ $office_code = $this->session->userdata('office');
 
 <script>
     $(document).ready(function() {
+        <?php 
+        if ($this->input->get('target')){
+            // echo 'console.logs('.$_REQUEST['target'].')'
+            ?>
+        $(document).find("#over_due").focus()
+        <?php
+        }
+        ?>
+
+
+console.log(
+    $(document).find("#over_due").focus()
+
+);
         let doc_type_data = [];
         var retVal;
         $.ajax({
@@ -466,6 +634,17 @@ $office_code = $this->session->userdata('office');
         console.log('====================================');
 
         var color = [
+            "#727cb6",
+            "#8753de",
+            "#348fe2",
+            "#49b6d6",
+            "#ffd900",
+            "#f59c1a",
+            "#ff5b57",
+            "#fb5597",
+            "#00acac",
+            "#32a932",
+            "#90ca4b",
             "#727cb6",
             "#8753de",
             "#348fe2",

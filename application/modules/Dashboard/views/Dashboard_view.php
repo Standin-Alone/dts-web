@@ -6,6 +6,7 @@
 <link href="<?php echo base_url(); ?>assets/css/style.css" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js" integrity="sha512-Zq9o+E00xhhR/7vJ49mxFNJ0KQw1E1TMWkPTxrWcnpfEFDEXgUiwJHIKit93EW/XxE31HSI5GEOW06G6BF1AtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css" integrity="sha512-O03ntXoVqaGUTAeAmvQ2YSzkCvclZEcPQu1eqloPaHfJ5RuNGiS4l+3duaidD801P50J28EHyonCV06CUlTSag==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://kit.fontawesome.com/91e45686be.js" crossorigin="anonymous"></script>
 <!-- ================== END ADDITIONALS STYLE ================== -->
 
 <style>
@@ -97,7 +98,6 @@ $my_archives_count = $count_data['my_archives_data'];
 <div id="content" class="content">
     <!-- begin row -->
     <div class="row">
-
         <!-- begin col-3 -->
         <div class="col-lg-3 col-md-6">
             <div class="widget widget-stats bg-success">
@@ -187,28 +187,11 @@ $my_archives_count = $count_data['my_archives_data'];
                     <div class="col-lg-6 col-md-6 my-3 d-flex flex-row mx-sm-auto">
                         <div class="col mh-400 mb-auto my-2 d-flex flex-column my-auto" style="border-radius: 10px;  ">
                             <div class="my-auto h-auto">
-                                <!-- <div class="card p-lg-4 h-auto my-md-3 my-lg-3 shadow bg-warning d-flex " style="border-radius: 10px; background: rgba(255, 255, 255, 0.7); box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
-                                    <a class="btn btn-lg wrap" href="<?php echo base_url() . 'Create_profile' ?>">
-                                        <h3 class="text-white"><i class="fa fa-book mr-3"></i>Create Profile</h3>
-                                        <p class="h5 text-white mx-auto my-0">
-                                            Profile your document for a documented transaction
-                                        </p>
-                                    </a>
-                                </div> -->
-                                <!-- <div class="card p-4 h-auto my-md-3 my-lg-3 bg-primary shadow d-flex " style="border-radius: 10px; background: rgba(9, 43, 150, 0.3); ">
-                                    <h3 class="mx-auto text-white mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Quick Receive</h3>
-                                    <p class="h5 text-white mx-auto">
-                                        Enter Document Number to log document
-                                    </p>
-                                    <form id="form_receive">
-                                        <div class="input-group p-5">
-                                            <input name="document_number" id="document_number" type="text" class="form-control" placeholder="Document Number">
-                                            <button type="submit" id="receive_btn" name="receive_btn" class="btn btn-warning"><i class="fa fa-arrow-circle-right text-lg"></i></button>
-                                        </div>
-                                    </form>
-                                </div> -->
                                 <div class="card p-4 h-auto my-md-3 my-lg-3 shadow d-flex mx-auto" style="border-radius: 10px; background: rgba(255, 255, 255, 0.5); ">
-                                    <h3 class="mx-auto text-primary mt-3"><i class="h3 fa fa-file-import mr-2 text-lg"></i>Quick Receive</h3>
+                                    <h3 class="mx-auto text-primary mt-3">
+                                        <!-- <i class="h3 fa fa-file-import mr-2 text-lg"></i> -->
+                                        Quick Receive
+                                    </h3>
                                     <p class="h5 text-secondary mx-auto">
                                         Enter Document Number to log document
                                     </p>
@@ -226,7 +209,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                     <p class="h5 text-secondary mx-auto">
                                         All documents for dissemenation
                                     </p>
-                                   
+
                                     <div id="carouselExampleIndicators" class="carousel slide p-0" data-ride="carousel">
                                         <!--Indicators-->
                                         <ol class="carousel-indicators">
@@ -248,7 +231,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                                             <div class="card-body">
                                                                 <h4 class="card-title"><?php echo $row->doc_type ?></h4>
                                                                 <p class="card-text"><?php echo $row->subject ?></p>
-                                                                <a target="_blank" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" class="btn border">View</a>
+                                                                <a target="_blank" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" class="btn bordergit ">View</a>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -349,7 +332,13 @@ $my_archives_count = $count_data['my_archives_data'];
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
-                            <a href="<?php echo base_url() ?>Dashboard/Outgoing_Documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3"><i class="fa fa-th-list mr-1"></i> View All</a>
+                            <a href="<?php echo base_url() ?>Dashboard/Outgoing_documents_view" class="btn btn-sm btn-outline-secondary fs-10px ps-2 pe-2 px-3">
+                                <i class="fa fa-th-list mr-1"></i>
+                                View All
+                            </a>
+                            <?php if ($get_over_due_outgoing) {
+                                echo '<sup><span class="mx-0 badge badge-danger badge-pill">' . count($get_over_due_outgoing) . '</span></sup>';
+                            } ?>
                         </span>
                     </div>
                 </div>

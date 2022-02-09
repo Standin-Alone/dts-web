@@ -54,6 +54,40 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
         opacity: 0.4;
         fill: rgba(224, 116, 76, 0.91);
     }
+
+    .dt-buttons{
+        display: none;
+    }
+
+    .dt-button{
+            background-color: #00c3ff !important;
+            color: #fff !important;
+            font-size: 14px !important;
+            border-radius: 5px !important;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            width: 107px;
+            height: 32px;
+        }
+
+        .buttons-print{
+            background-color: #12abda !important;
+            color: #fff !important;
+        }
+        .buttons-excel{
+            background-color: #0cb458 !important;
+            color: #fff !important;
+        }
+        .buttons-csv{
+            background-color: #0cb458 !important;
+            color: #fff !important;
+        }
+        .buttons-pdf{
+            background-color: #e42535 !important;
+            color: #fff !important;
+        }
 </style>
 
 <div id="content" class="content">
@@ -136,9 +170,10 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                     </div>
                     <div class="d-flex align-items-center justify-content-between mb-1">
                         <div class="btn-group ml-3" role="group" aria-label="Basic example">
-                            <button class="btn btn-danger"><i class="fa fa-file-pdf mr-1"></i> PDF</button>
-                            <button class="btn btn-success"><i class="fa fa-file-csv mr-1"></i> CSV</button>
-                            <button class="btn btn-primary"><i class="fa fa-file-word mr-1"></i> WORD</button>
+                            <button class="btn btn-warning" id="btn_print"><i class="fas fa-print mr-1"></i> Print</button>
+                            <button class="btn btn-danger" id="btn_pdf"><i class="fa fa-file-pdf mr-1"></i> PDF</button>
+                            <button class="btn btn-success" id="btn_csv"><i class="fa fa-file-csv mr-1"></i> CSV</button>
+                            <button class="btn btn-primary" id="btn_excel"><i class="fa fa-file-excel mr-1"></i> Excel</button>
                         </div>
                         <button class="btn btn-warning"><i class="fa fa-print mr-1"></i> Generate Report</button>
                     </div>
@@ -151,37 +186,42 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                     </div>
                     <div class="d-lg-flex flex-sm-row align-items-end mb-1 justify-content-between">
                         <div class="col-lg-4 col-md-12 d-lg-flex flex-row align-items-end mb-2">
-                            <a href="#" class="btn btn-dark text-truncate" id="daterange-filter">
+                            <!-- <a href="#" class="btn btn-dark text-truncate" id="daterange-filter">
                                 <i class="fa fa-calendar fa-fw text-white text-opacity-50 ms-n1"></i>
                                 <span>22 November 2021 - 21 December 2021</span>
                                 <b class="caret ms-1 opacity-5"></b>
-                            </a>
+                            </a> -->
+                            <div id="reportrange" class="rounded border form-control ml-2" style="background: #fff; cursor: pointer; border: 1px solid #ccc; width: 100%">
+                                <i class="fa fa-calendar"></i>&nbsp;
+                                <span data-column="6" id="date_range"></span> <i class="fa fa-caret-down"></i>
+                            </div>
                         </div>
+                        
                         <div class="col-lg-8 col-md-12 d-lg-flex flex-row align-items-end">
                             <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Status</label>
-                                <select class="form-control ml-2" aria-label="Default select example">
-                                    <option selected>All</option>
+                                <select name="status" id="status" data-column="8" class="form-control ml-2 filter-select" aria-label="Default select example">
+                                    <option value="" selected>All</option>
                                     <option value="1">Valid Logs</option>
                                     <option value="0">Invalid Logs</option>
                                 </select>
                             </span>
                             <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Origin Type</label>
-                                <select class="form-control ml-2" aria-label="Default select example">
-                                    <option selected>All</option>
+                                <select name="origin_type" id="origin_type" data-column="2" class="form-control ml-2 filter-select" aria-label="Default select example">
+                                    <option value="" selected>All</option>
                                     <option value="Internal">Internal</option>
                                     <option value="External">External</option>
                                 </select>
                             </span>
                             <span class="d-lg-flex flex-lg-row mx-sm-2 my-sm-2">
                                 <label for="">Document Type</label>
-                                <select class="form-control ml-2" aria-label="Default select example">
+                                <select name="document_type" id="document_type" data-column="1" class="form-control ml-2 filter-select" aria-label="Default select example">
                                     <option value="" selected>All</option>
                                     <?php
                                     foreach ($document_type as $val) {
                                     ?>
-                                        <option value="<?php echo $val->type_id ?>"> <?php echo $val->type ?></option>
+                                        <option value="<?php echo $val->type ?>"> <?php echo $val->type ?></option>
                                     <?php } ?>
                                 </select>
                             </span>
@@ -215,7 +255,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                     ];
                     if ($get_origin_type_data) {
                     ?>
-
                         <div class="d-flex mb-1 mt-0">
                             <span class="mr-2" data-toggle="tooltip" data-placement="left" title="Documents received inside DA"><i style="color: #348fe2;" class="fa fa-square mr-2"></i> <?php echo $get_origin_type_data[0]->origin_type ?></span>
                             <span class="h5 my-0 font-weight-bold"><?php echo $get_origin_type_data[0]->origin_type_count ?></span>
@@ -234,7 +273,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
 
         </div>
     </div>
-
     <table id="received_table" class="table table-bordered align-middle bg-light table-responsive">
         <thead class="bg-white">
             <tr>
@@ -246,67 +284,41 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                 <th width="1%">Status</th>
                 <th width="5%">Date Received</th>
                 <th width="1%" data-orderable="false">
-
                 </th>
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($get_received_documents as $key => $val) {
-
-            ?>
-                <tr>
-                    <td><?php echo $val->document_number ?></td>
-                    <td><?php echo $val->document_type ?></td>
-                    <td><?php echo $val->origin_type ?></td>
-                    <td><?php echo $val->subject ?></td>
-                    <td><?php echo $val->document_origin ?></td>
-                    <td class="text-center align-middle"><?php if ($val->status == "0") {
-                                                                echo "
-                                        <h5>
-                                        <span class=' badge badge-danger'>
-                                        Invalid Log
-                                        </span>
-                                        </h5>
-                                        ";
-                                                            } else {
-                                                                echo "
-                                        <h5>
-                                        <span class=' badge badge-success'>
-                                        Valid Log
-                                            </span>
-                                            </h5>
-                                            ";
-                                                            }
-                                                            ?></td>
-                    <td><?php echo $val->log_date ?></td>
-                    <td class="text-center align-middle">
-                        <div class="btn-group">
-                            <a type="button" class="btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" caret="false">
-                                <i class="fa fa-sliders-h"></i> More
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class=" dropdown-item d-flex justify-content-between align-items-center text-secondary"> <i class="fa fa-file-alt"></i> View Document</a>
-                                <button class="dropdown-item d-flex justify-content-between align-items-center text-secondary" type="button"><i class="fa fa-search-location"></i> Document Logs</button>
-                                <!-- <button class="dropdown-item" type="button">Another action</button>
-                                                <button class="dropdown-item" type="button">Something else here</button> -->
-                            </div>
-                        </div>
-                        <!-- <a href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-success">Track</a>
-                                        <a target="_blank" href="<?php echo base_url() ?>View_document/document/<?php echo $val->document_number ?>" class="btn btn-primary">View</a> -->
-                    </td>
-                </tr>
-            <?php } ?>
         </tbody>
     </table>
-</div>
-<script src="<?php echo base_url() ?>Dashboard/Received_js"></script>
-<!-- script -->
+<!-- ========================================================== -->
+    
 
-<script>
-    $(document).ready(function() {
-        $('#received_table').DataTable();
+<script type="text/javascript">
+    $(function() {
+        var start = moment().subtract(29, 'days');
+        var end = moment();
+
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY')).trigger('change');
+        }
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+        cb(start, end);
     });
 </script>
+<!-- ============================================================================ -->
+</div>
+<script src="<?php echo base_url() ?>Dashboard/Received_js"></script>
 <script>
     $(document).ready(function() {
         let doc_type_data = [];
@@ -335,7 +347,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
             "#49b6d6",
         ]
 
-
         let total = [];
         $.map(doc_type_data, function(data, i) {
             total.push({
@@ -344,8 +355,6 @@ $invalid_receive_count = $invalid_data['invalid_receive_count'];
                 color: color[i]
             })
         });
-
-
 
         var height = 320;
         var width = 320;
