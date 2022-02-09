@@ -18,7 +18,7 @@ io.on('connection', function(socket){
 
 
 
-http.listen(7980, '192.168.1.8', function(data) {
+http.listen(7980, '172.17.211.9', function(data) {
 
   console.log('Listening on Port 7980');
 });
@@ -44,7 +44,7 @@ http.listen(7980, '192.168.1.8', function(data) {
 
 // var https= require('https').createServer(credentials,app);
 // var io = require('socket.io')(https);
-// https.listen(7980,function(data) {
+// https.listen(8080,function(data) {
 
 //   console.log('Listening on Port 7980');
 // });
@@ -53,20 +53,15 @@ http.listen(7980, '192.168.1.8', function(data) {
 
 // io.on('connection', function(socket){
 
-
-//   console.log('connected');
-    
-//     socket.on('message',function(data){
-     
-//       io.emit('progress',data);
-   
-      
-//     })
-    
-
-
-//   })
-    
+//   socket.setMaxListeners(0);
+//   console.warn('connected server side');
+//   socket.on('push notification',function(message){
+//     console.warn(message);
+//     io.emit('get notification',message)
+//   });
+  
+ 
+// });
 
 
 

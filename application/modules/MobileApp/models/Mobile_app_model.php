@@ -1147,7 +1147,7 @@ public function get_history($document_number){
 										CONCAT( DATE_FORMAT(rcl.log_date,"%M %e, %Y"),"\n", TIME_FORMAT(rcl.log_date,"%r")) as time,
 										rcl.remarks as rcl_remarks,
 										dp.origin_type,
-										DATEDIFF(DATE(log_date),DATE(NOW())) as days_processed
+					
 										
 										')
 							->from('document_profile as dp')															
