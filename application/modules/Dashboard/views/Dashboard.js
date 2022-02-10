@@ -31,7 +31,7 @@ $(function () {
         var yyyy = today.getFullYear();
         today = mm + '/' + dd + '/' + yyyy;
 
-        if (today == date_registered) {
+        if (today != date_registered) {
             localStorage.setItem('date-registered', today)
 
             var notif_message = `
@@ -58,10 +58,10 @@ $(function () {
                 position: 'center', // bottomRight, bottomLeft, topRight, topLeft, topCenter, bottomCenter
                 progressBarColor: '#f59c1a',
                 buttons: [
-                    [`<button><i class="fa fa-arrow-down"></i><b>Incoming </b>${count.count_incoming}</button>`, function (instance, toast) {
+                    [`<button><i class="fa fa-arrow-down mr-2 text-success"></i><b>Incoming </b>${count.count_incoming}</button>`, function (instance, toast) {
                         location.href = base_url+"Dashboard/Incoming_documents_view/?target='over_due'";
                     }, ],
-                    [`<button><i class="fa fa-arrow-down"></i><b>Outgoing </b>${count.count_outgoing}</button>`, function (instance, toast) {
+                    [`<button><i class="fa fa-arrow-up mr-2 text-warning"></i><b>Outgoing </b>${count.count_outgoing}</button>`, function (instance, toast) {
                         location.href = base_url+"Dashboard/Outgoing_documents_view/?target='over_due'";
                         instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
                     },],

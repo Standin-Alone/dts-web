@@ -330,6 +330,7 @@ public function outgoing_documents($my_office_code){
 								->where('office_code',$my_office_code)
 								->where('status','Verified')
 								->or_where('status','Archived')
+								->order_by('date_created','DESC')
 								->get()
 								->result();
 		// $consolidate_outgoing = array();
@@ -1173,12 +1174,12 @@ public function get_history($document_number){
 								
 		$get_binded_document_number = 	$this->db->select('*')
 												->from('document_bind')
-												->where('orig_doc_number', 'DA-CO-ICTS-PY20220202-00001')
-												->get()->row();															
+												->where('binded_doc_number', $document_number)												
+												->get()->result();															
 								
 								
 		if($get_records){
-			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients,"document_info" => $get_document_info,"binded_doc_number" => $get_binded_document_number->binded_doc_number];
+			$result = ["Message" => "true", "history" =>$get_records,"released_to" => $get_recipients,"document_info" => $get_document_info,"binded_doc_number" => $get_binded_document_number];
 		}
 		
 	}catch(\Exception $e){

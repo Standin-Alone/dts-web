@@ -165,7 +165,8 @@ $office_code = $this->session->userdata('office');
                                                 ?> 
                                                
                                                 <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                    <h5><?php echo $data->document_number ?></h5>
+                                                    <!-- <h5><?php echo $data->document_number ?></h5> -->
+                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $data->document_number ?>" target="_blank"><h5 class="document_number"><?php echo $data->document_number ?></h5></a>
                                                     <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $data->document_type ?></span>
                                                     <span><label class="my-0 text-secondary">Subject: </label> <?php echo $data->subject ?></span>
                                                     <span><label class="my-0 text-secondary">Recipient Office(s): </label>
@@ -386,6 +387,19 @@ $office_code = $this->session->userdata('office');
     </div>
 </div>
 <script>
+    $(document).ready(function () {
+        <?php 
+        if ($this->input->get('target')){
+            // echo 'console.logs('.$_REQUEST['target'].')'
+            ?>
+        $('html, body').animate({
+            scrollTop: $("#over_due").offset().top - 70
+        }, 1500);
+        $(document).find("#over_due").focus()
+        <?php
+        }
+        ?>
+    });
     let doc_type_data = [];
         var retVal;
         $.ajax({

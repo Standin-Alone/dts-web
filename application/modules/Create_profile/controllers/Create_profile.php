@@ -191,4 +191,21 @@ class Create_profile extends MY_Controller {
 		echo json_encode($results);
 	}
 
+	public function check_doc_number(){
+		$doc_number 		 = $this->input->get('doc_number');
+		$results = $this->Create_profile_model->check_doc_number($doc_number);
+		echo json_encode($results);
+	}
+
+	public function document_numbers(){
+		$document_numbers = strtolower($_GET['document_numbers']);
+		$this->Create_profile_model->document_numbers($document_numbers);
+	}
+
+	public function get_bind_list(){
+		$doc_number 		 = $this->input->post('doc_number');
+		$results = $this->Create_profile_model->get_bind_list($doc_number);
+		echo json_encode($results);
+	}
+
 }

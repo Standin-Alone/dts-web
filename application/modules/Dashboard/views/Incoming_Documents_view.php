@@ -371,14 +371,31 @@ $office_code = $this->session->userdata('office');
                                             }
                                     ?>
                                             <li class="list-group-item col-md-12 d-flex flex-column justify-content-between py-2">
+                                            
                                                 <div class="mx-0 px-0 d-flex flex-row col-md-12">
+                                                <?php 
+                                                
+                                                if ($row->status == 'Archived'){
+                                                        echo '
+                                                        <span>
+                                                           <i class="fa fa-check-circle text-lime mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="Completed"></i>
+                                                        </span>
+                                                        ';
+                                                }else if($row->status == 'Verified'){
+                                                    echo '
+                                                    <span>
+                                                        <i class="fa fa-hourglass-half text-gray mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="In Process"></i>
+                                                    </span>
+                                                    ';
+                                                }
+                                                ?> 
                                                     <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                        <h5><?php echo $row->document_number ?></h5>
+                                                        <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank"><h5 class="document_number"><?php echo $row->document_number ?></h5></a>
                                                         <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $row->document_type ?></span>
                                                         <span><label class="my-0 text-secondary">Subject: </label> <?php echo $row->subject ?></span>
                                                         <span><label class="my-0 text-secondary">From: </label> <?php echo $row->from_office  ?></span>
                                                     </div>
-                                                    <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
+                                                    <div class="mx-0 px-0 d-flex flex-column col align-items-end justify-content-between">
                                                         <span><label class="my-0 text-secondary"></label>
                                                             <?php
                                                             $date_sent = $this->db->select("log_date")
@@ -394,7 +411,7 @@ $office_code = $this->session->userdata('office');
                                                             ?>
                                                         </span>
                                                         <span class="d-flex flex-column align-self-end">
-                                                            <a class="btn btn-sm btn-white"><i class="fa fa-search-location"></i> Transaction Logs</a>
+                                                            <a class="btn btn-sm btn-white log"><i class="fa fa-search-location"></i> Transaction Logs</a>
                                                             <!-- <span class=" text-secondary"><label class="my-0 text-secondary">Date last received: </label>
                                                                 <?php
                                                                 $date_last_received = $this->db->select("log_date")
@@ -545,25 +562,25 @@ $office_code = $this->session->userdata('office');
                                         </div>
                                         <div class="mx-0 px-0 d-flex flex-row col-md-12">
                                             <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                <h5><?php echo $data['details']['document_number'] ?></h5>
+                                                <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank"><h5 class="document_number"><?php echo $data['details']['document_number'] ?></h5></a>
                                                 <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $data['details']['doc_type'] ?> </span>
                                                 <span><label class="my-0 text-secondary">Subject: </label> <?php echo $data['details']['subject'] ?> </span>
                                                 <span><label class="my-0 text-secondary">From: </label> <?php echo $data['details']['from_office'] ?></span>
                                             </div>
-                                            <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between"">
+                                            <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
                                             <!-- <span><label class=" my-0 text-secondary">Date sent: </label>
 
                                                 </span> -->
                                                 <span><label class="my-0 text-secondary"> </label> Received <?php echo floor($data['interval']) ?> days ago</span>
-                                                <span class="d-flex flex-column mt-3">
-                                                    <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1">Release</a>
-                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm text-danger border mb-1">Mark As Completed</a>
+                                            </div>
+                                        </div>
+                                        <span class="d-flex flex-row mt-3">
+                                                    <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1 col-6">Release</a>
+                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm text-danger border mb-1 col-6">Mark As Completed</a>
                                                     <!-- <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                                     Details
                                                 </a> -->
                                                 </span>
-                                            </div>
-                                        </div>
                                         <div class="mx-0 px-0 d-flex flex-row col-md-12 ">
                                             <div class="collapse row col-md-12 mx-0 my-1 px-0 py-1 bg-light rounded" id="collapseExample<?php echo $key ?>">
                                                 <div class="card card-body mx-0 my-0 py-0 px-1 bg-light d-flex flex-column">
@@ -604,19 +621,20 @@ $office_code = $this->session->userdata('office');
 <script>
     $(document).ready(function() {
         <?php 
+        //scroll to overdue documents
         if ($this->input->get('target')){
-            // echo 'console.logs('.$_REQUEST['target'].')'
             ?>
+        $('html, body').animate({
+            scrollTop: $("#over_due").offset().top - 70
+        }, 1500);
         $(document).find("#over_due").focus()
         <?php
         }
         ?>
 
+        //log documents
 
-console.log(
-    $(document).find("#over_due").focus()
 
-);
         let doc_type_data = [];
         var retVal;
         $.ajax({

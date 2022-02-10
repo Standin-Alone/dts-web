@@ -56,7 +56,7 @@ class RCC_model extends CI_Model
             ->from("document_profile as dp")
             ->where("recipient_office_code", $office_code)
             ->like('date_created', $date_now)
-            ->where("dr.active", "1")
+            ->where("dr.received", "1")
             ->where("dp.status", "Verified")
             ->join("document_recipients as dr", "dp.document_number = dr.document_number")
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
@@ -138,7 +138,7 @@ class RCC_model extends CI_Model
                         ];
                         $insert_data = $this->insert_logs($received_data);
                         if ($insert_data) {
-                            $data = ['active' => '0'];
+                            $data = ['received' => '0'];
                             $this->db->set($data);
                             $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                             $this->db->update('document_recipients');
@@ -178,7 +178,7 @@ class RCC_model extends CI_Model
                         ];
                         $insert_data = $this->insert_logs($received_data);
                         if ($insert_data) {
-                            $data = ['active' => '0'];
+                            $data = ['received' => '0'];
                             $this->db->set($data);
                             $this->db->where('document_number', $document_number)->where('recipient_office_code', $office_code);
                             $this->db->update('document_recipients');
@@ -1040,7 +1040,7 @@ class RCC_model extends CI_Model
             ->join("document_profile as dp", "dp.document_number = dr.document_number")
             ->join("receipt_control_logs as rcl", "dr.document_number = rcl.document_number")
             ->join("lib_office as lo", "lo.OFFICE_CODE = dp.office_code")
-            ->where("dr.active", "0")
+            ->where("dr.received", "0")
             ->like('date_created', $date_now)
             ->group_by("dp.document_number")
             ->order_by("date_added", "desc")

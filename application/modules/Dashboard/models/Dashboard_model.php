@@ -90,6 +90,7 @@ class Dashboard_model extends CI_Model
             $date = $split_date[0] . "-" . $split_date[1] . "-" . $split_date[2];
             $document_number = $data->document_number;
             $document_details = $this->db->select("
+                        dp.status,
                         dp.document_number,
                         dp.subject,
                         dt.type as document_type,
@@ -99,6 +100,7 @@ class Dashboard_model extends CI_Model
                 ->join("doc_type as dt", "dp.document_type = dt.type_id")
                 ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
                 ->where("document_number", $document_number)
+                ->where("(status='Verified' OR status='Archived')")
                 ->get()->result();
             $document_data[] = [
                 "date" => $date,

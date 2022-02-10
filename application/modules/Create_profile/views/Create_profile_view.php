@@ -164,6 +164,43 @@
                                 </div>
                                 <div class="col-md-2">&nbsp;</div>
                             </div>
+<!--                             <div class="form-group row m-b-15" id="bind_attach">
+                                <label class="col-md-3 col-form-label text-md-right">Bind Document</label>
+                                <div class="col-md-3">
+                                    <select class="form-control-lg col-md-5" id="bind_id" name="bind_id" required>
+                                        <option></option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">&nbsp;</div>
+                            </div>
+ -->
+                            <div class="form-group row m-b-15" id="bind_attach">
+                                <label class="col-md-3 col-form-label text-md-right">Bind Document</label>
+                                <div class="col-md-3">
+                                    <input type="text" class="form-control col-md-12" id="bind_id" name="bind_id">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-success btn-icon-split text-right" id="view_bind">
+                                        <span class="icon text-white-50">
+                                            <i class="fas fa-search"></i>
+                                        </span>
+                                        <span class="text">Details</span>
+                                    </button>
+                                </div>
+                                <div class="col-md-2">&nbsp;</div>
+                            </div>
+
+<!--                             <div>
+                                <?php 
+                                    $query = $this->db->where('orig_doc_number', 'DA-CO-ICTS-PY20220202-00001')
+                                        #->where('binded_doc_number!=', 'DA-CO-ICTS-ORS20220201-00003')
+                                        ->get('vw_document_bind');
+                                    echo '<pre>';
+                                    print_r($query->result());
+                                    echo '</pre>';
+                                ?>
+                            </div> -->
+
                             <span id="sender_div">
                             <div class="form-group row m-b-15">
                                 <label class="col-md-3 col-form-label text-md-right">Sender Name</label>
@@ -437,6 +474,41 @@
         </div>
     </div>
 </div>
+
+<div class="modal fae bd-example-modal-lg" id="modal_bind" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="note note-success m-b-15">
+                    <div class="note-content">
+                        <h4 class="m-t-5 m-b-5 p-b-2">Document Information</h4>
+                        <ul class="m-b-5 p-l-25">
+                            <li>Document Number: <strong id="bind_orig"></strong></li>
+                            <li>Document Type: <strong id="bind_docu_type"></strong></li>
+                            <li>Subject: <strong id="bind_docu_subj"></strong></li>
+                            <li>Date Created: <strong id="bind_docu_datecreated"></strong></li>
+                            <li>Created by: <strong id="bind_docu_createdby"></strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <h4 class="text-center">Document Binds</h4>
+                    <table class="table table-bordered">
+                        <thead style="">
+                            <tr>
+                                <th class="text-center bg-success text-white" width="40%">Document Number</th>
+                                <th class="text-center bg-success text-white" width="40%">Document Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bind_list">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="<?php echo base_url(); ?>assets/plugins/dropzone/min/dropzone.min.js"></script>
 <script type="text/javascript">
 var path = '<?php echo base_url() .'Create_profile/qr_code/3/2/';?>';
@@ -486,6 +558,47 @@ $(document).ready(function(){
         }
       }
     });
+
+    $('#bind_id').autocomplete({
+        source: function( request, response ) {
+            $.getJSON( 'Create_profile/document_numbers', {
+                'document_numbers': request.term
+            }, response );
+        },
+        select: function(event, ui) {
+            // prevent autocomplete from updating the textbox
+            event.preventDefault();
+            // manually update the textbox and hidden field
+            $(this).val(ui.item.label);
+        },
+        change: function (event, ui) {
+            if (!ui.item) {
+                $(this).val("");
+            }
+        }
+    });
+    // $('#bind_id').select2({
+    //   placeholder: "Enter Document Number",
+    //   allowClear: true,
+    //   minimumResultsForSearch: 10,
+    //   width: '100%',
+    //   ajax: {
+    //     url: base_url + 'Create_profile/document_numbers',
+    //     type: 'get',
+    //     dataType: 'json',
+    //     data: function(params){
+    //       var queryParameters = {
+    //                 term: params.term
+    //             }
+    //             return queryParameters;
+    //     },
+    //     processResults: function(data){
+    //       return {
+    //             results: data
+    //         };
+    //     }
+    //   }
+    // });
     // Code for the Validator
     $('#add_profile').submit(function(e) {
         e.preventDefault();
@@ -875,6 +988,50 @@ $(document).ready(function(){
         }
     });
 
+    $(document.body).on('change', '#document_type', function(){
+        var this_val = $(this).val();
+        if (this_val == '2a88e281-80b8-471e-90d5-ad47916469e3') {
+            $('#bind_attach').css('display' , 'none');
+            $('#bind_id').attr('required' , false);
+            $('#bind_id').attr('disabled', true);
+        } else {
+            $('#bind_attach').css('display' , '');
+            $('#bind_id').attr('required' , true);
+            $('#bind_id').attr('disabled', false);
+        }
+    });
+
+    // $(document.body).on('keyup', '#bind_id', function() {
+    //     var check_doc_number = $(this).val();
+    //     $.ajax({
+    //         url: base_url + 'Create_profile/check_doc_number',
+    //         method:"GET",  
+    //         data: { doc_number: check_doc_number },
+    //         dataType: 'json', 
+    //         success:function(r)  
+    //         {
+    //             if(r > 0){
+    //                 console.log(r);
+    //                 Swal.fire({
+    //                     icon: 'warning',
+    //                     title: 'Warning!',
+    //                     text: 'Document Number Already Bind.'
+    //                 }).then((result) => {
+    //                     if(result.value){
+    //                         //location.reload();
+    //                     }
+    //                 });
+    //             }
+    //         },
+    //         error: function (jqXHR, textStatus, errorThrown)
+    //         {
+
+    //         }
+
+    //     });
+
+    // });
+
     $('input[type=radio][name=status]').change(function() {
         if (this.value == 'All') {
             $('#recipients').prop('disabled', true);
@@ -937,6 +1094,45 @@ $(document).ready(function(){
         });
     });
 
+    $(document.body).on('click', '#view_bind', function(){
+        var document_val = $('#bind_id').val();
+        $('#bind_list').html('');
+        $.ajax({
+            url: base_url + 'Create_profile/get_bind_list',
+            type: 'post',                                                                                                                                  
+            data: {'doc_number': document_val},
+            dataType: 'json',
+            success: function(r){
+                var ie;
+                var table_row = '';
+                var count = r.document_bind.length;
+                console.log(r);
+                $('#bind_orig').text(r.document_info[0].document_number);
+                $('#bind_docu_type').text(r.document_info[0].docu_type);
+                $('#bind_docu_subj').text(r.document_info[0].subject.toUpperCase());
+                $('#bind_docu_datecreated').text(r.document_info[0].date_created);
+                $('#bind_docu_createdby').text(r.document_info[0].created_by_user_fullname);
+                    if(count > 0){
+                        for (ie = 0; ie < count; ie++) {
+                            table_row += '<tr>';
+                            table_row += '<td class="text-center">'+r.document_bind[ie].binded_doc_number+'</td>';
+                            table_row += '<td class="text-center">'+r.document_bind[ie].doc_type+
+                                '</td>';
+                            table_row += '</tr>';
+                        }
+                    } else {
+                        table_row += '<tr>';
+                        table_row += '<td colspan="2" class="text-center">No Document Bind</td>';
+                        table_row += '</tr>';
+                    }
+
+                $('#bind_list').append(table_row);
+                $('#modal_bind').modal('show'); 
+            }
+
+        });
+                       
+    });
 
 });
 

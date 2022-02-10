@@ -22,6 +22,7 @@ class Create_profile_model extends CI_Model
 		$signatory_designation_desc = $this->input->post('signatory_designation_desc', true);
 		$signatory_office_code = $this->input->post('signatory_office_code', true);
 		$signatory_user_fullname = $this->input->post('signatory_user_fullname', true);
+		$bind_id = $this->input->post('bind_id', true);
 
 		$id   = Uuid::uuid4()->toString();
 		$data = array(
@@ -106,6 +107,52 @@ class Create_profile_model extends CI_Model
 
 			if (isset($signatory_user_fullname)) {
 				$query2 = $this->db->insert_batch('document_signatories', $data_signatories);
+			}
+
+			$query_bind ='';
+			if (!empty($bind_id)) {
+				// $bind = array(
+				// 	'orig_doc_number' => $result['data'][0]->document_number,
+				// 	'binded_doc_number' => $bind_id,
+				// 	'binded_by_id'			=> $this->session->userdata('user_id'),
+				// 	'binded_by_fullname'	=> $this->session->userdata('fullname')
+				// );
+				// $query_bind = $this->db->insert('document_bind', $bind);
+
+				$bind_r = array(
+					'orig_doc_number' => $bind_id,
+					'binded_doc_number' => $result['data'][0]->document_number,
+					'binded_by_id'			=> $this->session->userdata('user_id'),
+					'binded_by_fullname'	=> $this->session->userdata('fullname')
+				);
+				$query_bind_r = $this->db->insert('document_bind', $bind_r);
+
+				$result_connected = $this->get_bind_connected($bind_id);
+				
+				if (isset($result_connected)) {
+					if (count($result_connected) > 0) {
+						$data_bind_connected = [];
+						foreach ($result_connected as $k => $v) {
+							$data_bind_connected[$k] = array(
+								'orig_doc_number' => $result_connected[$k]->orig_doc_number,
+								'binded_doc_number' => $result['data'][0]->document_number,
+								'binded_by_id'			=> $this->session->userdata('user_id'),
+								'binded_by_fullname'	=> $this->session->userdata('fullname')
+							);
+						}
+
+						$querys = $this->db->insert_batch('document_bind', $data_bind_connected);
+					}
+
+
+					
+
+					//echo $this->db->last_query();
+                    // echo '<pre>';
+                    // print_r($data_bind_connected);
+                    // echo '</pre>';
+				}
+
 			}
 
 			return $result;
@@ -380,4 +427,63 @@ class Create_profile_model extends CI_Model
 			->get('vw_document_recipients');
 		return $query->result();
 	}
+
+  	public function check_doc_number($doc_number){
+	    $query = $this->db->where('binded_doc_number', $doc_number)
+	              ->get('document_bind');
+
+		// $query = $this->db->query("SELECT *
+		// 	FROM document_bind
+		// 	WHERE binded_doc_number = '$doc_number'
+		// 	AND binded_doc_number <> '$doc_number'
+		// 	");
+
+	    //echo $query->num_rows();
+    	return $query->num_rows();
+  	}
+
+	public function document_numbers($document_numbers){
+		$this->db->select('*')
+				 ->like('document_number', $document_numbers)
+				 ->order_by("document_number", "asc");
+		$query = $this->db->get('document_profile');
+			if($query->num_rows() > 0){
+				foreach ($query->result_array() as $row){
+				//$row_set[] = htmlentities(stripslashes($row['office_name']));  //build an array
+				$new_row['label']=stripslashes($row['document_number']);
+				$new_row['value']=htmlentities(stripslashes($row['document_number']));
+				$row_set[] = $new_row;
+			}
+			echo json_encode($row_set); //format the array into json data
+		}
+	}
+
+	public function get_bind_list($doc_number)
+	{
+		$document_bind = $this->db->where('orig_doc_number', $doc_number)
+			->get('vw_document_bind');
+
+		$document_info = $this->db->select('*')
+		   	->from('vw_document_profile_info')
+		   	->where('document_number', $doc_number)
+		   	->get();
+
+		$data = array(
+			'document_info' => $document_info->result(),
+			'document_bind' => $document_bind->result()
+		);
+
+		return $data;
+		#return $query->result();
+	}
+
+	public function get_bind_connected($bind_id)
+	{
+		$query = $this->db->where('binded_doc_number', $bind_id)
+			#->where('binded_doc_number!=', $orig_doc_number)
+			->get('vw_document_bind');
+		return $query->result();
+		#print_r($query->result());
+	}
+
 }
