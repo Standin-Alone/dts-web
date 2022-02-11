@@ -58,8 +58,8 @@ class Mobile extends MY_Controller {
 
 	// outgoing
 	
-	public function outgoing_documents($my_office_code){
-		$result = $this->Mobile_app_model->outgoing_documents($my_office_code);
+	public function outgoing_documents($my_office_code,$page){
+		$result = $this->Mobile_app_model->outgoing_documents($my_office_code,$page);
 		echo json_encode($result);
 	}
 
@@ -81,6 +81,11 @@ class Mobile extends MY_Controller {
 
 	public function release_document(){
 		$result = $this->Mobile_app_model->release_document();
+		echo json_encode($result);
+	}
+
+	public function check_utility($version){
+		$result = $this->Mobile_app_model->check_utility($version);
 		echo json_encode($result);
 	}
 

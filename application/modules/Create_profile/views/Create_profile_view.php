@@ -337,7 +337,7 @@
                         </div>
 
                         <div class="form-group row m-b-15">
-                            <label class="col-md-3 col-form-label text-md-right">Attachments</label>
+                            <label class="col-md-3 col-form-label text-md-right">Attachments (Optional)</label>
                             <div class="col-md-7">
                                 <div class="dropzone" id="attachmentDropzone">
                                     <div class="dz-message needsclick">
@@ -352,7 +352,7 @@
                                 <span class="icon text-white-50">
                                     <i class="fas fa-save fa-lg"></i>
                                 </span>
-                                <span class="text">Save</span>
+                                <span class="text">Next</span>
                             </button>
                         </div>
                     </fieldset>
@@ -570,6 +570,7 @@ $(document).ready(function(){
             event.preventDefault();
             // manually update the textbox and hidden field
             $(this).val(ui.item.label);
+            $("#view_bind").trigger("click");
         },
         change: function (event, ui) {
             if (!ui.item) {
@@ -900,55 +901,96 @@ $(document).ready(function(){
     });
 
     $(document.body).on('click', '#save_all', function() {
-        // Swal.fire({
-        //     position: 'center',
-        //     icon: 'success',
-        //     title: 'Profile Completed!',
-        //     text: 'Profile has been saved.',
-        //     showConfirmButton: false,
-        //     timer: 2500
-        // }).then(function(){ 
-        //     location.reload();
-        // });
 
-        Swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'File Uploaded!',
-            text: 'Profile has been saved.',
-            showConfirmButton: true,
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#42ba96',
-            cancelButtonText: `Save as Draft?`,
-            confirmButtonText: 'Print routing slip?'
-        }).then((result) => {
-            if(result.value){
-                $('#print_area').css("display", "");
-                $('#add_file').css("display", "none");
-                $.ajax({
-                    url: base_url + 'Create_profile/document_recipients', 
-                    type: 'post',
-                    data: { 'doc_number': doc_number },
-                    dataType: 'json',
-                    success: function(result){
-                        var tr='';
-                            var commo_count = result.length;
-                            for (ie = 0; ie < commo_count; ie++) {
-                                tr +='<tr>';
-                                //tr +='<td class="text-center">'+result[ie].added_by_user_fullname+'</td>';
-                                tr +='<td class="text-center pb-0">'+(result[ie].INFO_DIVISION == '' ? result[ie].INFO_SERVICE : result[ie].INFO_DIVISION)+'</td>';
-                                tr +='<td class="text-center">'+result[ie].date_added+'</td>';
-                                tr +='<td class="text-center"></td>';
-                                tr +='</tr>';
-                            }
-                            $('#recipients_list').html('').append(tr);
+        $.ajax({
+            url: base_url + 'Create_profile/check_upload', 
+            type: 'post',
+            data: { 'doc_number': doc_number },
+            dataType: 'json',
+            success: function(result){
+                //var upload_count = result.length;
+                if(result == 0 ){
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'warning',
+                        title: 'You did not upload a file!',
+                        text: 'Are you sure you want to proceed to next step?',
+                        showConfirmButton: true,
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#dc3545',
+                        cancelButtonText: `Cancel`,
+                        confirmButtonText: 'Yes, Print a routing slip.'
+                    }).then((result) => {
+                        if(result.value){
+                            $('#print_area').css("display", "");
+                            $('#add_file').css("display", "none");
+                            $.ajax({
+                                url: base_url + 'Create_profile/document_recipients', 
+                                type: 'post',
+                                data: { 'doc_number': doc_number },
+                                dataType: 'json',
+                                success: function(result){
+                                    var tr='';
+                                        var commo_count = result.length;
+                                        for (ie = 0; ie < commo_count; ie++) {
+                                            tr +='<tr>';
+                                            //tr +='<td class="text-center">'+result[ie].added_by_user_fullname+'</td>';
+                                            tr +='<td class="text-center pb-0">'+(result[ie].INFO_DIVISION == '' ? result[ie].INFO_SERVICE : result[ie].INFO_DIVISION)+'</td>';
+                                            tr +='<td class="text-center">'+result[ie].date_added+'</td>';
+                                            tr +='<td class="text-center"></td>';
+                                            tr +='</tr>';
+                                        }
+                                        $('#recipients_list').html('').append(tr);
+                                    }
+                            });
+                        } 
+
+                    });
+                } 
+                if(result > 0 ){
+                    Swal.fire({
+                        position: 'center',
+                        icon: 'success',
+                        title: 'File Uploaded!',
+                        text: 'Profile has been saved.',
+                        showConfirmButton: true,
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#42ba96',
+                        cancelButtonText: `Save as Draft?`,
+                        confirmButtonText: 'Print routing slip?'
+                    }).then((result) => {
+                        if(result.value){
+                            $('#print_area').css("display", "");
+                            $('#add_file').css("display", "none");
+                            $.ajax({
+                                url: base_url + 'Create_profile/document_recipients', 
+                                type: 'post',
+                                data: { 'doc_number': doc_number },
+                                dataType: 'json',
+                                success: function(result){
+                                    var tr='';
+                                        var commo_count = result.length;
+                                        for (ie = 0; ie < commo_count; ie++) {
+                                            tr +='<tr>';
+                                            //tr +='<td class="text-center">'+result[ie].added_by_user_fullname+'</td>';
+                                            tr +='<td class="text-center pb-0">'+(result[ie].INFO_DIVISION == '' ? result[ie].INFO_SERVICE : result[ie].INFO_DIVISION)+'</td>';
+                                            tr +='<td class="text-center">'+result[ie].date_added+'</td>';
+                                            tr +='<td class="text-center"></td>';
+                                            tr +='</tr>';
+                                        }
+                                        $('#recipients_list').html('').append(tr);
+                                    }
+                            });
+                        } else {
+                            location.reload();
                         }
-                });
-            } else {
-                location.reload();
+                    });
+                }
             }
         });
+
     });
 
     $(document.body).on('click', '.remove_sig', function() {
@@ -992,11 +1034,11 @@ $(document).ready(function(){
         var this_val = $(this).val();
         if (this_val == '2a88e281-80b8-471e-90d5-ad47916469e3') {
             $('#bind_attach').css('display' , 'none');
-            $('#bind_id').attr('required' , false);
+            //$('#bind_id').attr('required' , false);
             $('#bind_id').attr('disabled', true);
         } else {
             $('#bind_attach').css('display' , '');
-            $('#bind_id').attr('required' , true);
+            //$('#bind_id').attr('required' , true);
             $('#bind_id').attr('disabled', false);
         }
     });
@@ -1096,42 +1138,43 @@ $(document).ready(function(){
 
     $(document.body).on('click', '#view_bind', function(){
         var document_val = $('#bind_id').val();
-        $('#bind_list').html('');
-        $.ajax({
-            url: base_url + 'Create_profile/get_bind_list',
-            type: 'post',                                                                                                                                  
-            data: {'doc_number': document_val},
-            dataType: 'json',
-            success: function(r){
-                var ie;
-                var table_row = '';
-                var count = r.document_bind.length;
-                console.log(r);
-                $('#bind_orig').text(r.document_info[0].document_number);
-                $('#bind_docu_type').text(r.document_info[0].docu_type);
-                $('#bind_docu_subj').text(r.document_info[0].subject.toUpperCase());
-                $('#bind_docu_datecreated').text(r.document_info[0].date_created);
-                $('#bind_docu_createdby').text(r.document_info[0].created_by_user_fullname);
-                    if(count > 0){
-                        for (ie = 0; ie < count; ie++) {
+        if(document_val != ''){
+            $('#bind_list').html('');
+            $.ajax({
+                url: base_url + 'Create_profile/get_bind_list',
+                type: 'post',                                                                                                                                  
+                data: {'doc_number': document_val},
+                dataType: 'json',
+                success: function(r){
+                    var ie;
+                    var table_row = '';
+                    var count = r.document_bind.length;
+                    console.log(r);
+                    $('#bind_orig').text(r.document_info[0].document_number);
+                    $('#bind_docu_type').text(r.document_info[0].docu_type);
+                    $('#bind_docu_subj').text(r.document_info[0].subject.toUpperCase());
+                    $('#bind_docu_datecreated').text(r.document_info[0].date_created);
+                    $('#bind_docu_createdby').text(r.document_info[0].created_by_user_fullname);
+                        if(count > 0){
+                            for (ie = 0; ie < count; ie++) {
+                                table_row += '<tr>';
+                                table_row += '<td class="text-center">'+r.document_bind[ie].binded_doc_number+'</td>';
+                                table_row += '<td class="text-center">'+r.document_bind[ie].doc_type+
+                                    '</td>';
+                                table_row += '</tr>';
+                            }
+                        } else {
                             table_row += '<tr>';
-                            table_row += '<td class="text-center">'+r.document_bind[ie].binded_doc_number+'</td>';
-                            table_row += '<td class="text-center">'+r.document_bind[ie].doc_type+
-                                '</td>';
+                            table_row += '<td colspan="2" class="text-center">No Document Bind</td>';
                             table_row += '</tr>';
                         }
-                    } else {
-                        table_row += '<tr>';
-                        table_row += '<td colspan="2" class="text-center">No Document Bind</td>';
-                        table_row += '</tr>';
-                    }
 
-                $('#bind_list').append(table_row);
-                $('#modal_bind').modal('show'); 
-            }
+                    $('#bind_list').append(table_row);
+                    $('#modal_bind').modal('show'); 
+                }
 
-        });
-                       
+            });
+        }           
     });
 
 });
@@ -1162,12 +1205,26 @@ $(document).ready(function(){
 
     Dropzone.autoDiscover = false;
     Dropzone.options.myAwesomeDropzone = {
+        maxFilesize: 30,
+        maxFiles: 1,
         addRemoveLinks: true,
         dictRemoveFile: 'x',
         dictDefaultMessage: "<span>Drop files here or click to upload</span>",
         paramName: "doc_file",
         autoProcessQueue: false,
         acceptedFiles: '.pdf',
+        error: function(file){
+            if (!file.accepted){
+                Swal.fire({
+                    allowOutsideClick: false,
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'File Exceeds 30MB OR File Type is not allowed!',
+                });
+                file.previewElement.remove();
+            }
+
+        },
         processing: function(file) {
             $('#submit_upload_file').attr('disabled', true);
             check_upload = false;
@@ -1176,6 +1233,20 @@ $(document).ready(function(){
            var data = response.split('-');
            file.rm_id        = data[0];
            file.rm_file_name = data[1];
+            check_upload = true;
+            $('#submit_upload_file').removeAttr('disabled');
+            if(check_upload != false){
+                Swal.fire({
+                    allowOutsideClick: false,
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Document Uploaded: '+doc_number,
+                }).then((result) => {
+                    if(result.value){
+                        //location.reload();
+                    }
+                });
+            }
         },
         sending: function(file, xhr, formData){
             formData.append('doc_number', doc_number);
@@ -1198,37 +1269,42 @@ $(document).ready(function(){
                 confirmButtonText: 'Yes, remove it!'
             }).then((result) => {
                 if (result.value) {
-                    setTimeout(function() {
-                        $.ajax({
-                            url: base_url + 'Create_profile/remove_uploaded_file',
-                            type: 'post',
-                            data: {'rm_id': rm_id, 'rm_file_name': rm_file_name, 'doc_number': doc_number, 'doc_type': doc_type, 'mode': 'file'},
-                            dataType: 'json',
-                            success: function(result){
-                                console.log(result);
-                            }
-                        })
+                    if(file.rm_id != ''){
+                        setTimeout(function() {
+                            $.ajax({
+                                url: base_url + 'Create_profile/remove_uploaded_file',
+                                type: 'post',
+                                data: {'rm_id': rm_id, 'rm_file_name': rm_file_name, 'doc_number': doc_number, 'doc_type': doc_type, 'mode': 'file'},
+                                dataType: 'json',
+                                success: function(result){
+                                    console.log(result);
+                                }
+                            })
+                            file.previewElement.remove();
+                        }, 200);
+                    } else {
                         file.previewElement.remove();
-                    }, 200);
+                    }
                 }
             });
-        },
-        queuecomplete: function(file){
-            check_upload = true;
-            $('#submit_upload_file').removeAttr('disabled');
-                if(check_upload != false){
-                    Swal.fire({
-                        allowOutsideClick: false,
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Document Uploaded: '+doc_number,
-                    }).then((result) => {
-                        if(result.value){
-                            //location.reload();
-                        }
-                    });
-                }
         }
+        // ,
+        // queuecomplete: function(file){
+        //     check_upload = true;
+        //     $('#submit_upload_file').removeAttr('disabled');
+        //         if(check_upload != false){
+        //             Swal.fire({
+        //                 allowOutsideClick: false,
+        //                 icon: 'success',
+        //                 title: 'Success!',
+        //                 text: 'Document Uploaded: '+doc_number,
+        //             }).then((result) => {
+        //                 if(result.value){
+        //                     //location.reload();
+        //                 }
+        //             });
+        //         }
+        // }
     };
 
     var myDropzone = new Dropzone("div#myAwesomeDropzone", { url: base_url + "Create_profile/upload_file" });
@@ -1259,12 +1335,25 @@ $(document).ready(function(){
 
     Dropzone.autoDiscover = false;
     Dropzone.options.attachmentDropzone = {
+        maxFilesize: 30,
         addRemoveLinks: true,
         dictRemoveFile: 'x',
         dictDefaultMessage: "<span>Drop files here or click to upload</span>",
         paramName: "doc_file",
         autoProcessQueue: false,
         acceptedFiles: '.pdf',
+        error: function(file){
+            if (!file.accepted){
+                Swal.fire({
+                    allowOutsideClick: false,
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'File Exceeds 30MB OR File Type is not allowed!',
+                });
+                file.previewElement.remove();
+            }
+
+        },
         processing: function(file) {
             $('#submit_upload_attachment').attr('disabled', true);
             check_upload = false;
@@ -1273,6 +1362,20 @@ $(document).ready(function(){
            var data = response.split('-');
            file.rm_id        = data[0];
            file.rm_file_name = data[1];
+            check_upload = true;
+            $('#submit_upload_attachment').removeAttr('disabled');
+                if(check_upload != false){
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        icon: 'success',
+                        title: 'Success!',
+                        text: 'Document Uploaded: '+doc_number,
+                    }).then((result) => {
+                        if(result.value){
+                            //location.reload();
+                        }
+                    });
+                }
         },
         sending: function(file, xhr, formData){
             formData.append('doc_number', doc_number);
@@ -1309,22 +1412,6 @@ $(document).ready(function(){
                     }, 200);
                 }
             });
-        },
-        queuecomplete: function(file){
-            check_upload = true;
-            $('#submit_upload_attachment').removeAttr('disabled');
-                if(check_upload != false){
-                    Swal.fire({
-                        allowOutsideClick: false,
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Document Uploaded: '+doc_number,
-                    }).then((result) => {
-                        if(result.value){
-                            //location.reload();
-                        }
-                    });
-                }
         }
     };
 

@@ -301,7 +301,7 @@ public function incoming_documents($my_office_code){
 
 
 // outgoing documents model
-public function outgoing_documents($my_office_code){
+public function outgoing_documents($my_office_code,$page){
 	$result = '';
 
 	try{
@@ -330,6 +330,7 @@ public function outgoing_documents($my_office_code){
 								->where('office_code',$my_office_code)
 								->where('status','Verified')
 								->or_where('status','Archived')
+								->limit(4, $page == 1 ? 0 : $page)
 								->order_by('date_created','DESC')
 								->get()
 								->result();
@@ -1273,6 +1274,21 @@ public function get_doc_type(){
 	return $result;
 }
 
+
+public function check_utility($version){
+	$check_version = $this->db->select('*')
+						->from('mobile_utility')
+						->where('version',$version)
+						->get()->row();
+	$result = '';
+	if($check_version){
+		$result = ["message"=>'true',"maintenance"=>$check_version->maintenance , "active" => $check_version->active];
+	}else{
+		$result = ["message"=>'false'];
+	}
+	return $result;
+	
+}
 
 
 }

@@ -6,23 +6,26 @@ class Create_profile extends MY_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('Create_profile_model');
-		if($this->session->userdata('dts_logged_in') == FALSE){
-			redirect('Login');
-		}
 	}
 
-	public function index(){ 
-		$this->Create_profile_view();
+	public function index(){
+		// if($this->session->userdata('user_type') == 'user' && $this->session->userdata('bids_logged_in') == TRUE){
+		// 	redirect('Proposal');
+		// } elseif($this->session->userdata('user_type') == 'admin' && $this->session->userdata('bids_logged_in') == TRUE OR $this->session->userdata('user_type') == 'super_admin' && $this->session->userdata('bids_logged_in') == TRUE ){
+			$this->Create_profile_view();
+		// } else {
+		// 	redirect('Login');
+		// }
 	}
 
-    public function add_profile(){
-        $result = $this->Create_profile_model->add_profile();
+    public function add_pras_profile(){
+        $result = $this->Create_profile_model->add_pras_profile();
         echo json_encode($result);
     }
 
 	public function get_offices(){
-		$results = $this->Create_profile_model->get_offices();
-		echo json_encode($results);
+		$office_name = strtolower($_GET['office_name']);
+		$this->Create_profile_model->get_offices($office_name);
 	}
 
 	public function get_services(){
@@ -46,7 +49,7 @@ class Create_profile extends MY_Controller {
 		$this->data['document_type'] = $this->Create_profile_model->document_type();
 		$this->data['document_for'] = $this->Create_profile_model->document_for();
 		$this->data['recipients'] = $this->Create_profile_model->recipients();
-		$this->data['title'] = 'Create Document';
+		$this->data['title'] = 'Add PRAS Profile';
 		$this->middle 		 = 'Create_profile_view';
 		$this->layout();
 	}
@@ -58,25 +61,35 @@ class Create_profile extends MY_Controller {
 		// print_r($this->input->post('doc_number'));
 		// echo '</pre>';
 
-		$doc_number  = $this->input->post('doc_number');
-		$doc_prefix  = $this->input->post('doc_type');
-		$mode  	 = $this->input->post('mode');
-
-		if($mode == 'file'){ //add details
-			$folder_name = 'files';
-		}else { //add attachments
-			$folder_name = 'attachments';
-		}
-
+		//$mode 		 = $this->input->get('mode');
+		$doc_prefix  = $this->input->post('mode');
 		$year    	 = date('Y');
 		$month   	 = date('m');
+		//$doc_type 	 = $doc_prefix[0];
+		//$service	 = $this->session->userdata('service_long_name');
 
 		$base_path = './uploads/';
-		$docPath   = './uploads/'.$folder_name.'/'.$doc_prefix;
+		//$fullpath  = './uploads/'.$year.'/'.$month.'/'.$doc_type.'/'.$service;
+		//$docPath   = './uploads/'.$year.'/'.$month.'/'.$doc_prefix;
+		$docPath   = './uploads/attachment/'.$doc_prefix;
+		$pathYear  = './uploads/'.$year;
+		$pathMonth = './uploads/'.$year.'/'.$month;
 
 		if(!is_dir($base_path)){
 			$oldmask = umask(0);
 			mkdir($base_path, 0775, TRUE);
+			umask($oldmask);
+		}
+
+		if(!is_dir($pathYear)){
+			$oldmask = umask(0);
+			mkdir($pathYear, 0775, TRUE);
+			umask($oldmask);
+		}
+
+		if(!is_dir($pathMonth)){
+			$oldmask = umask(0);
+			mkdir($pathMonth, 0775, TRUE);
 			umask($oldmask);
 		}
 
@@ -86,12 +99,21 @@ class Create_profile extends MY_Controller {
 			umask($oldmask);
 		}
 
+		// if(!is_dir($fullpath)){
+		// 	$oldmask = umask(0);
+		// 	mkdir($fullpath, 0775, TRUE);
+		// 	umask($oldmask);
+		// }
+
 		$this->load->library('upload');
+
+		//$config['upload_path'] = "D:/uploads";
+		//$config['upload_path']	= "https://devsysadd.da.gov.ph/philaimis/try_uploads";
+		//$config['upload_path']	= "../../../uploads/";
 		$config['upload_path']	= $docPath;
 		$config['allowed_types']= 'pdf';//'jpg|jpeg|png|bitmap|pdf|docx|doc'
 		$config['max_size']		= 0;
-		$oldname = $_FILES["doc_file"]['name'];
-		$config['file_name'] = trim(strtolower(md5(time().$oldname)));
+		
 		$this->upload->initialize($config);
 		
 		if(!$this->upload->do_upload('doc_file')){
@@ -105,9 +127,11 @@ class Create_profile extends MY_Controller {
 			);
 
 			$file_name  = $data['uploaded_data']['file_name'];
-			$db = 'document_file';
+			$pras_id = $this->input->post('pras_id');
 
-			$results   = $this->Create_profile_model->insert_upload_details($file_name, $doc_number, $doc_prefix, $mode, $db);
+			$db = 'pras_attachment_file';
+
+			$results   = $this->Create_profile_model->insert_upload_details($file_name, $pras_id, $db);
 
 			echo $results.'-'.$file_name;
 		}
@@ -116,20 +140,21 @@ class Create_profile extends MY_Controller {
 	public function remove_uploaded_file(){
 		$mode 		 = $this->input->post('mode');
 		$rm_id		 = $this->input->post('rm_id', true);
-		//$doc_prefix  = explode('-', $this->input->post('doc_number'));
+		$doc_prefix  = explode('-', $this->input->post('doc_number'));
 		$year    	 = date('Y');
 		$month   	 = date('m');
-		$doc_type 	 = $this->input->post('doc_type', true);
+		$doc_type 	 = $doc_prefix[0];
+		//$service	 = $this->session->userdata('service_long_name');
 
-		if($mode == 'file'){ //add details
-			$folder_name = 'files';
+		$fullpath  = FCPATH.'uploads/'.$year.'/'.$month.'/'.$doc_type;
+
+		if($mode == 'd'){ //add details
+			$db = 'document_details';
 		}else { //add attachments
-			$folder_name = 'attachments';
+			$db = 'document_attachments';
 		}
 
-		$fullpath  = FCPATH.'uploads/'.$folder_name.'/'.$doc_type;
-
-		$results = $this->Create_profile_model->remove_uploaded_file($rm_id);
+		$results = $this->Create_profile_model->remove_uploaded_file($rm_id, $db);
 
 		if($results){
 			unlink($fullpath.'/'.$this->input->post('rm_file_name', true));
@@ -139,6 +164,14 @@ class Create_profile extends MY_Controller {
 	public function Create_profile_js(){
 		$this->output->set_content_type('text/javascript');
 		$this->load->view('Create_profile.js');
+	}
+	
+    public function check_exists(){
+      	if (isset($_GET['params'])) {
+	        $params = strtoupper($_GET['params']);
+	        $results = $this->Create_profile_model->check_exists($params);
+	      	echo json_encode($results);
+    	}
 	}
 
 	public function get_recipients(){
@@ -155,63 +188,12 @@ class Create_profile extends MY_Controller {
 			$this->Create_profile_model->get_signature_da_name($q);
 		}
 	}
-
 	public function get_signature_div_da(){
 		if (isset($_GET['term'])){
-			$q = strtoupper($_GET['term']);
+			$q = strtolower($_GET['term']);
 			//$w = strtolower($_GET['agency_id']);
 			$this->Create_profile_model->get_signature_div_da($q);
 		}
-	}
-
-	public function get_sender_name(){
-		if (isset($_GET['term'])){
-			$q = strtolower($_GET['term']);
-			$this->Create_profile_model->get_sender_name($q);
-		}
-	}
-
-	public function insert_signatories(){
-		$results = $this->Insert_document_model->insert_signatories();
-		echo json_encode($results);
-	}
-
-	public function qr_code($size1,$size2,$doc_number){
-		$this->load->library('phpqrcode/qrlib');
-
-		//$QR = QRcode::png($doc_number, false,QR_ECLEVEL_H, 3, 2, true);
-		$QR = QRcode::png($doc_number, false,QR_ECLEVEL_H, $size1, $size2, true);
-
-		return $QR;
-	}
-
-	public function document_recipients(){
-		$doc_number 		 = $this->input->post('doc_number');
-		$results = $this->Create_profile_model->document_recipients($doc_number);
-		echo json_encode($results);
-	}
-
-	public function check_doc_number(){
-		$doc_number 		 = $this->input->get('doc_number');
-		$results = $this->Create_profile_model->check_doc_number($doc_number);
-		echo json_encode($results);
-	}
-
-	public function document_numbers(){
-		$document_numbers = strtolower($_GET['document_numbers']);
-		$this->Create_profile_model->document_numbers($document_numbers);
-	}
-
-	public function get_bind_list(){
-		$doc_number 		 = $this->input->post('doc_number');
-		$results = $this->Create_profile_model->get_bind_list($doc_number);
-		echo json_encode($results);
-	}
-
-	public function check_upload(){
-		$doc_number 		 = $this->input->post('doc_number');
-		$results = $this->Create_profile_model->check_upload($doc_number);
-		echo json_encode($results);
 	}
 
 }

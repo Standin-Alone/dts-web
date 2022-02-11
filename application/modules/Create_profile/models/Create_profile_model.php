@@ -486,4 +486,11 @@ class Create_profile_model extends CI_Model
 		#print_r($query->result());
 	}
 
+  	public function check_upload($doc_number){
+	    $query = $this->db->where('document_number', $doc_number)
+	              ->where('type', 'base_file')
+	              ->get('document_file');
+    	return $query->num_rows();
+  	}
+
 }
