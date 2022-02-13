@@ -82,7 +82,7 @@ class Create_profile extends MY_Controller {
 
 		if(!is_dir($docPath)){
 			$oldmask = umask(0);
-			mkdir($docPath, 0777, TRUE);
+			mkdir($docPath, 0775, TRUE);
 			umask($oldmask);
 		}
 

@@ -127,7 +127,7 @@ class View_document extends MY_Controller {
     public function release_document1(){
     	$doc_number   = $this->input->post('doc_number', true);
     	if($this->View_document_model->check_released($doc_number) == 1){
-    		$result = 'already';
+    		$result['data'] = 'already';
     	} else {
     		$result = $this->View_document_model->release_document1();
     	}

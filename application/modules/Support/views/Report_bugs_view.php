@@ -1,5 +1,9 @@
 <link href="<?php echo base_url() ?>assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" />
 <script src="<?php echo base_url() ?>assets/plugins/dropzone/min/dropzone.min.js"></script>
+<script src="https://kit.fontawesome.com/91e45686be.js" crossorigin="anonymous"></script>
+<!-- <link href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" rel="stylesheet"> -->
+<!-- <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"> -->
+<!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous"/> -->
 <div id="content" class="content">
     <div class="row">
         <div class="d-flex align-items-center mb-3">
@@ -13,9 +17,8 @@
             <div class="ms-auto">
             </div>
         </div>
-        <div class="col-md-12">
-            <div class="card">
-                <div class="row col-md-12 d-flex flex-row align-items-center">
+        <div class="col-md-12 rounded bg-light">
+            <div class="row d-flex flex-row align-items-end ">
                     <span class="col d-flex flex-row align-items-center mt-4">
                         <!-- <i class="fa fa-bug text-danger fa-fw fa-3x mr-2"></i> -->
                         <span class="d-flex flex-column justify-items-center">
@@ -28,20 +31,19 @@
                             </span>
                         </span>
                     </span>
-                    <span class="d-flex flex-row align-items-center ">
-                        <button type="button" class="btn btn-success m-0" data-toggle="modal" data-target="#support_bug_modal"><i class="fa fa-plus fa-lg me-2 ms-n2 text-success-900"></i> Add New</button>
+                    <span class="d-flex flex-row align-self-end justify-self-end ">
+                        <button type="button" class="btn btn-success mr-3 mb-1" data-toggle="modal" data-target="#support_bug_modal"><i class="fa fa-plus fa-lg me-2 ms-n2 text-success-900"></i> Add New</button>
                     </span>
                 </div>
                 <div class="col-md-12 p-0">
                 </div>
-            </div>
-            <table class="table table-bordered rounded bg-white">
+            <table class="table rounded bg-white mt-2">
                 <thead>
-                    <tr class="text-center">
-                        <td class=""><label>Issues/Concerns</label> </td>
-                        <td class=""><label>Actions Taken</label> </td>
-                        <td class=""><label>Date</label> </td>
-                        <td class=""><label>Options</label> </td>
+                    <tr>
+                        <td width="20" class=""><label>Issues/Concerns</label> </td>
+                        <td width="10" class=""><label>Actions Taken</label> </td>
+                        <td width="5" class=""><label>Date</label> </td>
+                        <td width="1" class=""><label>Options</label> </td>
                     </tr>
                 </thead>
                 <tbody>
@@ -69,7 +71,8 @@
                             <span class="fs-11px fw-bold">04/16/2021, 12.39pm</span>
                         </td>
                         <td class="text-center" width="1%">
-                            <span class="fs-11px fw-bold"><i class="fa fa-cog"></i></span>
+                            <button class="btn bg-white text-secondary fs-11px fw-bold"><i class="fa fa-trash"></i></button>
+                            <button class="btn bg-white text-secondary fs-11px fw-bold"><i class="fa fa-pen-to-square"></i></button>
                         </td>
                     </tr>
                     <tr class="border-bottom">
@@ -94,7 +97,7 @@
                             <span class="fs-11px fw-bold">04/16/2021, 12.39pm</span>
                         </td>
                         <td class="text-center" width="1%">
-                            <span class="fs-11px fw-bold"><i class="fa fa-cog"></i></span>
+                            <button class="btn bg-white text-secondary fs-11px fw-bold"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>
                     <tr class="border-bottom">
@@ -119,7 +122,7 @@
                             <span class="fs-11px fw-bold">04/16/2021, 12.39pm</span>
                         </td>
                         <td class="text-center align-middle" width="2%">
-                            <button class="btn fs-11px fw-bold"><i class="fa fa-ellipsis-v"></i></button>
+                            <button class="btn bg-white text-secondary fs-11px fw-bold"><i class="fa fa-trash"></i></button>
                         </td>
                     </tr>
                 </tbody>
@@ -136,6 +139,7 @@
                     <form id="bug_report" action="">
                         <div class="card-body mb-2">
                             <span class="col d-flex flex-column align-items-center mb-5 text-center">
+                                <img src="<?php echo base_url() ?>assets/img/support/bug-report-form.svg" class="img-fluid" width="30%" alt="">
                                 <!-- <img class="img-fluid" src="<?php echo base_url() ?>assets/img/support/support-banner.svg" alt="Card image" style="max-width: 13%;"> -->
                                 <h2 class="content-title mt-2">Users Report Form</h2>
                                 <p class="card-text m-0 col-8">Please give us a brief explanation about your issues/concerns. Providing a screenshot will help us address your problems faster.</p>

@@ -21,6 +21,8 @@ class Dashboard extends MY_Controller
 		$this->data['received_documents'] = $this->Dashboard_model->received_documents();
 		$this->data['released_documents'] = $this->Dashboard_model->released_documents();
 		$this->data['incoming_documents'] = $this->Dashboard_model->incoming_documents();
+		$this->data['get_recent_incoming'] = $this->Dashboard_model->get_recent_incoming();
+		$this->data['get_recent_outgoing'] = $this->Dashboard_model->get_recent_outgoing();
 		$this->data['outgoing_documents'] = $this->Dashboard_model->outgoing_documents();
 		$this->data['get_over_due_incoming'] = $this->Dashboard_model->get_over_due_incoming();
 		$this->data['get_over_due_outgoing'] = $this->Dashboard_model->get_over_due_outgoing();
@@ -107,11 +109,13 @@ class Dashboard extends MY_Controller
 		$this->middle 		 		 = 'Incoming_Documents_view';
 		$this->layout();
 	}
+	
 	public function Outgoing_Documents_view()
 	{
 		$this->data = [];
 		$this->data['get_outgoing_documents'] = $this->Dashboard_model->get_outgoing_documents();
 		$this->data['get_latest_outgoing'] = $this->Dashboard_model->get_latest_outgoing();
+		$this->data['get_recent_outgoing'] = $this->Dashboard_model->get_recent_outgoing();
 		$this->data['get_document_type_data_outgoing'] = $this->Dashboard_model->get_document_type_data_outgoing();
 		$this->data['get_over_due_outgoing'] = $this->Dashboard_model->get_over_due_outgoing();
 		$this->data['title'] 		 = 'DTS | Outgoing Documents';
@@ -122,10 +126,8 @@ class Dashboard extends MY_Controller
 	public function Print_Logs($document_number)
 	{
 		$this->data = [];
-		$this->data['document_logs'] = $this->Dashboard_model->get_history($document_number);
-		$this->data['title'] 		 = 'DTS | Print Logs';
-		$this->middle 		 		 = 'Print_logs';
-		$this->layout();
+		$data['document_logs'] = $this->Dashboard_model->get_history($document_number);
+		$this->load->view('Print_logs',$data);
 	}
 	public function Dashboard_js()
 	{

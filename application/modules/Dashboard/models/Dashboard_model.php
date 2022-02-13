@@ -11,6 +11,7 @@ class Dashboard_model extends CI_Model
 
         $get_assign_doc = $this->db->select("
                                 dp.document_number,
+                                dp.for,
                                 dp.subject,
                                 CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
                                 dp.date_created
@@ -18,7 +19,7 @@ class Dashboard_model extends CI_Model
             ->from("document_profile as dp")
             ->where("recipient_office_code", $office_code)
             ->like('date_created', $date_now)
-            ->where("dr.active", "1")
+            ->where("dr.received", "1")
             ->where("dp.status", "Verified")
             ->join("document_recipients as dr", "dp.document_number = dr.document_number")
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
@@ -39,10 +40,13 @@ class Dashboard_model extends CI_Model
         $get_assign_doc = $this->db->select("
                                 dp.document_number,
                                 dp.subject,
+                                dp.status,
+                                dp.for,
+                                dp.type,
                                 dt.type as document_type,
                                 CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
                                 dp.date_created as date,
-                                dr.active
+                                dr.received
         ")
             ->from("document_profile as dp")
             ->where("recipient_office_code", $office_code)
@@ -91,6 +95,7 @@ class Dashboard_model extends CI_Model
             $document_number = $data->document_number;
             $document_details = $this->db->select("
                         dp.status,
+                        dp.for,
                         dp.document_number,
                         dp.subject,
                         dt.type as document_type,
@@ -128,7 +133,7 @@ class Dashboard_model extends CI_Model
             ->like('date_created', $date_now)
             // ->join("document_profile as dp", "dp.document_number = dr.document_number")
             ->group_by("document_number")
-            ->order_by("date_created", "asc")
+            ->order_by("date_created", "desc")
             ->get()->result();
 
         // "<pre>";
@@ -147,6 +152,8 @@ class Dashboard_model extends CI_Model
         $get_outgoing = $this->db->select("
         dp.document_number,
         dp.subject,
+        dp.for,
+        dp.status,
         dt.type as document_type,
         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
         dp.date_created as date
@@ -173,6 +180,7 @@ class Dashboard_model extends CI_Model
         $get_outgoing = $this->db->select("
         dp.document_number,
         dp.subject,
+        dp.for,
         dt.type as document_type,
         dp.status,
         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
@@ -521,6 +529,7 @@ class Dashboard_model extends CI_Model
 
     public function get_history($document_number)
     {
+        $document_number = trim($document_number);
         $result = '';
         try {
             $check_if_exist = $this->db->where("document_number", $document_number)->get("document_profile");
@@ -628,6 +637,7 @@ class Dashboard_model extends CI_Model
                         dt.type as document_type,
                         dp.origin_type,
                         dp.subject,
+                        dp.status,
                         CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as document_origin,
                         rcl.status,
                         max(log_date) log_date
@@ -910,6 +920,7 @@ class Dashboard_model extends CI_Model
                         rcl.document_number,
                         dt.type as doc_type,
                         dp.origin_type,
+                        dp.for,
                         dp.subject,
                         CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as from_office,
                         rcl.status,
@@ -937,6 +948,7 @@ class Dashboard_model extends CI_Model
                 rcl.type,
                 dt.type as doc_type,
                 dp.subject,
+                dp.for,
                 rcl.log_date
                 ")
                     ->from("receipt_control_logs as rcl")
@@ -977,6 +989,7 @@ class Dashboard_model extends CI_Model
                                     'document_number' =>   $row->document_number,
                                     'doc_type' => $row->doc_type,
                                     'subject' => $row->subject,
+                                    'for' => $row->for,
                                     'from_office' => $row->from_office,
                                     'log_date' => $row->log_date,
                                 ]
@@ -1007,6 +1020,7 @@ class Dashboard_model extends CI_Model
                         dt.type as doc_type,
                         dp.origin_type,
                         dp.subject,
+                        dp.for,
                         CONCAT(lo.INFO_SERVICE, ' - ', lo.INFO_DIVISION) as from_office,
                         dp.status,
                         dp.date_created
@@ -1032,6 +1046,7 @@ class Dashboard_model extends CI_Model
                 rcl.type,
                 dt.type as doc_type,
                 dp.subject,
+                dp.for,
                 rcl.log_date
                 ")
                     ->from("receipt_control_logs as rcl")
@@ -1074,6 +1089,7 @@ class Dashboard_model extends CI_Model
                                 'details' => [
                                     'document_number' =>   $row->document_number,
                                     'doc_type' => $row->doc_type,
+                                    'for' => $row->for,
                                     'subject' => $row->subject,
                                     'current_office' => $last_transaction->current_office,
                                     'log_date' => $last_transaction->log_date,
@@ -1138,10 +1154,12 @@ class Dashboard_model extends CI_Model
         $get_assign_doc = $this->db->select("
                                 dp.document_number,
                                 dp.subject,
+                                dp.for,
+                                dp.status,
                                 dt.type as document_type,
                                 CONCAT(INFO_SERVICE, ' - ', INFO_DIVISION) as from_office,
                                 dp.date_created as date,
-                                dr.active
+                                dr.received
         ")
             ->from("document_profile as dp")
             ->where("recipient_office_code", $office_code)
@@ -1150,6 +1168,44 @@ class Dashboard_model extends CI_Model
             // ->like('dp.date_created', $date_now)
             // ->where("dr.active", "1")
             ->where("dp.status", "Verified")
+            ->join("doc_type as dt", "dp.document_type = dt.type_id")
+            ->join("document_recipients as dr", "dp.document_number = dr.document_number")
+            ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
+            ->where("recipient_office_code", $office_code)
+            ->group_by("dp.document_number")
+            ->order_by("date_added", "desc")
+            ->get()->result();
+
+        // print_r($get_assign_doc);
+
+        return $get_assign_doc;
+    }
+
+    public function get_recent_outgoing()
+    {
+        $user_id = $this->session->userdata('user_id');
+        $office_code = $this->session->userdata('office');
+        $date_now = date("Y-m-d");
+
+        $first_date = date("Y-m-d", strtotime($date_now . '-2 days'));
+        $second_date = date("Y-m-d", strtotime($date_now . '-1 day'));
+
+        $get_assign_doc = $this->db->select("
+                                dp.document_number,
+                                dp.subject,
+                                dp.for,
+                                dp.status,
+                                dt.type as document_type,
+                                dp.date_created as date,
+                                dr.received
+        ")
+            ->from("document_profile as dp")
+            ->where("dp.office_code", $office_code)
+            ->where("dp.date >=", $first_date)
+            ->where("dp.date <=", $second_date)
+            // ->like('dp.date_created', $date_now)
+            // ->where("dr.active", "1")
+            // ->where("dp.status", "Verified")
             ->join("doc_type as dt", "dp.document_type = dt.type_id")
             ->join("document_recipients as dr", "dp.document_number = dr.document_number")
             ->join("lib_office as lo", "dp.office_code = lo.OFFICE_CODE")
@@ -1182,6 +1238,7 @@ class Dashboard_model extends CI_Model
 
         $this->db->select('*')
                  ->from('vw_latest_rnc')
+                # ->where("action != 'Profiled'")
                  ->where('transacting_office', $office_code)
                  ->where('type', $type);
 
@@ -1215,6 +1272,8 @@ class Dashboard_model extends CI_Model
                  ->limit($length, $start);
 
         $query = $this->db->get();
+
+        #echo $this->db->last_query();
 
         $data = array(
             'draw'            => $draw,

@@ -540,19 +540,32 @@ $('#edit_recipient').submit(function(e) {
                     dataType: 'json', 
                     success:function(r)  
                     {
-                        if(r == 'success'){
-                            console.log(r);
+
+                        var test = [];
+                        $.each(r.data, function(k,v) {
+                            test.push(v.recipient_office_code);
+                        });
+
+                        if(r.output == 'success'){
+                                var message = 'You have an incoming document from '+office_name+' with a subject of '+subj_text+'.';
+                                socket().emit('push notification', {
+                                channel: test,
+                                message:
+                                    message,
+                                document_number: doc_number
+                                });
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Completed',
                                 text: 'Document Released.'
                             }).then((result) => {
                                 if(result.value){
-                                    //location.reload();
+                                    location.reload();
                                 }
                             });
                         }
-                        if(r == 'already'){
+
+                        if(r.output == 'already'){
                             console.log(r);
                             Swal.fire({
                                 icon: 'warning',

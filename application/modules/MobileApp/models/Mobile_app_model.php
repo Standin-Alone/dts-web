@@ -1018,7 +1018,7 @@ public function release_document(){
 			
 
 
-			if($action != 'Return to Sender'){
+		
 			// insert recipients
 			foreach($recipients_office_code as $value){
 				
@@ -1029,20 +1029,29 @@ public function release_document(){
 								->where('received','1')
 								->get()->result_array();
 
-								
-				if(!in_array($value,array_column($get_document_recipients,"recipient_office_code"))){
-					$this->db->insert('document_recipients',[					
-						'document_number' => $document_number,
-						'recipient_office_code' => $value,		
-						'owner' => $value == $get_owner ? 'Y' : 'N',		
-						'added_by_user_id' => $user_id,
-						'added_by_user_fullname' => $full_name,
-						'added_by_user_office' => $office_code			
-					]);	
+				if($action != 'Return to Sender'){
+					if(!in_array($value,array_column($get_document_recipients,"recipient_office_code"))){
+						$this->db->insert('document_recipients',[					
+							'document_number' => $document_number,
+							'recipient_office_code' => $value,		
+							'owner' => $value == $get_owner ? 'Y' : 'N',		
+							'added_by_user_id' => $user_id,
+							'added_by_user_fullname' => $full_name,
+							'added_by_user_office' => $office_code			
+						]);	
+					}
+				}else{
+
+					if(!in_array($value,array_column($get_document_recipients,"recipient_office_code"))){
+						$this->db->where('recipient_office_code',$value)->where('document_number',$document_number)->update('document_recipients',['received' => '1']);
+					}
+
+
+					
 				}
 
 			}
-			}
+		
 			$result = ["Message" => "true"];
 		
 
@@ -1244,10 +1253,6 @@ public function get_offices($document_number,$my_office_code){
 			// get default recipients
 			$get_default_recipient_office_info = $this->db->select('info_service,office_Code,shortname_region,info_division')->from('lib_office')->where('STATUS_CODE','1')
 										->where_in('office_code',count($consolidate_recipients) != 0 ? $consolidate_recipients : '')->get()->result();
-
-
-
-			
 			
 	
 		
@@ -1259,6 +1264,71 @@ public function get_offices($document_number,$my_office_code){
 		$result = ["Message" => "false", "error" => $e->getMessage()];
 	}
 }
+
+//list of  offices that receive the document for RETURN TO SENDER
+public function get_last_recipients($document_number,$my_office_code){
+
+
+	$result = '';
+	try{
+
+
+		$get_last_recipients_office_code = $this->db
+										->select('recipient_office_code')
+										->from('document_recipients')
+										->where('document_number',$document_number)
+										->where('recipient_office_code !=',$my_office_code)
+										->where('received','0')
+										->get()->result();
+		$consolidate_recipients = [];									
+		//  push default recipients
+		foreach($get_last_recipients_office_code as $item){
+			array_push($consolidate_recipients,$item->recipient_office_code);
+		}
+								
+		$check_if_recipient_is_empty = isset($consolidate_recipients) ? $consolidate_recipients  : array() ;
+		
+		
+		
+		$get_division = $this->db->distinct()->select('INFO_DIVISION ,office_code')->from('lib_office')->where('STATUS_CODE','1')->group_by('INFO_DIVISION')->get();
+		
+		$office_array = [];
+		if($get_division){
+
+			foreach($get_division->result() as $division_key => $item){
+
+				array_push($office_array , ["name"=>$item->INFO_DIVISION,'id'=>$division_key, "children"=>[]]);
+
+				$get_records = $this->db->select('INFO_SERVICE,OFFICE_CODE,SHORTNAME_REGION,INFO_DIVISION')->from('lib_office')->where('STATUS_CODE','1')->where('INFO_DIVISION',$item->INFO_DIVISION)->where_in('office_code',[] )->get();		
+				foreach($get_records->result() as $value){	
+					
+					
+					foreach($office_array as $office_value){						
+						if($office_value['id'] == $division_key){
+						
+								array_push($office_array[$division_key]['children'],["division"=>$value->INFO_DIVISION,"name"=>($value->SHORTNAME_REGION  == 'OSEC' ? 'DA / ' : '').$value->INFO_SERVICE,'id'=>$value->OFFICE_CODE]);
+							
+						}
+					}
+
+					
+				
+				}
+			}
+		
+		
+	
+		
+			$result = ["Message" => "true", "offices" =>$office_array];
+		}
+		return $result;
+
+	}catch(\Exception $e){
+		$result = ["Message" => "false", "error" => $e->getMessage()];
+	}
+
+}
+
 
 
 public function get_doc_type(){
@@ -1288,6 +1358,20 @@ public function check_utility($version){
 	}
 	return $result;
 	
+}
+
+
+public function get_actions(){
+
+	$actions = $this->db->select('*')
+						->from('get_actions')						
+						->get()->result();
+	
+
+	
+
+	
+	return $result;
 }
 
 

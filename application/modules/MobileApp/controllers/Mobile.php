@@ -74,6 +74,13 @@ class Mobile extends MY_Controller {
 		echo json_encode($result);
 	}
 
+
+	public function get_last_recipients($document_number,$my_office_code){
+		$result = $this->Mobile_app_model->get_last_recipients($document_number,$my_office_code);
+		echo json_encode($result);
+	}
+
+
 	public function get_doc_type(){
 		$result = $this->Mobile_app_model->get_doc_type();
 		echo json_encode($result);
@@ -86,6 +93,11 @@ class Mobile extends MY_Controller {
 
 	public function check_utility($version){
 		$result = $this->Mobile_app_model->check_utility($version);
+		echo json_encode($result);
+	}
+
+	public function get_actions(){
+		$result = $this->Mobile_app_model->get_actions();
 		echo json_encode($result);
 	}
 

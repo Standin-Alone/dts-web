@@ -267,9 +267,32 @@ $my_archives_count = $count_data['my_archives_data'];
                     <div class="d-flex justify-content-between">
                         <div class="col">
                             <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-down"></i>INCOMING DOCUMENTS</h6>
-                            <h3 class="text-white">
-                                <?php echo count($incoming_documents) ?>
-                            </h3>
+                            <div class="d-flex flex-row">
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($incoming_documents) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Latest Incoming
+                                </span>
+                            </span>
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($get_recent_incoming) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Recent Transaction<?php echo count($get_recent_incoming) > 1 ? "s" : "";?>
+                                </span>
+                            </span>
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($get_over_due_incoming) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Overdue Documents
+                                </span>
+                            </span>
+                            </div>
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
@@ -285,16 +308,55 @@ $my_archives_count = $count_data['my_archives_data'];
                 </div>
                 <div class="p-2 <?php echo $class = !empty($incoming_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
                     <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
-                        <?php
+                    <?php
                         if ($incoming_documents) {
                             foreach ($incoming_documents as $row) {
+                                if($row->for == 2){
                         ?>
-
+                                <!-- <div class="alert alert-danger fade show">the quick brown fox jump over the lazy dog</div> -->
+                                <div class="list-group-item list-group-item-action border-danger">
+                                    <div class=" d-flex flex-column">
+                                        <div class="row d-flex flex-row justify-content-between">
+                                            <span>
+                                                <i class="fa-solid fa-circle-exclamation fa-fade mx-1 fa-2x text-danger"></i>
+                                            </span>
+                                            <div class="col-md-8 d-flex flex-column">
+                                                <span class="d-flex flex-row align-items-center">
+                                                    <a href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank" class="fs-14px lh-12 mb-2px font-weight-bold text-danger mb-1 incoming_document_number">
+                                                        <?php echo $row->document_number ?> 
+                                                    </a>    
+                                                </span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">From: <?php echo $row->from_office ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
+                                                <span>
+                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                </span>
+                                            </div>
+                                            <div class="col d-flex flex-column justify-content-between align-items-end mx-0 px-0">
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo date("g:i a", strtotime($row->date_created)) ?></span>
+                                                <span class="d-flex flex-row justify-content-between align-self-end mx-0">
+                                                    <button class="btn btn-sm btn-outline-secondary bg-white mx-1 logs"><i class="fa fa-search-location mr-1"></i> Logs</button>
+                                                    <a href="<?php echo base_url() . 'Receipt_Control_Center/Receive/' . $row->document_number ?>" target="_blank" class="btn btn-sm btn-secondary ml-1"><i class="fa fa-file-alt mr-1"></i>Receive</a>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                        <?php
+                        }
+                        
+                            }
+                        }
+                        if ($incoming_documents) {
+                            foreach ($incoming_documents as $row) {
+                                if($row->for != 2){
+                        ?>
                                 <div class="list-group-item list-group-item-action">
                                     <div class="d-flex flex-column">
                                         <div class="row d-flex flex-row justify-content-between">
                                             <div class="col-md-8 d-flex flex-column">
-                                                <a href="<?php echo base_url() . 'Receipt_Control_Center/Receive/' . $row->document_number ?>" target="_blank" class="fs-14px lh-12 mb-2px font-weight-bold text-secondary mb-1 incoming_document_number"><?php echo $row->document_number ?></a>
+                                                <a href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank" class="fs-14px lh-12 mb-2px font-weight-bold text-secondary mb-1 incoming_document_number"><?php echo $row->document_number ?></a>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">From: <?php echo $row->from_office ?></span>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
                                             </div>
@@ -302,7 +364,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo date("g:i a", strtotime($row->date_created)) ?></span>
                                                 <span class="d-flex flex-row justify-content-between align-self-end mx-0">
                                                     <button class="btn btn-sm btn-outline-secondary mx-1 logs"><i class="fa fa-search-location mr-1"></i> Logs</button>
-                                                    <a href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank" class="btn btn-sm btn-secondary ml-1"><i class="fa fa-file-alt mr-1"></i> View</a>
+                                                    <a href="<?php echo base_url() . 'Receipt_Control_Center/Receive/' . $row->document_number ?>" target="_blank" class="btn btn-sm btn-secondary ml-1"><i class="fa fa-file-alt mr-1"></i>Receive</a>
                                                 </span>
                                             </div>
                                         </div>
@@ -310,6 +372,7 @@ $my_archives_count = $count_data['my_archives_data'];
                                 </div>
 
                             <?php }
+                            }
                         } else { ?>
                             <div class="text-center my-4">
                                 <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
@@ -326,9 +389,32 @@ $my_archives_count = $count_data['my_archives_data'];
                     <div class="d-flex justify-content-between">
                         <div class="col">
                             <h6 class="mb-3 text-white" style="opacity: 75%;"> <i class="mr-1 fa fa-arrow-up"></i>OUTGOING DOCUMENTS</h6>
-                            <h3 class="text-white">
-                                <?php echo count($outgoing_documents) ?>
-                            </h3>
+                            <div class="d-flex flex-row">
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($outgoing_documents) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Latest Outgoing
+                                </span>
+                            </span>
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($get_recent_outgoing) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Recent Transaction<?php echo count($get_recent_outgoing) > 1 ? "s" : "";?>
+                                </span>
+                            </span>
+                            <span class="col-3 d-flex flex-row align-items-center">
+                                <h3 class="text-white mb-1 mr-2">
+                                    <?php echo count($get_over_due_outgoing) ?>
+                                </h3>
+                                <span class="text-secondary d-flex flex-row">
+                                    Overdue Documents
+                                </span>
+                            </span>
+                            </div>
                         </div>
                         <!-- <img src="<?php echo base_url() ?>/assets/img/dashboard/outgoing.svg" height="80" class="d-none d-lg-block mx-auto"> -->
                         <span>
@@ -344,18 +430,75 @@ $my_archives_count = $count_data['my_archives_data'];
                 </div>
                 <div class="p-2 <?php echo $class = !empty($outgoing_documents) ? 'scrollbar' : ''; ?>" style="max-height: 350px;">
                     <div class="list-group list-group-flush rounded-bottom overflow-hidden panel-body p-0">
-                        <?php
+                    <?php
                         if ($outgoing_documents) {
                             foreach ($outgoing_documents as $row) {
+                                if ($row->for == 2){
                                 $this->db
                                     ->where("document_number", $row->document_number)
                                     ->from("document_recipients");
                                 $count_recipient = $this->db->get()->num_rows();
 
+                                $this->db
+                                    ->where("document_number", $row->document_number)
+                                    ->where("received", "0")
+                                    ->from("document_recipients");
+                                $count_received_recipient = $this->db->get()->num_rows();
+                        ?>
+                        <div class="list-group-item list-group-item-action">
+                                    <div class=" d-flex flex-column">
+                                        <div class="row d-flex justify-content-between">
+                                            <span>
+                                                <i class="fa-solid fa-circle-exclamation fa-fade mx-1 fa-2x text-danger"></i>
+                                            </span>
+                                            <div class="col-8 d-flex flex-column">
+                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 ">
+                                                    <a class="text-dark status_document_number text-danger" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank">
+                                                        <?php echo $row->document_number ?>
+                                                    </a>
+                                                </label>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Recipients: <?php echo $count_received_recipient . '/' . $count_recipient ?> Received</span>
+                                                <span>
+                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                </span>
+                                            </div>
+                                            <div class="col d-flex flex-column justify-content-between">
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 align-self-end">Today at <?php echo  $time = date('g:i a', strtotime($row->date_created));   ?></span>
+                                                <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1"><?php
+                                                                                                            if ($count_received_recipient == $count_recipient) {
+                                                                                                                echo '
+                                                                                                                <button class="btn btn-outline-success btn-xs float-right check_status" data-toggle="tooltip" data-placement="top" title="Check Status">
+                                                                                                                    <i class="fa fa-check-circle mr-1"></i> Done
+                                                                                                                </button>
+                                                                                                                ';
+                                                                                                            } else {
+                                                                                                                echo '
+                                                                                                                <button class="btn btn-outline-secondary btn-xs float-right check_status" data-toggle="tooltip" data-placement="top" title="Check Status">
+                                                                                                                    <i class="fa fa-hourglass-start mr-1"></i> Processing
+                                                                                                                </button>
+                                                                                                                ';
+                                                                                                            }
+                                                                                                            ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        <?php
+                            }
+                        }
+                        }
+                        if ($outgoing_documents) {
+                            foreach ($outgoing_documents as $row) {
+                                if ($row->for != 2){
+                                $this->db
+                                    ->where("document_number", $row->document_number)
+                                    ->from("document_recipients");
+                                $count_recipient = $this->db->get()->num_rows();
 
                                 $this->db
                                     ->where("document_number", $row->document_number)
-                                    ->where("active", "0")
+                                    ->where("received", "0")
                                     ->from("document_recipients");
                                 $count_received_recipient = $this->db->get()->num_rows();
                         ?>
@@ -363,7 +506,11 @@ $my_archives_count = $count_data['my_archives_data'];
                                     <div class="d-flex flex-column">
                                         <div class="row d-flex justify-content-between">
                                             <div class="d-flex flex-column">
-                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 status_document_number"><?php echo $row->document_number ?></label>
+                                                <label class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1 ">
+                                                    <a class="text-dark status_document_number" href="<?php echo base_url() . 'View_document/document/' . $row->document_number ?>" target="_blank">
+                                                        <?php echo $row->document_number ?>
+                                                    </a>
+                                                </label>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Subject: <?php echo $row->subject ?></span>
                                                 <span class="fs-14px lh-12 mb-2px fw-bold text-dark mb-1">Recipients: <?php echo $count_received_recipient . '/' . $count_recipient ?> Received</span>
                                             </div>
@@ -383,19 +530,13 @@ $my_archives_count = $count_data['my_archives_data'];
                                                                                                                 </button>
                                                                                                                 ';
                                                                                                             }
-                                                                                                            // if ($row->status == "Archived") {
-                                                                                                            //     echo "
-                                                                                                            //                 <span class = 'border-primary rounded float-right border text-primary p-1'>
-                                                                                                            //                    <i class='fa fa-archive mr-1'></i> Archived
-                                                                                                            //                 </span>
-                                                                                                            //                 ";
-                                                                                                            // }
                                                                                                             ?></span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             <?php }
+                            }
                         } else { ?>
                             <div class="text-center my-4">
                                 <span class="h4 text-dark mb-2 text-center mx-auto my-3">No New Transaction</span>
@@ -720,27 +861,7 @@ $my_archives_count = $count_data['my_archives_data'];
             </div>
         </div>
     </div>
-
-
-
-    <!-- ================================== Released Modal ============================================ -->
-    <div class="modal fade bd-example-modal-lg" id="modal_check_status" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="container pt-5 pb-2">
-                    <!-- For demo purpose -->
-                    <div class="row text-center text-white">
-                        <div class="col-lg-8 mx-auto">
-                            <h1 class="display-6">Document Status</h1>
-                            <div class="input-group mb-3">
-
-                            </div>
-                        </div>
-                    </div><!-- End -->
-                </div>
-            </div>
-        </div>
-    </div>
+   
 </div>
 
 <script src="<?php echo base_url() ?>Dashboard/Dashboard_js"></script>

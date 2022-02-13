@@ -88,18 +88,18 @@ class My_documents_model extends CI_Model {
 
 
 		$this->db->select('*')
-				 ->from('receipt_control_logs')
+				 ->from('vw_latest_rnc')
 				 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE)', '', FALSE);
 			   	 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
-			   	 ->where('action', 'Received')
-				 ->where('transacting_office !=', $this->session->userdata('office') );
+			   	 ->where('status', '1')
+				 ->where('transacting_office', $this->session->userdata('office') );
 
 		if($search != ''){
 			$this->db->group_start()
 					 ->like('document_number', $search['value'])
 					 ->or_like('log_date', $search['value'])
-					 ->or_like('transacting_user_fullname', $search['value'])
-					 ->or_like('action', $search['value'])
+					 //->or_like('transacting_user_fullname', $search['value'])
+					 //->or_like('action', $search['value'])
 					 ->or_like('type', $search['value'])
 					 ->group_end();
 		}
@@ -124,17 +124,17 @@ class My_documents_model extends CI_Model {
 
 	public function get_total_all($search = null, $user_id = null){
 		$this->db->select('*')
-				 ->from('receipt_control_logs')
+				 ->from('vw_latest_rnc')
 				 //->where('EXISTS (SELECT * FROM lib_office WHERE document_profile.office_code = lib_office.OFFICE_CODE )', '', FALSE); 
-				 ->where('action', 'Received')
+				 ->where('status', '1')
 				 ->where('transacting_office', $this->session->userdata('office') );
 
 		if($search != ''){
 			$this->db->group_start()
 					 ->like('document_number', $search)
 					 ->or_like('log_date', $search)
-					 ->or_like('transacting_user_fullname',$search)
-					 ->or_like('action', $search)
+					 // ->or_like('transacting_user_fullname',$search)
+					 // ->or_like('action', $search)
 					 ->or_like('type',$search)
 					 ->group_end();
 		}

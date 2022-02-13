@@ -146,6 +146,7 @@ class RCC_model extends CI_Model
                         $result = [
                             "status" => 'Latest transaction, last transaction status is released, Insert status = ' . $insert_data,
                             "error" => "false",
+                            "document_number" => $document_number,
                             "message" => "Document has been received successfully",
                             "sender_details" => $this->get_sender($document_number)
                         ];
@@ -186,6 +187,7 @@ class RCC_model extends CI_Model
                         $result = [
                             "status" => 'Not latest transaction, last transaction status is released, Insert status = ' . $insert_data,
                             "error" => "false",
+                            "document_number" => $document_number,
                             "message" => "Document has been received successfully",
                             "sender_details" => $this->get_sender($document_number)
                         ];
@@ -729,6 +731,7 @@ class RCC_model extends CI_Model
                                 $result = [
                                     "status" => "",
                                     "error" => "false",
+                                    "document_number" => $document_number,
                                     "message" => "Document has been released succesfully",
                                     "recipient_details" => $recipient_details,
                                     "sender_details" => $sender_details
@@ -877,6 +880,7 @@ class RCC_model extends CI_Model
                                         $result = [
                                             "status" => "",
                                             "error" => "false",
+                                            "document_number" => $document_number,
                                             "message" => "Document has been released succesfully",
                                             "recipient_details" => $recipient_details,
                                             "sender_details" => $sender_details

@@ -732,6 +732,8 @@
     var upload_path = '<?php echo base_url() .'uploads/attachments/';?>';
     var doc_number = '<?php echo $doc_number; ?>';
     var office_code = '<?php echo $this->session->userdata('office'); ?>';
+    var office_name = '<?php echo strtoupper($this->session->userdata('division_name') == '' ? $this->session->userdata('service_long_name') : $this->session->userdata('division_name')); ?>';
+    var subj_text = "<?php echo $document_information['document_details'][0]->subject; ?>";
     $('#print_area').css("display", "none");
     $(document).ready(function(){
         $('.datepicker').datepicker({

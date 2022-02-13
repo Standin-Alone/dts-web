@@ -117,12 +117,13 @@ $(document).ready(function () {
                     if(result.recipient_details){
                         $.map(result.recipient_details.recipients, function (recipient, indexOrKey) {
                             //incoming
-                            var message = `Your have an incoming document from ${from_office} with a subject of ${subject}`
+                            var message = `You have an incoming document from ${from_office} with a subject of ${subject}`
                             socket().emit('push notification', {
+                            subject: subject,
                             channel: [recipient],
                             message:
                                 message,
-                            document_number: result.document_number
+                            document_number: result.sender_details.document_number
                             });
                             
                         });
@@ -131,13 +132,14 @@ $(document).ready(function () {
                             channel: [ sender_office ],
                             message:
                                 `Your document with a subject of ${subject} has been released from ${from_office}`,
-                            document_number: result.document_number
+                            document_number: result.sender_details.document_number
                         });
                         
                     }else{
                         var message = `Your document with a subject of ${subject} has been released from ${from_office}`
     
                         socket().emit('push notification', {
+                        subject: subject,
                         channel: [sender_office],
                         message:
                             message,

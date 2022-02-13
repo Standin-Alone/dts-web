@@ -20,12 +20,12 @@ class Receipt_Control_Center extends MY_Controller
 		$this->load->model('RCC_model');
 	}
 
-	public function index()
-	{
-		$this->data['title']          = 'Receipt Control Center';
-		$this->middle                   = 'RCC_view';
-		$this->layout();
-	}
+	// public function index()
+	// {
+	// 	$this->data['title']          = 'Receipt Control Center';
+	// 	$this->middle                   = 'RCC_view';
+	// 	$this->layout();
+	// }
 
 	public function Receive()
 	{

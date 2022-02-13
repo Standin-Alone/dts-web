@@ -497,7 +497,7 @@ class View_document_model extends CI_Model {
     }
 
 	public function release_document1(){
-		$result   = 'failed';
+		$result['output']  = 'failed';
 		$doc_number   = $this->input->post('doc_number', true);
 
 		$logs = array(
@@ -518,7 +518,11 @@ class View_document_model extends CI_Model {
 		}
 
 		if($query_logs){
-			$result = 'success';
+			$last_query 	= $this->db->select('recipient_office_code')
+									   ->where('document_number', $doc_number)
+									   ->get('document_recipients');
+			$result['data'] = $last_query->result();
+			$result['output'] = 'success';
 		}
 
 		return $result;

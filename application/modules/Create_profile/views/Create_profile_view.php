@@ -518,6 +518,8 @@ var doc_number;
 var doc_type;
 var action_for;
 var subj_text;
+var office_code = '<?php echo $this->session->userdata('office'); ?>';
+var office_name = '<?php echo strtoupper($this->session->userdata('division_name') == '' ? $this->session->userdata('service_long_name') : $this->session->userdata('division_name')); ?>';
 $('#add_file,#print_area').css("display", "none");
 $('#sender_div,#recipient_div').css('display' , 'none');
 $('#sender_name,#sender_position,#sender_address').attr('disabled', true);
@@ -685,6 +687,7 @@ $(document).ready(function(){
                             doc_number = results.data[0].document_number;
                             doc_type = results.data[0].type;
                             action_for = results.data[0].for;
+                            subj_text = results.data[0].subject;
                             console.log(doc_type);
                             $('#doc_number_sig').val(doc_number);
                             $("#doc_num_qr").attr('src', path+doc_number);
@@ -1113,12 +1116,36 @@ $(document).ready(function(){
                     dataType: 'json', 
                     success:function(r)  
                     {
-                        if(r == 'success'){
-                            console.log(r);
+
+                        var test = [];
+                        $.each(r.data, function(k,v) {
+                            test.push(v.recipient_office_code);
+                        });
+                        if(r.output == 'success'){
+                                var message = 'You have an incoming document from '+office_name+' with a subject of '+subj_text+'.';
+                                socket().emit('push notification', {
+                                channel: test,
+                                message:
+                                    message,
+                                document_number: doc_number
+                                });
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Completed',
                                 text: 'Document Released.'
+                            }).then((result) => {
+                                if(result.value){
+                                    location.reload();
+                                }
+                            });
+                        }
+
+                        if(r.output == 'already'){
+                            console.log(r);
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Warning!',
+                                text: 'Document is already Released.'
                             }).then((result) => {
                                 if(result.value){
                                     location.reload();

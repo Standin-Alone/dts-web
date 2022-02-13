@@ -68,13 +68,39 @@ $office_code = $this->session->userdata('office');
                                                     <div class="mx-0 px-0 d-flex flex-row col-md-12 justify-content-between">
                                                     </div>
                                                     <div class="mx-0 px-0 d-flex flex-row col-md-12">
+                                                        <?php
+                                                        if ($row->status == 'Archived') {
+                                                            echo '
+                                                        <span>
+                                                           <i class="fa fa-check-circle text-lime mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="Completed"></i>
+                                                        </span>
+                                                        ';
+                                                        } else if ($row->status == 'Verified') {
+                                                            echo '
+                                                    <span>
+                                                        <i class="fa fa-hourglass-half text-gray mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="In Process"></i>
+                                                    </span>
+                                                    ';
+                                                        }
+                                                        ?>
                                                         <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                            <h5><?php echo $row->document_number ?></h5>
+                                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank">
+                                                                <h5><?php echo '<span class="document_number">' . $row->document_number . '</span>';
+                                                                    if ($row->for == 2) {
+                                                                        echo '
+                                                                <span>
+                                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                                </span>
+                                                                ';
+                                                                    } ?>
+                                                                </h5>
+                                                            </a>
                                                             <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $row->document_type ?></span>
                                                             <span><label class="my-0 text-secondary">Subject: </label> <?php echo $row->subject ?></span>
                                                             <span><label class="my-0 text-secondary">From: </label> <?php echo $row->from_office  ?></span>
+
                                                         </div>
-                                                        <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
+                                                        <div class="mx-0 px-0 d-flex flex-column col align-items-end justify-content-between">
                                                             <span>Sent at
                                                                 <?php
                                                                 $date_sent = $this->db->select("log_date")
@@ -123,12 +149,12 @@ $office_code = $this->session->userdata('office');
                                                             </span> -->
                                                             <span>
                                                                 <?php
-                                                                if ($row->active == '1') {
+                                                                if ($row->received == '1') {
                                                                 ?>
-                                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                    <button class="btn btn-secondary log">Logs</button>
                                                                     <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
                                                                     <?php
-                                                                } else if ($row->active == '0') {
+                                                                } else if ($row->received == '0') {
                                                                     $last_log = $this->db->select("type ,action")
                                                                         ->from("receipt_control_logs")
                                                                         ->where("document_number", $row->document_number)
@@ -146,31 +172,37 @@ $office_code = $this->session->userdata('office');
                                                                             ->from("receipt_control_logs")
                                                                             ->where("document_number", $row->document_number)
                                                                             ->where("transacting_office", $office_code)
+                                                                            ->where("type", "Released")
                                                                             ->where("status", "1")
                                                                             ->order_by("log_date", "desc")
                                                                             ->limit(1)
-                                                                            ->get()->result();
-                                                                        if ($latest_log[0]->type == 'Released') {
+                                                                            ->get()->row();
+                                                                       
+                                                                            if ($latest_log) {
                                                                         ?>
-                                                                            <span class="d-flex align-items-end">
-                                                                                Latest Status:
-                                                                                <span>
-                                                                                    <?php
+                                                                                <span class="d-flex align-items-end">
+                                                                                    Latest Status:
+                                                                                    <span>
+                                                                                        <?php
 
-                                                                                    $latest_log_date =  $latest_log ? $latest_log[0]->log_date : "";
-                                                                                    echo $latest_log[0]->type;
-                                                                                    echo ' at ';
-                                                                                    echo date("g:i a", strtotime($latest_log_date));
-                                                                                    ?>
+                                                                                        $latest_log_date =  $latest_log ? $latest_log->log_date : "";
+                                                                                        echo $latest_log->type;
+                                                                                        echo ' at ';
+                                                                                        echo date("Mdy g:i a", strtotime($latest_log_date));
+                                                                                        ?>
+                                                                                    </span>
                                                                                 </span>
-                                                                            </span>
-                                                                        <?php
-                                                                        } else {
-                                                                        ?>
-                                                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
-                                                                            <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $row->document_number ?>" target="_blank" class="btn btn-warning">Release</a>
+                                                                            <?php
+                                                                            } else {
+                                                                            ?>
+                                                                                <button class="btn btn-secondary log">Logs</button>
+                                                                                <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
+                                                                            <?php
+                                                                            }
+                                                                       
+                                                                            ?>
                                                                 <?php
-                                                                        }
+                                                                        
                                                                     }
                                                                 }
                                                                 ?>
@@ -206,13 +238,39 @@ $office_code = $this->session->userdata('office');
 
                                                     </div>
                                                     <div class="mx-0 px-0 d-flex flex-row col-md-12">
+                                                        <?php
+                                                        if ($row->status == 'Archived') {
+                                                            echo '
+                                                        <span>
+                                                           <i class="fa fa-check-circle text-lime mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="Completed"></i>
+                                                        </span>
+                                                        ';
+                                                        } else if ($row->status == 'Verified') {
+                                                            echo '
+                                                    <span>
+                                                        <i class="fa fa-hourglass-half text-gray mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="In Process"></i>
+                                                    </span>
+                                                    ';
+                                                        }
+                                                        ?>
                                                         <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                            <h5><?php echo $row->document_number ?></h5>
+                                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank">
+                                                                <h5><?php echo '<span class="document_number">' . $row->document_number . '</span>';
+                                                                    if ($row->for == 2) {
+                                                                        echo '
+                                                                <span>
+                                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                                </span>
+                                                                ';
+                                                                    } ?>
+                                                                </h5>
+                                                            </a>
+                                                            </h5>
                                                             <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $row->document_type ?></span>
                                                             <span><label class="my-0 text-secondary">Subject: </label> <?php echo $row->subject ?></span>
                                                             <span><label class="my-0 text-secondary">From: </label> <?php echo $row->from_office  ?></span>
                                                         </div>
-                                                        <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
+                                                        <div class="mx-0 px-0 d-flex flex-column col align-items-end justify-content-between">
                                                             <span>
                                                                 <?php
                                                                 $date_sent = $this->db->select("log_date")
@@ -231,7 +289,13 @@ $office_code = $this->session->userdata('office');
                                                                 $secs = $datetime2 - $datetime1; // == <seconds between the two times>
                                                                 $days = $secs / 86400;
 
-                                                                echo 'Received ' . floor($days) . ' days ago';
+                                                                if (floor($days) < 2){
+                                                                    // echo 'Received yesterday at ' . date("h:i a", strtotime($logdate));
+                                                                    echo 'Sent ' . floor($days) . ' day ago';
+                                                                }else{
+                                                                    echo 'Sent ' . floor($days) . ' days ago';
+                                                                }
+
                                                                 // echo date(":ga", strtotime($logdate));
                                                                 ?>
                                                             </span>
@@ -266,12 +330,12 @@ $office_code = $this->session->userdata('office');
                                                             </span> -->
                                                             <span>
                                                                 <?php
-                                                                if ($row->active == '1') {
+                                                                if ($row->received == '1') {
                                                                 ?>
-                                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                    <button class="btn btn-secondary log">Logs</button>
                                                                     <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
                                                                     <?php
-                                                                } else if ($row->active == '0') {
+                                                                } else if ($row->received == '0') {
                                                                     $last_log = $this->db->select("type ,action")
                                                                         ->from("receipt_control_logs")
                                                                         ->where("document_number", $row->document_number)
@@ -281,7 +345,7 @@ $office_code = $this->session->userdata('office');
                                                                         ->get()->result();
                                                                     if ($last_log[0]->action == 'Return to Sender') {
                                                                     ?>
-                                                                        <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                        <button class="btn btn-secondary log">Logs</button>
                                                                         <a href="<?php echo base_url() ?>Receipt_Control_Center/Receive/<?php echo $row->document_number ?>" target="_blank" class="btn btn-success">Receive</a>
                                                                         <?php
                                                                     } else {
@@ -296,12 +360,12 @@ $office_code = $this->session->userdata('office');
                                                                         if ($latest_log[0]->type == 'Released') {
                                                                         ?>
                                                                             <span class="d-flex align-items-end">
-                                                                                Latest Status:
+                                                                                Latest Status: &nbsp;
                                                                                 <span>
                                                                                     <?php
 
                                                                                     $latest_log_date =  $latest_log ? $latest_log[0]->log_date : "";
-                                                                                    echo $latest_log[0]->type;
+                                                                                    echo ' ' . $latest_log[0]->type;
                                                                                     echo ' at ';
                                                                                     echo date("g:i a", strtotime($latest_log_date));
                                                                                     ?>
@@ -310,7 +374,7 @@ $office_code = $this->session->userdata('office');
                                                                         <?php
                                                                         } else {
                                                                         ?>
-                                                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank" class="btn btn-secondary">View</a>
+                                                                            <button class="btn btn-secondary log">Logs</button>
                                                                             <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $row->document_number ?>" target="_blank" class="btn btn-warning">Release</a>
                                                                 <?php
                                                                         }
@@ -340,29 +404,61 @@ $office_code = $this->session->userdata('office');
                             <div class="mb-3 text-gray-500">
                                 <b>ALL INCOMING DOCUMENTS</b>
                                 <span class="ms-2 "><i class="fa fa-info-circle" data-toggle="tooltip" data-placement="top" title="List of all incoming documents"></i></span>
+                                <?php
+                                $date = "";
+                                if ($get_incoming_documents) {
+                                    $completed = [];
+                                    $inprocess = [];
+                                    $date = "";
+                                    $total = count($get_incoming_documents);
+                                    foreach ($get_incoming_documents as $data) {
+                                        foreach ($data['details'] as $key => $row) {
+                                            $date_word = date('F d, Y', strtotime($data['date']));
+                                            if ($date != $data['date']) {
+                                            }
+                                            if ($row->status == 'Archived') {
+                                                $completed[] = $row->document_number;
+                                            } else if ($row->status == 'Verified') {
+                                                $inprocess[] = $row->document_number;
+                                            }
+                                        }
+                                    }
 
+                                    $completed_percent = floor(count($completed) / $total * 100);
+                                    $inprocess_percent = floor(count($inprocess) / $total * 100);
+                                }
+                                ?>
+                                <div class="row text-truncate my-2 rounded bg-light py-2">
+                                    <div class="col-6 d-flex flex-row align-items-center">
+                                        <span>
 
-                                <!-- <table class="table table-sm mt-4">
-                                    <thead>
-                                        <tr>
-                                            <th class="h5">Document Number</th>
-                                            <th class="h5">Document Type</th>
-                                            <th class="h5">Subject</th>
-                                            <th class="h5">From</th>
-                                            <th class="h5">Date Sent</th>
-                                            <th class="h5">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table> -->
+                                        </span>
+                                        <span class="col">
+                                            <div class=" text-gray-500"> <i class="fa fa-hourglass-half text-gray mr-2 mt-1"></i> Total Documents In Process</div>
+                                            <div class="h5 mb-5px fw-bold my-2" data-animation="number" data-value="<?php echo count($inprocess) ? count($inprocess) :  "0"; ?>"><?php echo count($inprocess) ? count($inprocess) : "0" ?></div>
+                                            <div class="progress h-5px rounded-3 bg-gray-900 mb-5px" data-toggle="tooltip" data-placement="top" title="<?php echo $inprocess_percent ? $inprocess_percent : "0" ?>% In Process">
+                                                <div class="progress-bar progress-bar-striped rounded-right bg-secondary" data-animation="width" data-value="<?php echo $inprocess_percent ? $inprocess_percent : "0" ?>%" style="width: <?php echo $inprocess_percent ? $inprocess_percent : "0" ?>%;"></div>
+                                            </div>
+                                        </span>
+                                    </div>
+                                    <div class="col-6 d-flex flex-row align-items-center">
+                                        <span>
+
+                                        </span>
+                                        <span class="col">
+                                            <div class=" text-gray-500"><i class="fa fa-check-circle text-lime mr-2 mt-1"></i>Total Documents Comlpeted</div>
+                                            <div class="h5 mb-5px fw-bold my-2" data-animation="number" data-value="<?php echo count($completed) ? count($completed) : "0" ?>"><?php echo count($completed) ? count($completed) : "0" ?></div>
+                                            <div class="progress h-5px rounded-3 bg-gray-900 mb-5px" data-toggle="tooltip" data-placement="top" title="<?php echo $completed_percent ? $completed_percent : "0" ?>% Completed">
+                                                <div class="progress-bar progress-bar-striped rounded-right bg-lime" data-animation="width" data-value="<?php echo $completed_percent ? $completed_percent : "0" ?>%" style="width: <?php echo $completed_percent ? $completed_percent : "0" ?>%;"></div>
+                                            </div>
+                                        </span>
+                                    </div>
+                                </div>
                                 <ul class="list-group mt-4">
                                     <?php
                                     // print_r($get_incoming_documents);
                                     $date = "";
                                     foreach ($get_incoming_documents as $data) {
-
-
                                         foreach ($data['details'] as $key => $row) {
                                             $date_word = date('F d, Y', strtotime($data['date']));
                                             if ($date != $data['date']) {
@@ -371,26 +467,35 @@ $office_code = $this->session->userdata('office');
                                             }
                                     ?>
                                             <li class="list-group-item col-md-12 d-flex flex-column justify-content-between py-2">
-                                            
+
                                                 <div class="mx-0 px-0 d-flex flex-row col-md-12">
-                                                <?php 
-                                                
-                                                if ($row->status == 'Archived'){
+                                                    <?php
+                                                    if ($row->status == 'Archived') {
                                                         echo '
                                                         <span>
                                                            <i class="fa fa-check-circle text-lime mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="Completed"></i>
                                                         </span>
                                                         ';
-                                                }else if($row->status == 'Verified'){
-                                                    echo '
+                                                    } else if ($row->status == 'Verified') {
+                                                        echo '
                                                     <span>
                                                         <i class="fa fa-hourglass-half text-gray mr-2 mt-1" data-toggle="tooltip" data-placement="top" title="In Process"></i>
                                                     </span>
                                                     ';
-                                                }
-                                                ?> 
+                                                    }
+                                                    ?>
                                                     <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                        <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank"><h5 class="document_number"><?php echo $row->document_number ?></h5></a>
+                                                        <a href="<?php echo base_url() ?>View_document/document/<?php echo $row->document_number ?>" target="_blank">
+                                                            <h5><?php echo '<span class="document_number">' . $row->document_number . '</span>';
+                                                                if ($row->for == 2) {
+                                                                    echo '
+                                                                <span>
+                                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                                </span>
+                                                                ';
+                                                                } ?>
+                                                            </h5>
+                                                        </a>
                                                         <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $row->document_type ?></span>
                                                         <span><label class="my-0 text-secondary">Subject: </label> <?php echo $row->subject ?></span>
                                                         <span><label class="my-0 text-secondary">From: </label> <?php echo $row->from_office  ?></span>
@@ -543,7 +648,7 @@ $office_code = $this->session->userdata('office');
                                 <b class="text-danger mb-2 mt-3">
                                     OVERDUE DOCUMENTS
                                 </b>
-                                <span class="ms-2 "><i class="fa fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="Received documents without action for more than 3 day"></i></span>
+                                <span class="ms-2 "><i class="fa fa-info-circle text-danger" data-toggle="tooltip" data-placement="top" title="Received documents without action for more than 3 days"></i></span>
                             </span>
                             <?php if ($get_over_due_incoming) {
                                 echo '<span class="badge badge-danger">' . count($get_over_due_incoming) . '</span>';
@@ -562,25 +667,35 @@ $office_code = $this->session->userdata('office');
                                         </div>
                                         <div class="mx-0 px-0 d-flex flex-row col-md-12">
                                             <div class="mx-0 px-0 d-flex flex-column col-md-8">
-                                                <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank"><h5 class="document_number"><?php echo $data['details']['document_number'] ?></h5></a>
+                                                <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank">
+                                                    <h5><?php echo '<span class="document_number">' . $data['details']['document_number'] . '</span>';
+                                                        if ($data['details']['for'] == 2) {
+                                                            echo '
+                                                                <span>
+                                                                    <span class="badge badge-lg badge-danger">Urgent Action</span>
+                                                                </span>
+                                                                ';
+                                                        } ?>
+                                                    </h5>
+                                                </a>
                                                 <span><label class="my-0 text-secondary">Document Type: </label> <?php echo $data['details']['doc_type'] ?> </span>
                                                 <span><label class="my-0 text-secondary">Subject: </label> <?php echo $data['details']['subject'] ?> </span>
                                                 <span><label class="my-0 text-secondary">From: </label> <?php echo $data['details']['from_office'] ?></span>
                                             </div>
                                             <div class="mx-0 px-0 d-flex flex-column col-md-4 align-items-end justify-content-between">
-                                            <!-- <span><label class=" my-0 text-secondary">Date sent: </label>
+                                                <!-- <span><label class=" my-0 text-secondary">Date sent: </label>
 
                                                 </span> -->
                                                 <span><label class="my-0 text-secondary"> </label> Received <?php echo floor($data['interval']) ?> days ago</span>
                                             </div>
                                         </div>
                                         <span class="d-flex flex-row mt-3">
-                                                    <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1 col-6">Release</a>
-                                                    <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm text-danger border mb-1 col-6">Mark As Completed</a>
-                                                    <!-- <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
+                                            <a href="<?php echo base_url() ?>Receipt_Control_Center/Release/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm border mb-1 col-6">Release</a>
+                                            <a href="<?php echo base_url() ?>View_document/document/<?php echo $data['details']['document_number'] ?>" target="_blank" class="btn btn-sm text-danger border mb-1 col-6">Mark As Completed</a>
+                                            <!-- <a class="btn border btn-sm" data-toggle="collapse" href="#collapseExample<?php echo $key ?>" role="button" aria-expanded="false" aria-controls="collapseExample">
                                                     Details
                                                 </a> -->
-                                                </span>
+                                        </span>
                                         <div class="mx-0 px-0 d-flex flex-row col-md-12 ">
                                             <div class="collapse row col-md-12 mx-0 my-1 px-0 py-1 bg-light rounded" id="collapseExample<?php echo $key ?>">
                                                 <div class="card card-body mx-0 my-0 py-0 px-1 bg-light d-flex flex-column">
@@ -620,14 +735,14 @@ $office_code = $this->session->userdata('office');
 
 <script>
     $(document).ready(function() {
-        <?php 
+        <?php
         //scroll to overdue documents
-        if ($this->input->get('target')){
-            ?>
-        $('html, body').animate({
-            scrollTop: $("#over_due").offset().top - 70
-        }, 1500);
-        $(document).find("#over_due").focus()
+        if ($this->input->get('target')) {
+        ?>
+            $('html, body').animate({
+                scrollTop: $("#over_due").offset().top - 70
+            }, 1500);
+            $(document).find("#over_due").focus()
         <?php
         }
         ?>
@@ -810,5 +925,16 @@ $office_code = $this->session->userdata('office');
             return chart1;
 
         });
+        $(document).find(".log").each(function(i) {
+            var check_status_btn = $(this)
+
+            check_status_btn.on('click', function() {
+                var document_number = check_status_btn.parents(".list-group-item").find(".document_number").text()
+                var result = document_number.split(' ').join('')
+
+                console.log(result);
+                track_document(result)
+            })
+        })
     });
 </script>

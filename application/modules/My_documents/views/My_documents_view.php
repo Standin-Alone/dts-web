@@ -72,8 +72,8 @@
                                         <tr>
                                             <th class="text-nowrap">Document Number</th>
                                             <th class="text-nowrap">Transaction Office Code</th>
-                                            <th class="text-nowrap">Name</th>
-                                            <th class="text-nowrap">Action</th>
+<!--                                             <th class="text-nowrap">Name</th>
+                                            <th class="text-nowrap">Action</th> -->
                                             <th class="text-nowrap">Log Date</th>
                                             <th class="text-nowrap">View</th>
                                         </tr>
@@ -209,14 +209,14 @@ $(document).ready(function() {
                 data: 'transacting_office',
                 className: 'text-center align-middle'
             },
-            {
-                data: 'transacting_user_fullname',
-                className: 'text-center align-middle'
-            },
-            {
-                data: 'action',
-                className: 'text-center align-middle'
-            },
+            // {
+            //     data: 'transacting_user_fullname',
+            //     className: 'text-center align-middle'
+            // },
+            // {
+            //     data: 'action',
+            //     className: 'text-center align-middle'
+            // },
             {
                 className: 'text-center align-middle',
                 render: function(data, type, row){
